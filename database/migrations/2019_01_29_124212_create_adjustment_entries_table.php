@@ -18,12 +18,17 @@ class CreateAdjustmentEntriesTable extends Migration
             $table->integer('adjustment_id')->unsigned();
             $table->foreign('adjustment_id')
                   ->references('id')->on('adjustments')->onDelete('CASCADE');
+
             $table->integer('product_id')->unsigned();
             $table->foreign('product_id')
                   ->references('id')->on('products');
+            $table->string('product_label');
+
             $table->integer('stock_unit_id')->unsigned();
             $table->foreign('stock_unit_id')
                   ->references('id')->on('stock_units');
+            $table->string('stock_unit_label');
+                  
             $table->integer('old_quantity');
             $table->integer('new_quantity');
             $table->timestamps();

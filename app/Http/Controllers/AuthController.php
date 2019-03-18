@@ -19,6 +19,8 @@ class AuthController extends Controller
             $user->api_token = str_random(80);
             $user->save();
             return response()->json(['code'=>0, 'message'=>'successfull', 'user'=> $user]);
+        } else {
+            return response()->json(['message'=> 'Wrong username-password combination']);
         }
         return response()->json(['code'=> 500, 'message'=> 'Server error']);
     }

@@ -4,14 +4,14 @@ namespace App\Http\Controllers;
 
 use App\Reason;
 use Illuminate\Http\Request;
+use App\Http\Controllers\Controller;
 
 
 class AdjustmentReasonController extends Controller
 {
     public function __construct()
     {
-        $this->middleware('auth');
-        $this->middleware('eroles:manager,admin');
+        $this->middleware('api_auth');
     }
 
     public function index()
@@ -28,12 +28,7 @@ class AdjustmentReasonController extends Controller
         return response()->json($result);
     }
 
-    public function store(Request $reqeust)
-    {
-        
-    }
-
-    public function createReason(Request $request)
+    public function store(Request $request)
     {
         $request->validate([
             'label'=> 'required|unique:adjustment_reasons'
@@ -45,6 +40,7 @@ class AdjustmentReasonController extends Controller
             ]);
             $result['code'] = 0;
             $result['reason'] = $reason;
+            $result['message'] = "reason created successfully";
         } catch(Exception $e) {
             return $e;
             $result['code'] = 1;

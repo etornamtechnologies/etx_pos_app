@@ -6,6 +6,15 @@
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>etx-pos</title>
     <link rel="stylesheet" href="/css/bootstrap.min.css">
+    <style>
+        body, html {
+            overflow-y: hidden;
+        }
+        .form-icon {
+            width: 70px;
+            height: 70px;
+        }
+    </style>
 </head>
 <body>
     <div id="app" class="main">

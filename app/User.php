@@ -53,4 +53,14 @@ class User extends Model
         return false;
     }
 
+    public static function AuthUser($token)
+    {
+        $user = User::where('api_token', $token)->first();
+        if($user) {
+            return $user;
+        } else {
+            return false;
+        }
+    }
+
 }

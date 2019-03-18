@@ -15,7 +15,7 @@ class Sale extends Model
 {
     protected $table = "sales";
 
-    protected $fillable = ["customer_id", "reference_number", "total_cost", "user_id", "status"];
+    protected $fillable = ["customer_id", "ref_code", "total_cost", "user_id", "status", "paid"];
 
     public function entries()
     {

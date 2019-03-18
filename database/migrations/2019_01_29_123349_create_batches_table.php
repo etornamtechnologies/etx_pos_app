@@ -15,7 +15,7 @@ class CreateBatchesTable extends Migration
     {
         Schema::create('batches', function (Blueprint $table) {
             $table->increments('id');
-            $table->string('label')->unique();
+            $table->string('batch_no')->unique();
             $table->date('expiry_date');
             $table->integer('product_id')->unsigned();
             $table->foreign('product_id')

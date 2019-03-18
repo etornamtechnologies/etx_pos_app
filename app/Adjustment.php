@@ -11,7 +11,7 @@ class Adjustment extends Model
 {
     protected $table = "adjustments";
 
-    protected $fillable = ["reference_code", "reason_id", "user_id"];
+    protected $fillable = ["ref_code", "reason_id", "user_id"];
 
     public function entries()
     {

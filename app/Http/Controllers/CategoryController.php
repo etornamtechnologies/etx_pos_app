@@ -56,9 +56,9 @@ class CategoryController extends Controller
             $category = Category::create([
                 'label'=>strtoupper($request->label)
             ]);
-            dd($category);
             $result['code'] = 0;
-            $result['category'] = Category::where('id', $category)->withCount('products')->first();
+            $result['message'] = "category created successfully";
+            $result['category'] = Category::where('id', $category->id)->withCount('products')->first();
         } catch (Exception $e) {
             $result['code'] = 1;
             $result['message'] = "server error";
@@ -69,7 +69,7 @@ class CategoryController extends Controller
     public function update(Request $request, $categoryId)
     {
         $request->validate([
-           'label'=> 'required|unique:categories, label,'.$categoryId.'id'
+           'label'=> 'required|unique:categories,label,'.$categoryId.'id'
         ]);
         $category = Category::findOrFail($categoryId);
         $result = [];
@@ -78,7 +78,8 @@ class CategoryController extends Controller
                 'label'=>strtoupper($request->label)
             ]);
             $result['code'] = 0;
-            $result['category'] = $category;
+            $result['message'] = 'category updated successfully';
+            $result['categories'] = Category::withCount('products')->get();
         } catch (Exception $e) {
             $result['code'] = 1;
             $result['message'] = "Something went wrong";
@@ -94,11 +95,12 @@ class CategoryController extends Controller
             Category::destroy($categoryId);
             $result['code'] = 0;
             $status = 200;
+            $result['message'] = "category deleted successfully";
         } catch (Exception $e) {
             $result['code'] = 1;
             $result['message'] = "Something went wrong";
-            $status=401;
+            $status=500;
         }
-        return response()->json($result);
+        return response()->json($result, $status);
     }
 }

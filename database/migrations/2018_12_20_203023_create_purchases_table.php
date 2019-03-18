@@ -15,16 +15,17 @@ class CreatePurchasesTable extends Migration
     {
         Schema::create('purchases', function (Blueprint $table) {
             $table->increments('id');
-            $table->string('reference_number');
+            $table->string('ref_code');
             $table->string('invoice_number');
-            $table->integer('invoice_total_cost');
+            $table->integer('total');
+            $table->integer('paid');
             $table->integer('user_id')->unsigned();
             $table->foreign('user_id')
                   ->references('id')->on('users');
             $table->integer('supplier_id')->unsigned();
             $table->foreign('supplier_id')
                   ->references('id')->on('suppliers');
-            $table->enum('status', ['active', 'inactive'])->default('active');
+            $table->enum('status', ['active', 'cancelled'])->default('active');
             $table->timestamps();
         });
     }

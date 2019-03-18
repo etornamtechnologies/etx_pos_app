@@ -22,16 +22,20 @@ class CreateSaleEntriesTable extends Migration
             $table->integer('product_id')->unsigned();
             $table->foreign('product_id')
                   ->references('id')->on('products');
-        
+            $table->string('product_label');
+
             $table->integer('stock_unit_id')->unsigned();
             $table->foreign('stock_unit_id')
                   ->references('id')->on('stock_units');
+            $table->string('stock_unit_label');
+
             $table->integer('selling_price')->default(0);
             $table->integer('cost_price')->default(0);
             $table->integer('quantity');
             $table->integer('metric_quantity');
             $table->integer('amount');
-            $table->enum('status', ['active', 'inactive'])->default('active');
+            $table->date('expiry_date')->nullable();
+            $table->enum('status', ['active', 'cancelled'])->default('active');
             $table->timestamps();
         });
     }

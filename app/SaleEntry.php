@@ -10,7 +10,8 @@ class SaleEntry extends Model
     protected $table = "sale_entries";
 
     protected $fillable = ["sale_id", "product_id", "stock_unit_id", "selling_price"
-                            , "cost_price", "quantity", "amount", "metric_quantity"];
+                            , "cost_price", "quantity", "amount", "metric_quantity", "product_label"
+                            ,"stock_unit_label"];
 
     public function sale()
     {

@@ -45,5 +45,43 @@ Route::put('/products/{product}', 'ProductController@update');
 Route::delete('/products/{product}', 'ProductController@destroy');
 Route::post('/products/entries', 'ProductController@storeEntries');
 
+
 Route::get('/inventory/products/{product}/stock-units/{stock_unit}/add', 'InventoryController@addStockUnit');
 Route::get('/inventory/products/{product}/stock-units/{stock_unit}/remove', 'InventoryController@removeStockUnit');
+
+
+Route::get('/stock-adjustment-reasons', 'AdjustmentReasonController@index');
+Route::post('/stock-adjustment-reasons', 'AdjustmentReasonController@store');
+
+//pos
+
+Route::get('/stock-adjustments', 'AdjustmentController@index');
+Route::post('/stock-adjustments', 'AdjustmentController@store');
+
+Route::get('/sales', 'SaleController@index');
+Route::post('/sales', 'SaleController@store');
+Route::get('/sales/{sale}/', 'SaleController@show');
+Route::get('/sales/{sale}/cancel', 'SaleController@cancel');
+
+Route::get('/purchases', 'PurchaseController@index');
+Route::post('/purchases', 'PurchaseController@store');
+Route::get('/purchases/{purchase}/cancel', 'PurchaseController@cancel');
+
+Route::get('/settings/shop-setup', 'ConfigController@index');
+Route::post('/settings/shop-setup', 'ConfigController@store');
+Route::put('/settings/shop-setup', 'ConfigController@update');
+
+Route::get('/seetings/backup', 'ConfigController@getBackup');
+Route::get('/seetings/backup/create', 'ConfigController@createBackup');
+Route::get('/seetings/restore', 'ConfigController@restoreBackup');
+
+Route::get('/customers', 'CustomerController@index');
+Route::post('/customers', 'CustomerController@store');
+Route::put('/customers{customer}', 'CustomerController@update');
+Route::delete('/customers/{customer}', 'CustomerController@destroy');
+
+
+Route::get('/suppliers', 'SupplierController@index');
+Route::post('/suppliers', 'SupplierController@store');
+Route::put('/suppliers/{supplier}', 'SupplierController@update');
+Route::delete('/suppliers/{supplier}', 'SupplierController@destroy');

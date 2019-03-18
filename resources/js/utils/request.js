@@ -66,7 +66,14 @@ service.interceptors.response.use(
                 duration: 2 * 1000
             })
         }) 
-    } else if(status == 401) {
+    } else if(status == 404) {
+        Message({
+            message: "Resource not available",
+            type: 'error',
+            duration: 2 * 1000
+        })
+    } 
+    else if(status == 401) {
         router.push('/account/login')
     } else {
         Message({

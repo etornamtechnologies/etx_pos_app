@@ -18,7 +18,7 @@ class StockUnitController extends Controller
         $filter = $request->has('filter') ? $request->query('filter') : "";
         try{
             $stockUnits = [];
-            $q = StockUnit::where('label', 'LIKE', '%'.$filter.'%')->withCount('products');
+            $q = StockUnit::where('label', 'LIKE', '%'.$filter.'%');
             if($request->has('paginate')) {
                 $stockUnits = $q->paginate(10);
             } else {
@@ -65,7 +65,7 @@ class StockUnitController extends Controller
                 'label'=> strtoupper($request->label)
             ]);
             $result['code'] = 0;
-            $result['stock_unit'] = $stockUnit;
+            $result['stock_units'] = StockUnit::all();
             $result['message'] = "stock unit updated successfully"; 
             $status = 200;
         } catch (Exception $e) {

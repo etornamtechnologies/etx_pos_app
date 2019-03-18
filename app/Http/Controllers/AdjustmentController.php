@@ -8,6 +8,7 @@
 
 namespace App\Http\Controllers;
 
+use App\User;
 use App\Batch;
 use App\Product;
 use App\Adjustment;
@@ -51,21 +52,26 @@ class AdjustmentController extends Controller
         $request->validate([
             'summary.reason_id'=> 'required'
         ]);
+        $token = $request->header('Authorization');
+        if(!$token) {
+            return response()->json(['message'=> "Not logged in"], 401);
+        }
         $adjCount = Adjustment::count() + 1;
-        $referenceCode = "LEK-ADJ/$adjCount";
+        $refCode = "ADJ/".$adjCount;
         try{
-            DB::transaction(function () use($result, &$referenceCode){
+            DB::transaction(function () use($result, &$refCode, &$token){
                 $input = Input::all();
                 $reasonId = $input['summary']['reason_id'];
                 $entries = $input['entries'];
                 $adjustment = Adjustment::create([
                     'reason_id'=> $reasonId,
-                    'reference_code'=> $referenceCode,
-                    'user_id'=> Auth::user()->id
+                    'ref_code'=> $refCode,
+                    'user_id'=> User::AuthUser($token)->id
                 ]);
-                $this->createAdjustmentEntries($adjustment->id, $entries);
+                AdjustmentEntry::createAdjustmentEntries($adjustment->id, $entries);
             });
             $result['code'] = 0;
+            $result['message'] = "stock adjustment created successfully";
         } catch (Exception $e) {
             $result['code'] = 1;
             $result['message'] = "Something went wrong";
@@ -73,31 +79,4 @@ class AdjustmentController extends Controller
         return response()->json($result);
     }
 
-    public function createAdjustmentEntries($adjId, $entries)
-    {
-        foreach($entries as $entry) {
-            $productId = $entry['product_id'];
-            $product = Product::findOrFail($productId);
-            $product = Product::findOrFail($productId);
-            // if(Batch::where('product_id', $productId) && !$entry['batch_number'] && !$entry['expiry_date']) {
-            //     return false;
-            // }
-            AdjustmentEntry::create([
-                'product_id'=> $productId,
-                'stock_unit_id'=> $product->default_stock_unit,
-                'old_quantity'=> $entry['old_quantity'],
-                'new_quantity'=> $entry['new_quantity'],
-                'adjustment_id'=> $adjId
-            ]);
-            $product->increment('stock_quantity', $entry['difference']);
-            if($entry['batch_number'] && $entry['expiry_date']) {
-                if($entry['difference'] > 0) {
-                    BatchController::addBatch($entry['batch_number'], $entry['expiry_date']
-                                                    , $productId, $entry['difference']);
-                } else if($entry['difference'] < 0){
-                    BatchController::removeBatchFor($productId, $entry['batch_number'], $entry['difference']);
-                }
-            }
-        }
-    }
 }

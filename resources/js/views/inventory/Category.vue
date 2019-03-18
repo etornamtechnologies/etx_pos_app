@@ -28,7 +28,7 @@
                 <v-data-table
                 :headers="headers"
                 :items="categories"
-                :hide-actions=true
+                :search="search"
                 >
                 <template v-slot:items="props">
                     <td>{{ props.item.label }}</td>
@@ -121,9 +121,10 @@ import {GetCategory, CreateCategory, UpdateCategory, DeleteCategory} from '../..
                     .then(result=> {
                         this.categories.push(result.category || {});
                         this.createCategoryDialog = false;
+                        this.new_category = {label:''}
                     })
                     .catch(err=> {
-
+                        this.new_category = {label:''}
                     })
             },
             openEditCategoryDialog: function(row, index){
@@ -134,7 +135,7 @@ import {GetCategory, CreateCategory, UpdateCategory, DeleteCategory} from '../..
             updateCategory: function(){
                 UpdateCategory(this.edit_category)
                     .then(result=> {
-                        this.categories[this.edit_category.index] = result.category;
+                        this.categories= result.categories;
                         this.isOpenEditCategoryDialog = false;
                         this.$forceUpdate();
                     })

@@ -112,8 +112,8 @@
                                 <td>{{ sku.label }}</td>
                                 <td>{{ sku.pivot.metric_scale }}</td>
                                 <td>{{ metricQuantity(sku) }}</td>
-                                <td>{{ sku.pivot.cost_price || 0 }}</td>
-                                <td>{{ sku.pivot.selling_price || 0 }}</td>
+                                <td>{{ entryPrice(sku.pivot.cost_price || 0) }}</td>
+                                <td>{{ entryPrice(sku.pivot.selling_price || 0) }}</td>
                                 <td>
                                     <v-btn icon color="red" dark @click="removeStockUnitFromProduct(sku)">
                                         <v-icon>remove</v-icon>
@@ -234,6 +234,10 @@
                     .then(result=> {
                         location.reload();
                     })
+            },
+            entryPrice: function(price) {
+                let s = (price/100)
+                return s.toFixed(2);
             }
         },
         computed:  {

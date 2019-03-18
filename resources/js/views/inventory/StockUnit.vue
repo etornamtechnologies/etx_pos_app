@@ -122,7 +122,7 @@ import {GetStockUnit, CreateStockUnit, UpdateStockUnit, DeleteStockUnit} from '.
                         this.new_stock_unit = {};
                     })
                     .catch(err=> {
-
+                        this.new_stock_unit = {label:''};
                     })
             },
             openEditStockUnitDialog: function(row, index){
@@ -133,12 +133,12 @@ import {GetStockUnit, CreateStockUnit, UpdateStockUnit, DeleteStockUnit} from '.
             updateStockUnit: function(){
                 UpdateStockUnit(this.edit_stock_unit)
                     .then(result=> {
-                        this.stock_units[this.edit_stock_unit.index] = result.category;
+                        this.stock_units = result.stock_units || [];
                         this.isOpenEditStockUnitDialog = false;
                         this.$forceUpdate();
                     })
                     .catch(err=> {
-                        console.log('err', err)
+                        this.new_stock_unit = {}
                     })
             },
             deleteStockUnit: function(row) {

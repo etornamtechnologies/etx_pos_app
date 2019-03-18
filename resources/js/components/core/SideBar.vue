@@ -81,7 +81,6 @@
             </template>
             <el-menu-item-group>
                 <el-menu-item index="/admin/manage-users">User Management</el-menu-item>
-                <el-menu-item index="/admin/backup-restores">Backup and Restore</el-menu-item>
                 <el-menu-item index="/admin/invnetory-csv">Upload Inventory using csv</el-menu-item>
             </el-menu-item-group>
         </el-submenu> 
@@ -92,8 +91,9 @@
                 <span slot="title" class="menu-title">Configuration</span>
             </template>
             <el-menu-item-group>
-                <el-menu-item index="/settings/shop settings">Shop Set-Up</el-menu-item>
+                <el-menu-item index="/settings/shopsetup">Shop Set-Up</el-menu-item>
                 <el-menu-item index="/settings/tax">Tax settings</el-menu-item>
+                <el-menu-item index="/settings/backup-and-restore">Backup and Restore</el-menu-item>
             </el-menu-item-group>
         </el-submenu>                       
     </el-menu>

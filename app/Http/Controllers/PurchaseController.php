@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Http\Controllers;
+use App\User;
 use App\Batch;
 use App\Product;
 use App\Purchase;
@@ -22,8 +23,7 @@ class PurchaseController extends Controller
 
     public function __construct()
     {
-        $this->middleware('auth');
-        $this->middleware('eroles:admin,manager', ['except'=> []]);
+        $this->middleware('api_auth');
     }
 
     public function index(Request $request)
@@ -97,31 +97,34 @@ class PurchaseController extends Controller
         $result = [];
         $status = null;
         try{
-            DB::transaction(function () use($result){
+            DB::transaction(function () use($result, &$request){
                 $input = Input::all();
-                $userId = Auth::user()->id;
+                $token = $request->header('Authorization');
+                $user = User::authUser($token);
+                $userId = $user->id;
                 $supplierId = $input['summary']['supplier_id'];
                 $supplierInvoiceNumber = $input['summary']['supplier_invoice'];
                 $amountPaid = $input['summary']['amount_paid'] *100;
                 $invoiceAmount = $input['summary']['invoice_amount'] * 100;
                 $entries = $input['entries'];
                 $purchaseCount = Purchase::count() + 1;
-                $referenceNumber = "LEK-PUR/$purchaseCount";
+                $refCode = "LEK-PUR/$purchaseCount";
                 $purchase = Purchase::create([
                     'supplier_id'=> $supplierId,
-                    'reference_number'=> $referenceNumber,
+                    'ref_code'=> $refCode,
                     'user_id'=> $userId,
                     'invoice_number'=> $supplierInvoiceNumber,
-                    'invoice_total_cost'=> $invoiceAmount,
-                    'status'=> 'active'
+                    'total'=> $invoiceAmount,
+                    'status'=> 'active',
+                    'paid'=> $amountPaid,
                 ]);
                 //make payment
                 OutPayment::create([
-                    'user_id'=> Auth::user()->id,
+                    'user_id'=> $userId,
                     'count'=> $amountPaid,
                     'purchase_id'=> $purchase->id
                 ]);
-                $purchaseEntries = $this->createPurchaseEntries($purchase->id, $entries);
+                $purchaseEntries = PurchaseEntry::createPurchaseEntries($purchase->id, $entries);
             });
             $result['code'] = 0;
         } catch (Exception $e) {

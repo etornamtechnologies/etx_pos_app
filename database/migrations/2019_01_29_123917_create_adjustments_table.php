@@ -15,7 +15,7 @@ class CreateAdjustmentsTable extends Migration
     {
         Schema::create('adjustments', function (Blueprint $table) {
             $table->increments('id');
-            $table->string('reference_code')->unique();
+            $table->string('ref_code')->unique();
             $table->integer('reason_id')->unsigned();
             $table->foreign('reason_id')
                 ->references('id')->on('adjustment_reasons');

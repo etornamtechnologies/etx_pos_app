@@ -15,6 +15,12 @@ import ProductCreateEntries from './views/inventory/ProductCreateEntries'
 import ProductCreate from './views/inventory/ProductCreate'
 import ProductDetail from './views/inventory/ProductDetail'
 import StockAdjustmentCreate from './views/inventory/StockAdjustmentCreate'
+import CreateSale from './views/sale/CreateSale'
+import ListSale from './views/sale/ListSale'
+import CreatePurchase from './views/purchase/CreatePurchase'
+import ListPurchase from './views/purchase/ListPurchase'
+import ShopSetup from './views/config/ShopSetup'
+import BackupAndRestore from './views/config/BackupAndRestore'
 import store from './store';
 
 Vue.use(Router)
@@ -88,6 +94,30 @@ export default new Router({
                         }
                     ]
                 },
+                {
+                    path: 'sales',
+                    component: ListSale
+                },
+                {
+                    path: 'sales/create',
+                    component: CreateSale
+                },
+                {
+                    path: 'purchases',
+                    component: ListPurchase
+                },
+                {
+                    path: 'purchases/create',
+                    component: CreatePurchase
+                },
+                {
+                    path: 'settings/shopsetup',
+                    component: ShopSetup
+                },
+                {
+                    path: 'settings/backup-and-restore',
+                    component: BackupAndRestore
+                }
             ]
         }
   ]

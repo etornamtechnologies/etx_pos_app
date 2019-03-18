@@ -9,8 +9,8 @@ class Purchase extends Model
 {
     protected $table = "purchases";
 
-    protected $fillable = ["supplier_id", "reference_number", "invoice_number"
-                                , "invoice_total_cost", "user_id", "status"];
+    protected $fillable = ["supplier_id", "ref_code", "invoice_number"
+                                , "total", "user_id", "status", "paid"];
 
     public function entries()
     {

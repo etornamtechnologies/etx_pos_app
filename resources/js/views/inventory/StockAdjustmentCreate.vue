@@ -141,6 +141,7 @@
 
 <script>
     import {GetProduct} from '../../utils/product'
+    import { CreateReason, GetReason, CreateStockAdjustment } from '../../utils/adjustment'
     export default {
         mounted() {
             this.fetchReasons();
@@ -167,10 +168,23 @@
                     })
             },
             fetchReasons: function() {
-                
+                GetReason()
+                    .then(result=> {
+                        this.reasons = result.reasons;
+                    })
             },
             createReason: function() {
-                
+                CreateReason(this.reason)
+                    .then(result=> {
+                        console.log(result)
+                        if(result.code == 0) {
+                            this.reasons.push(result.reason);
+                            this.showCreateReasonModal = false;
+                        }
+                    })
+                    .catch(err=> {
+
+                    })
             },
             handleProductSearchResult: function(products) {
                 let productLen = products.length;
@@ -240,18 +254,13 @@
             createAdjustment: function() {
                 let cartdEntries = this.getEntries();
                 let data = {entries: cartdEntries, summary: this.summary};
-                console.log(data);
-                axios.post(`/adjustments`, data)
-                    .then((result)=> {
-                        let res = result.data || {};
-                        if(res.code == 0) {
-                            //location.reload(true);
-                        } else {
-                            //Notifier.error(res.message || "")
-                        }
+                CreateStockAdjustment(data)
+                    .then(result=> {
+                        this.cart = [];
+                        this.summary = {reason_id:null};
                     })
-                    .catch((err)=> {
-                        handleAjaxError(err)
+                    .catch(err=> {
+
                     })
             },
             entryDefaultSku: function(row) {

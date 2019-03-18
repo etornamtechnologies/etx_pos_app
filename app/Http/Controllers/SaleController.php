@@ -8,6 +8,8 @@
 
 namespace App\Http\Controllers;
 use App\Sale;
+use App\User;
+use App\Batch;
 use App\Config;
 use App\Product;
 use App\InPayment;
@@ -24,6 +26,11 @@ use App\Http\Controllers\BatchController;
 class SaleController extends Controller
 {
     
+    public function __construct()
+    {
+        $this->middleware('api_auth');
+    }
+
     public function index(Request $request)
     {
         $result = [];
@@ -32,7 +39,7 @@ class SaleController extends Controller
             $slaes = [];
             $debts = [];
             if($request->query('type') == 'debts') {
-                $query = Sale::where('reference_number', 'LIKE', '%'.$filter.'%')
+                $query = Sale::where('ref_code', 'LIKE', '%'.$filter.'%')
                                 ->with('in_payments')->latest()->get();
                 foreach($query as $qq) {
                     $sum = 0;
@@ -49,7 +56,7 @@ class SaleController extends Controller
                 $result['code'] = 0;
             } else {
                 $q = Sale::where('reference_number', 'LIKE', '%'.$filter.'%')
-                ->orderBy('created_at', 'DES')
+                ->orderBy('created_at', 'DESC')
                 ->with(['user', 'customer','in_payments']);
                 if($request->has('paginate')) {
                     $sales = $q->paginate(10);
@@ -70,47 +77,48 @@ class SaleController extends Controller
     {
         $result = [];
         $saleCount = Sale::count() + 1;
-        $referenceNumber = "LEK-SALE/$saleCount";
+        $refCode = "SALE/".$saleCount;
         $receiptData = [];
-        try{
-            DB::transaction(function () use($result, &$referenceNumber, &$receiptData){
-                $input = Input::all();
-                $userId = Auth::user()->id;
-                $entries = $input['entries'];
-                $customerId = $input['summary']['customer_id'];
-                $paid = $input['summary']['amount_paid'] * 100;
-                $amountPaid = $paid;
-                $totalCost = $this->getTotalSaleCost($entries)['total'];
-                $change = $paid - $totalCost;
-                if($change > 0) {
-                    $amountPaid = $totalCost;
-                }
-                $receiptEntries = $this->getTotalSaleCost($entries)['receipt_entries'];
-                $receiptSummary = ['reference_number'=> $referenceNumber, 'amount_paid'=> $paid/100
-                                    ,'total_cost'=> $totalCost/100, 'change'=> $change/100
-                                    ,'user'=> Auth::user()->name];
-                //create sale
-                $sale = Sale::create([
-                    'customer_id'=>$customerId,
-                    'user_id'=>$userId,
-                    'reference_number'=>$referenceNumber,
-                    'total_cost'=>$totalCost,
-                    'status'=>'active'
-                ]);
-                //create payment
-                $this->createPayment($sale->id, $userId, $amountPaid);
-                //createEntries
-                $this->createSaleEntries($sale->id, $entries); 
-                $receiptData['entries'] = $receiptEntries;
-                $receiptData['summary'] = $receiptSummary;
-                $receiptData['shop_info'] = Config::findOrFail(1);
-            });
-            $result['code'] = 0;
-            $result['receipt_data'] = $receiptData;
-        } catch (Exception $e) {
-            $result['code'] = 1;
-            $result['message'] = "Something went wrong";
-        }
+        DB::transaction(function () use($result, &$refCode, &$receiptData, &$request){
+            $input = Input::all();
+            $token = $request->header('Authorization');
+            $user = User::AuthUser($token);
+            if(!$user) {
+                return response()->json(['message'=> "Not Logged In"], 401);
+            }
+            $entries = $input['entries'];
+            $customerId = $input['summary']['customer_id'];
+            $paid = $input['summary']['amount_paid'] * 100;
+            $amountPaid = $paid;
+            $totalCost = $this->getTotalSaleCost($entries)['total'];
+            $change = $paid - $totalCost;
+            if($change > 0) {
+                $amountPaid = $totalCost;
+            }
+            $receiptEntries = $this->getTotalSaleCost($entries)['receipt_entries'];
+            $receiptSummary = ['reference_number'=> $refCode, 'amount_paid'=> $paid/100
+                                ,'total_cost'=> $totalCost/100, 'change'=> $change/100
+                                ,'user'=> $user->id];
+            //create sale
+            $sale = Sale::create([
+                'customer_id'=>$customerId,
+                'user_id'=>$user->id,
+                'ref_code'=>$refCode,
+                'total_cost'=>$totalCost,
+                'status'=>'active',
+                'paid'=> $amountPaid
+            ]);
+            //create payment
+            $this->createPayment($sale->id, $user->id, $amountPaid);
+            //createEntries
+            $this->createSaleEntries($sale->id, $entries); 
+            $receiptData['entries'] = $receiptEntries;
+            $receiptData['summary'] = $receiptSummary;
+            $receiptData['shop_info'] = Config::findOrFail(1);
+        });
+        $result['code'] = 0;
+        $result['receipt_data'] = $receiptData;
+        $result['message'] = "Sale created successfully";
         return response()->json($result);
     }
 
@@ -185,7 +193,9 @@ class SaleController extends Controller
     {
         foreach($entries as $entry) {
             $productId = $entry['product_id'];
+            $product = Product::findOrFail($productId);
             $stockUnitId = $entry['stock_unit_id'];
+            $stockUnit = StockUnit::findOrFail($stockUnitId);
             $quantity = $entry['quantity'];
             $productStockUnitQuery = DB::table('product_stock_unit')
                         ->where('product_id', $productId)
@@ -198,17 +208,18 @@ class SaleController extends Controller
             SaleEntry::create([
                 'sale_id'=> $saleId,
                 'product_id'=> $productId,
+                'product_label'=> $product->label,
                 'stock_unit_id'=> $stockUnitId,
+                'stock_unit_label'=> $stockUnit->label,
                 'selling_price'=> $sellingPrice,
                 'cost_price'=> $costPrice,
                 'quantity'=> $quantity,
                 'metric_quantity'=> $metricQty,
-                'amount'=> $amount
+                'amount'=> $amount, 
             ]);
             //make deduction
-            BatchController::removeBatch($productId, $metricQty);
+            Batch::removeFirstBatch($productId, $metricQty);
             Product::where('id', $productId)->decrement('stock_quantity', $metricQty);
-
         }
     }
 
