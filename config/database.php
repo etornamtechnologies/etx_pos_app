@@ -52,6 +52,11 @@ return [
             'collation' => 'utf8mb4_unicode_ci',
             'prefix' => '',
             'prefix_indexes' => true,
+            'dump'=> [
+                'dump_binary_path'=> 'C:\xampp\mysql\bin',
+                'use_single_transaction',
+                'timeout'=> 60 * 5,
+            ],
             'strict' => true,
             'engine' => null,
             'options' => array_filter([

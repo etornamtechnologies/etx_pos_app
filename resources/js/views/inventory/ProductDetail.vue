@@ -115,8 +115,8 @@
                                 <td>{{ entryPrice(sku.pivot.cost_price || 0) }}</td>
                                 <td>{{ entryPrice(sku.pivot.selling_price || 0) }}</td>
                                 <td>
-                                    <v-btn icon color="red" dark @click="removeStockUnitFromProduct(sku)">
-                                        <v-icon>remove</v-icon>
+                                    <v-btn icon color="red" dark @click="removeStockUnitFromProduct(sku)" small>
+                                        <v-icon small>remove</v-icon>
                                     </v-btn>
                                 </td>
                             </tr>
@@ -213,14 +213,15 @@
                 console.log(this.add_stock_unit);
                 AddStockUnitToProduct(this.add_stock_unit)
                     .then(result=> {
-                        location.reload();
+                        this.product = result.product
+                        this.addStockUnitModal = false;
                     })
             },
             removeStockUnitFromProduct: function(row) {
                 let data = {product_id:this.product.id, stock_unit_id: row.id}
                 RemoveStockUnitFromProduct(data)
                     .then(result=> {
-                        location.reload();
+                        this.product = result.product
                     })
             }, 
             updateProduct: function(){

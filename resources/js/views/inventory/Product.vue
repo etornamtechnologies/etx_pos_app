@@ -6,12 +6,32 @@
                     <v-toolbar-side-icon></v-toolbar-side-icon>
                     <v-toolbar-title>PRODUCTS</v-toolbar-title>
                     <v-spacer></v-spacer>
-                    <v-btn icon color="cyan" dark>
-                        <v-icon
-                        @click="createProductDialog = true">
-                            add
-                        </v-icon>
-                    </v-btn>
+                    <v-menu bottom left>
+                        <template v-slot:activator="{ on }">
+                            <v-btn
+                                dark
+                                icon
+                                v-on="on"
+                            >
+                                <v-icon>more_vert</v-icon>
+                            </v-btn>
+                        </template>
+
+                        <v-list>
+                            <v-list-tile
+                                key="create_product"
+                                @click="openCreateProductModal"
+                            >
+                                <v-list-tile-title>+ create product</v-list-tile-title>
+                            </v-list-tile>
+                            <v-list-tile
+                                key="create_product_entries"
+                                @click="goCreateProductEntries"
+                            >
+                                <v-list-tile-title>+ create product(multiple)</v-list-tile-title>
+                            </v-list-tile>
+                        </v-list>
+                    </v-menu>
                 </v-toolbar>
                 <v-card-title>
                     Products
@@ -33,8 +53,8 @@
                 <template v-slot:items="props">
                     <td>{{ props.item.label }}</td>
                     <td class="text-xs-left">{{ props.item.barcode }}</td>
-                    <td class="text-xs-left">{{ props.item.category.label }}</td>
-                    <td class="text-xs-left">{{ props.item.stock_quantity }} {{ props.item.default_sku.label }}</td>
+                    <td class="text-xs-left">{{ (props.item.category || {}).label }}</td>
+                    <td class="text-xs-left">{{ props.item.stock_quantity }} {{ (props.item.default_sku || {}).label }}</td>
                     <td class="text-xs-left">{{ props.item.status }}</td>
                     <td class="text-xs-left">
                         <v-icon
@@ -42,7 +62,7 @@
                         <v-icon color="red"
                         @click="deleteProduct(props.item)">delete</v-icon>
                         <v-icon
-                        @click="productDetail(props.item)">more</v-icon>
+                        @click="productDetail(props.item)">info</v-icon>
                     </td>
                 </template>
                 <v-alert v-slot:no-results :value="true" color="error" icon="warning">
@@ -52,51 +72,75 @@
             </v-card>
         </v-flex>
 
-        <v-dialog v-model="createProductDialog" persistent width="500">
+        <v-dialog v-model="isOpenCreateProductDialog" persistent width="500">
             <v-card>
-                <form @submit.prevent="createProduct">
-                <v-card-title class="headline">create category</v-card-title>
+                <v-form @submit.prevent="createProduct"
+                ref="form"
+                v-model="valid">
+                <v-card-title class="headline">create product</v-card-title>
                 <v-card-text>
                     <v-text-field
-                    label="label"
+                    label="label *"
                     required
-                    v-model="new_product.label"></v-text-field>
+                    :rules="[v => !!v || 'label is required']"
+                    v-model="product.label"></v-text-field>
+                    <v-text-field
+                    label="barcode"
+                    required
+                    v-model="product.barcode"></v-text-field>
+                    <v-select
+                    label="category *"
+                    item-text="label"
+                    item-value="id"
+                    :rules="[v => !!v || 'category is required']"
+                    v-model="product.category_id"
+                    :items="categories"></v-select>
+                    <v-select
+                        label="default stock unit *"
+                        item-text="label"
+                        item-value="id"
+                        :rules="[v => !!v || 'default sku is required']"
+                        v-model="product.category_id"
+                        :items="stock_units"></v-select>
                 </v-card-text>
                 <v-card-actions>
                     <v-spacer></v-spacer>
-                    <v-btn color="red darken-1" flat ripple @click="createProductDialog = false">CANCEL</v-btn>
-                    <v-btn color="green darken-1" flat type="submit">CREATE</v-btn>
+                    <v-btn color="red darken-1" flat ripple @click="isOpenCreateProductDialog = false">CANCEL</v-btn>
+                    <v-btn color="green darken-1" flat type="submit"
+                    :disabled="!valid">CREATE</v-btn>
                 </v-card-actions>
-                </form>
+                </v-form>
             </v-card>
         </v-dialog>
 
         <v-dialog v-model="isOpenEditProductDialog" persistent width="500">
             <v-card>
-                <form @submit.prevent="updateProduct">
-                <v-card-title class="headline">edit product</v-card-title>
-                <v-card-text>
-                    <v-text-field
-                    label="label"
-                    required
-                    v-model="edit_product.label"></v-text-field>
-                    <v-text-field
-                    label="label"
-                    required
-                    v-model="edit_product.barcode"></v-text-field>
-                    <v-select
-                    label="category"
-                    item-text="label"
-                    item-value="id"
-                    v-model="edit_product.category_id"
-                    :items="categories"></v-select>
-                </v-card-text>
-                <v-card-actions>
-                    <v-spacer></v-spacer>
-                    <v-btn color="red darken-1" flat ripple @click="isOpenEditProductDialog = false">CANCEL</v-btn>
-                    <v-btn color="green darken-1" flat type="submit">UPDATE</v-btn>
-                </v-card-actions>
-                </form>
+                <v-form @submit.prevent="updateProduct">
+                    <v-card-title class="headline">edit product</v-card-title>
+                    <v-card-text>
+                        <v-text-field
+                        label="label *"
+                        required
+                        :rules="[v => !!v || 'label is required']"
+                        v-model="edit_product.label"></v-text-field>
+                        <v-text-field
+                        label="label"
+                        required
+                        v-model="edit_product.barcode"></v-text-field>
+                        <v-select
+                        label="category *"
+                        item-text="label"
+                        item-value="id"
+                        :rules="[v => !!v || 'category is required']"
+                        v-model="edit_product.category_id"
+                        :items="categories"></v-select>
+                    </v-card-text>
+                    <v-card-actions>
+                        <v-spacer></v-spacer>
+                        <v-btn color="red darken-1" flat ripple @click="isOpenEditProductDialog = false">CANCEL</v-btn>
+                        <v-btn color="green darken-1" flat type="submit">UPDATE</v-btn>
+                    </v-card-actions>
+                </v-form>
             </v-card>
         </v-dialog>
    </v-layout>
@@ -105,23 +149,33 @@
 <script>
     import {GetProduct, CreateProduct, UpdateProduct, DeleteProduct} from '../../utils/product'
     import {GetCategory} from '../../utils/category'
+    import {GetStockUnit} from '../../utils/stock-unit'
     export default {
         mounted() {
             this.fetchProducts();
             this.fetchCategories();
+            this.fetchStockUnits();
         },
         data(){
             return {
                 search:'',
                 createProductDialog: false,
                 isOpenEditProductDialog: false,
+                isOpenCreateProductDialog: false,
                 categories: [],
+                stock_units: [],
                 products: [],
                 headers: [{text:'label', value:'label'}, {text:'barcode', value:'barcode'}
                             ,{text:'category', value:'category.label'}, {text:'stock_quantity', value:'quantity'}
                             ,{text:'status', value:'status'}, {text:'', value:'buttons'}],
                 new_product: {label:''},
                 edit_product: {id:null, label:''},
+                product: {label:'', category_id:'', barcode:''},
+                nameRules: [
+                    v => !!v || 'Name is required',
+                    v => (v && v.length <= 50) || 'Name must be less than 50 characters'
+                ],
+                valid: true,
             }
         },
         methods: {
@@ -138,13 +192,18 @@
                         this.categories = result.categories || []
                     })
             },
+            fetchStockUnits: function() {
+                GetStockUnit({})
+                    .then(result=> {
+                        this.stock_units = result.stock_units || [];
+                    })
+            },
             createProduct: function(){
-                let data = Vue.util.extend({}, this.new_product);
-                data.label = this.new_product.label.toUpperCase();
+                let data = Vue.util.extend({}, this.product);
                 CreateProduct(data)
                     .then(result=> {
-                        this.categories.push(result.product || {});
-                        this.createProductDialog = false;
+                        this.products.push(result.product || {});
+                        this.isOpenCreateProductDialog = false;
                     })
                     .catch(err=> {
 
@@ -178,6 +237,12 @@
             productDetail: function(row){
                 let productId = row.id || null;
                 this.$router.push(`/inventory/products/${productId}`);
+            },
+            openCreateProductModal: function() {
+                this.isOpenCreateProductDialog = true;
+            },
+            goCreateProductEntries: function(){
+                this.$router.push({name:'create_product_entries'})
             }
         },
         computed: {

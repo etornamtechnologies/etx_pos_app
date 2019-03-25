@@ -68,7 +68,7 @@ class InventoryController extends Controller
 
     public function addStockUnit(Request $request, $productId, $stockUnitId)
     {
-        $result = [];          
+        $result = [];    
         $metricScale = $request->query('metric_scale');
         if($this->productStockUnitExists($productId, $stockUnitId)) {
             $result['code'] = 1;
@@ -78,6 +78,8 @@ class InventoryController extends Controller
         try{
             Product::findOrFail($productId)->stock_units()->attach($stockUnitId, ['metric_scale'=> $metricScale]);
             $result['code'] = 0;
+            $result['product'] = Product::where('id', $productId)->with(['stock_units', 'category','defaultSku'])->first();
+            $result['message'] = "stock unit added";
         } catch(Exception $e) {
             $result['code'] = 1;
             $result['message'] = "Something went wrong";
@@ -95,6 +97,8 @@ class InventoryController extends Controller
             try{
                 Product::findOrFail($productId)->stock_units()->detach($stockUnitId);
                 $result['code'] = 0;
+                $result['product'] = Product::where('id', $productId)->with(['stock_units', 'category','defaultSku'])->first();
+                $result['message'] = "stock unit removed";
             } catch(Exception $e) {
                 $result['code']=1;
                 $result['message'] = 'Something went wrong';

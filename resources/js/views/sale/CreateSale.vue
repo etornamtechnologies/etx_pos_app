@@ -1,282 +1,212 @@
 <template>
     <div class="container fluid" style="overflow-x:hidden">
-    <div class="row mb-4">
-        <div class="col-md-8">
-            <div class="card">
-                <div class="card-header py-1">
-                    Create Sale Quote
+        <div class="row sale-topbar" style="background-color:#fff">
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="">
+                        Customer 
+                        <span @click="openCreateCustomerModal()" class="create-link ml-2">create customer</span>
+                    </label>
+                    <select class="form-control"
+                    v-model="summary.customer_id"
+                    >
+                        <option value="">Anonymous</option>
+                        <option v-for="customer in customers" :key="customer.id" :value="customer.id">
+                            {{ customer.name }}
+                        </option>
+                    </select>
                 </div>
-                <div class="card-body">
-                    <div class="row mb-2">
-                        <div class="col-md-6">
-                            <span><i class="shopping-cart"></i>  cart entries</span>
-                        </div>
-                        <div class="col-md-6" style="position:relative">
-                            <form @submit.prevent="searchProduct">
-                                <v-text-field
-                                prepend-inner-icon="search"
-                                autocomplete="off"
-                                autofocus
-                                id="search-input"
-                                v-model="filter"></v-text-field>
-                                <button style="display:none" type="submit"></button>
-                            </form>
-                            <div v-if="search_result.length > 0" class="search-result">
-                                <div class="row">
-                                    <div class="col-md-12">
-                                        <button
-                                        class="btn btn-warning btn-sm btn-block mr-1"
-                                        @click="search_result = []">x close</button>
-                                    </div>
-                                </div>    
-                                <div class="row">
-                                    <div class="col-md-12">
-                                        <ul class="search-list-menu">
-                                            <li 
-                                            v-for="item in search_result" 
-                                            :key="item.id" 
-                                            class="search-list"
-                                            @click="addToCart(item)">
-                                                {{ item.label }}
-                                            </li>
-                                        </ul>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-md-12" style="height:650px; overflow-y:auto">
-                            <table class="table table-bordered">
-                                <thead>
-                                    <tr>
-                                        <th>#</th>
-                                        <th>product</th>
-                                        <th>quantity</th>
-                                        <th>uom</th>
-                                        <th>unit-price</th>
-                                        <th>sum</th>
-                                        <th></th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr v-for="(entry, index) in cart" :key="entry.id">
-                                        <td>{{ index+1 }}</td>
-                                        <td>{{ entry.data.label }}</td>
-                                        <td style="width:170px">
-                                            <input type="number" class="form-control" min="1" v-model="entry.quantity">
-                                        </td>
-                                        <td style="width:200px">
-                                            <select 
-                                            class="form-control"
-                                            v-model="entry.selected_sku">
-                                                <option v-for="sku in getEntryStockUnits(entry)" :value="sku.id" :key="sku.id">
-                                                    {{ sku.label }}
-                                                </option>
-                                            </select>
-                                        </td>
-                                        <td>{{ (getEntrySellingPrice(entry)/100).toFixed(2) }}</td>
-                                        <td>{{ (getEntrySum(entry)/100).toFixed(2) }}</td>
-                                        <td>
-                                            <el-button 
-                                            type="danger"
-                                            @click="removeCartEntry(index)">x</el-button>
-                                        </td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
+            </div>
+            <div class="col-md-2">
+                <div class="form-group">
+                    <label>total cost</label>
+                    <input type="number" 
+                    class="form-control"
+                    style="width:100% !important"
+                    :value="(saleTotal/100).toFixed(2)"
+                    readonly>
                 </div>
+            </div>
+            <div class="col-md-2">
+                <div class="form-group">
+                    <label for="">total paid</label>
+                    <input type="number" 
+                    style="width:100% !important"
+                    class="form-control"
+                    v-model="summary.amount_paid">
+                </div>
+            </div>
+            <div class="col-md-2">
+                <div class="form-group">
+                    <label for="">balance</label>
+                    <input type="text" 
+                    class="form-control"
+                    :value = "(saleBalance/100).toFixed(2)"
+                    readonly>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <button 
+                class="btn btn-info mt-4" 
+                type="submit"
+                :disabled="cart.length < 1"
+                @click="createSale">SELL</button>
             </div>
         </div>
-        <div class="col-md-4">
-            <div class="card" style="height:100%">
-                <div class="card-header py-1">
-                    sale quote summary
+        <div class="row mt-3" style="background-color:#fff">
+            <div class="col-md-12 sale-entries-body">
+                <div class="row">
+                    <div class="col-md-6 pt-3">
+                        <span ><i class="fa fas-shopping-cart"></i>  SALE / CART ENTRIES</span>
+                    </div>
+                    <div class="col-md-6" style="position:relative">
+                        <form @submit.prevent="searchProduct">
+                            <v-text-field
+                            color="cyan"
+                            prepend-inner-icon="search"
+                            autocomplete="off"
+                            autofocus
+                            id="search-input"
+                            v-model="filter"></v-text-field>
+                            <button style="display:none" type="submit"></button>
+                        </form>
+                        <div v-if="search_result.length > 0" class="search-result">
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <button
+                                    class="btn btn-warning btn-sm btn-block mr-1"
+                                    @click="search_result = []">x close</button>
+                                </div>
+                            </div>    
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <ul class="search-list-menu">
+                                        <li 
+                                        v-for="item in search_result" 
+                                        :key="item.id" 
+                                        class="search-list"
+                                        @click="addToCart(item)">
+                                            {{ item.label }}
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-                <div class="card-body">
-                    <div class="row">
-                        <div class="col-md-12">
-                            <div class="card">
-                                <div class="card-body bg-light py-1">
-                                    <div class="row">
-                                        <div class="col-md-3 item-centered" style="border-right:solid 1px #ffffff">
-                                            <img class="form-icon" src="/img/icons/boy.svg" alt="">
-                                        </div>
-                                        <div class="col-md-9">
-                                            <div class="form-group">
-                                                <label for="">
-                                                    Customer 
-                                                    <span @click="openCreateCustomerModal()" class="create-link ml-2">create customer</span>
-                                                </label>
-                                                <select class="form-control"
-                                                v-model="summary.customer_id"
-                                                >
-                                                    <option value="">Anonymous</option>
-                                                    <option v-for="customer in customers" :key="customer.id" :value="customer.id">
-                                                        {{ customer.name }}
-                                                    </option>
-                                                </select>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="row mt-2">
-                        <div class="col-md-12">
-                            <div class="card">
-                                <div class="card-body bg-light">
-                                    <div class="row">
-                                        <div class="col-md-3 item-centered" style="border-right:solid 1px #ffffff">
-                                            <img src="/img/icons/shopping-cart.svg" class="form-icon" alt="">
-                                        </div>
-                                        <div class="col-md-9">
-                                            <div class="form-group">
-                                                <label>total cost</label>
-                                                <input type="number" 
-                                                class="form-control"
-                                                style="width:100% !important"
-                                                :value="(saleTotal/100).toFixed(2)"
-                                                readonly>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="row mt-2">
-                        <div class="col-md-12">
-                            <div class="card">
-                                <div class="card-body bg-light">
-                                    <div class="row">
-                                        <div class="col-md-3 item-centered" style="border-right:solid 1px #ffffff">
-                                            <img src="/img/icons/debit-card.svg" class="form-icon" alt="">
-                                        </div>
-                                        <div class="col-md-9">
-                                            <div class="form-group">
-                                                <label for="">total paid</label>
-                                                <input type="number" 
-                                                style="width:100% !important"
-                                                class="form-control"
-                                                v-model="summary.amount_paid">
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="row mt-2">
-                        <div class="col-md-12">
-                            <div class="card">
-                                <div class="card-body bg-light">
-                                    <div class="row">
-                                        <div class="col-md-3 item-centered" style="border-right:solid 1px #ffffff">
-                                            <img class="form-icon" src="/img/icons/change.svg" alt="">
-                                        </div>
-                                        <div class="col-md-9">
-                                            <div class="form-group">
-                                                <label for="">balance</label>
-                                                <input type="text" 
-                                                class="form-control"
-                                                :value = "(saleBalance/100).toFixed(2)"
-                                                readonly>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="row mt-5">
-                        <div class="col-md-12">
-                            <button 
-                            class="btn btn-info btn-block" 
-                            type="submit"
-                            @click="createSale">SELL</button>
-                        </div>
+                <div class="row">
+                    <div class="col-md-12" style="height:500px; overflow-y:auto">
+                        <table class="table table-bordered">
+                            <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th>product</th>
+                                    <th>quantity</th>
+                                    <th>uom</th>
+                                    <th>unit-price</th>
+                                    <th>sum</th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr v-for="(entry, index) in cart" :key="entry.id">
+                                    <td>{{ index+1 }}</td>
+                                    <td>{{ entry.data.label }}</td>
+                                    <td style="width:170px">
+                                        <input type="number" class="form-control" min="1" v-model="entry.quantity">
+                                    </td>
+                                    <td style="width:200px">
+                                        <select 
+                                        class="form-control"
+                                        v-model="entry.selected_sku">
+                                            <option v-for="sku in getEntryStockUnits(entry)" :value="sku.id" :key="sku.id">
+                                                {{ sku.label }}
+                                            </option>
+                                        </select>
+                                    </td>
+                                    <td>{{ (getEntrySellingPrice(entry)/100).toFixed(2) }}</td>
+                                    <td>{{ (getEntrySum(entry)/100).toFixed(2) }}</td>
+                                    <td>
+                                        <el-button 
+                                        type="danger"
+                                        @click="removeCartEntry(index)">x</el-button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             </div>
+            <!--Receipt-->
+            <div class="receipt">
+                <div class="receipt-header">
+                    <div class="header-item">{{ (receipt_data.shop_info || {}).shop_name }}</div>
+                    <div class="header-item">{{ (receipt_data.shop_info || {}).shop_address }}</div>
+                    <div class="header-item">{{ (receipt_data.shop_info || {}).shop_phone }}</div>
+                    <div class="header-item">attendant: {{ (receipt_data.summary || {}).user}}</div>
+                </div>
+                <div class="receipt-invoice-wrapper">
+                    <span>invoice#: {{ (receipt_data.summary || {}).reference_number }}</span>
+                </div>
+                <div class="receipt-entries-wrapper">
+                    <table class="table table-bordered table-responsive">
+                        <thead>
+                            <tr>
+                                <th>Product</th>
+                                <th>Quantity</th>
+                                <th>Price</th>
+                                <th>Sum</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr v-for="(entry, index) in receipt_data.entries" :key="index">
+                                <td>{{ entry.product }}</td>
+                                <td>{{ entry.quantity }} {{ entry.stock_unit }} (s)</td>
+                                <td>{{ (entry.unit_price || 0).toFixed(2) }}</td>
+                                <td>{{ (entry.sum || 0).toFixed(2) }}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="receipt-summary">
+                    <div class="summary-item">TOTAL: {{ ((receipt_data.summary || {}).total_cost || 0).toFixed(2) }}</div>
+                    <div class="summary-item">PAID: {{ ((receipt_data.summary || {}).amount_paid || 0).toFixed(2)  }}</div>
+                    <div class="summary-item">CHANGE: {{ ((receipt_data.summary || {}).change || 0).toFixed(2) }}</div>
+                </div>
+                <div class="receipt-message text-center">
+                    <span><i>{{ ((receipt_data.summary || {}).shop_message) || "Thank you" }}</i></span>
+                </div>
+            </div>
+
+            <el-dialog
+                title="create customer"
+                :visible.sync="showCreateCustomerModal"
+                width="30%"
+                center>
+                <form @submit.prevent="createCustomer">
+                    <div class="form-group">
+                        <label>Name:</label>
+                        <input type="text" class="form-control" v-model="customer.name">
+                    </div>
+                    <div class="form-group">
+                        <label>phone:</label>
+                        <input type="text" class="form-control" v-model="customer.phone">
+                    </div>
+                    <div class="form-group">
+                        <label>email:</label>
+                        <input type="text" class="form-control" v-model="customer.email">
+                    </div>
+                    <div class="form-group">
+                        <label>address:</label>
+                        <input type="text" class="form-control" v-model="customer.address">
+                    </div>
+                    <button class="btn btn-success btn-block" type="submit">
+                        <el-icon class="el-icon-circle-plus"></el-icon>
+                        create customer
+                    </button>
+                </form>
+            </el-dialog>
         </div>
-        <!--Receipt-->
-        <div class="receipt">
-            <div class="receipt-header">
-                <div class="header-item">{{ (receipt_data.shop_info || {}).shop_name }}</div>
-                <div class="header-item">{{ (receipt_data.shop_info || {}).shop_address }}</div>
-                <div class="header-item">{{ (receipt_data.shop_info || {}).shop_phone }}</div>
-                <div class="header-item">attendant: {{ (receipt_data.summary || {}).user}}</div>
-            </div>
-            <div class="receipt-invoice-wrapper">
-                <span>invoice#: {{ (receipt_data.summary || {}).reference_number }}</span>
-            </div>
-            <div class="receipt-entries-wrapper">
-                <table class="table table-bordered table-responsive">
-                    <thead>
-                        <tr>
-                            <th>Product</th>
-                            <th>Quantity</th>
-                            <th>Price</th>
-                            <th>Sum</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr v-for="(entry, index) in receipt_data.entries" :key="index">
-                            <td>{{ entry.product }}</td>
-                            <td>{{ entry.quantity }} {{ entry.stock_unit }} (s)</td>
-                            <td>{{ entry.unit_price }}</td>
-                            <td>{{ entry.sum }}</td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-            <div class="receipt-summary">
-                <div class="summary-item">TOTAL: {{ ((receipt_data.summary || {}).total_cost || 0).toFixed(2) }}</div>
-                <div class="summary-item">PAID: {{ ((receipt_data.summary || {}).amount_paid || 0).toFixed(2)  }}</div>
-                <div class="summary-item">CHANGE: {{ ((receipt_data.summary || {}).change || 0).toFixed(2) }}</div>
-            </div>
-            <div class="receipt-message text-center">
-                <span><i>{{ ((receipt_data.summary || {}).shop_message) || "Thank you" }}</i></span>
-            </div>
-        </div>
-
-        <el-dialog
-            title="create customer"
-            :visible.sync="showCreateCustomerModal"
-            width="30%"
-            center>
-            <form @submit.prevent="createCustomer">
-                <div class="form-group">
-                    <label>Name:</label>
-                    <input type="text" class="form-control" v-model="customer.name">
-                </div>
-                <div class="form-group">
-                    <label>phone:</label>
-                    <input type="text" class="form-control" v-model="customer.phone">
-                </div>
-                <div class="form-group">
-                    <label>email:</label>
-                    <input type="text" class="form-control" v-model="customer.email">
-                </div>
-                <div class="form-group">
-                    <label>address:</label>
-                    <input type="text" class="form-control" v-model="customer.address">
-                </div>
-                <button class="btn btn-success btn-block" type="submit">
-                    <el-icon class="el-icon-circle-plus"></el-icon>
-                    create customer
-                </button>
-            </form>
-        </el-dialog>
-    </div>
     </div>
 </template>
 
@@ -514,7 +444,12 @@
             size: 0;
             margin: 0mm;
         }
-
+        .sale-topbar {
+            display: none;
+        }
+        .sale-entries-body {
+            display: none;
+        }
         .left-side {
             display: none;
         }

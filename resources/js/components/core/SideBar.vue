@@ -35,7 +35,6 @@
                 <el-menu-item index="/inventory/products">Products</el-menu-item>
                 <el-menu-item index="/inventory/categories">Categories</el-menu-item>
                 <el-menu-item index="/inventory/stock-units">Stock-Units</el-menu-item>
-                <el-menu-item index="/inventory/stock-adjustments">Stock-Adjustments</el-menu-item>
                 <el-menu-item index="/inventory/stock-adjustments/create">+ Create Stock-Adjustment</el-menu-item>
             </el-menu-item-group>
         </el-submenu>
@@ -80,7 +79,7 @@
                 <span slot="title" class="menu-title">admin</span>
             </template>
             <el-menu-item-group>
-                <el-menu-item index="/admin/manage-users">User Management</el-menu-item>
+                <el-menu-item index="/admin/users">User Management</el-menu-item>
                 <el-menu-item index="/admin/invnetory-csv">Upload Inventory using csv</el-menu-item>
             </el-menu-item-group>
         </el-submenu> 

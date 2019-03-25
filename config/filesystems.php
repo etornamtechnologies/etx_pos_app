@@ -1,5 +1,4 @@
 <?php
-
 return [
 
     /*
@@ -13,7 +12,7 @@ return [
     |
     */
 
-    'default' => env('FILESYSTEM_DRIVER', 'local'),
+    'default' => env('FILESYSTEM_DRIVER', 'dropbox'),
 
     /*
     |--------------------------------------------------------------------------
@@ -26,7 +25,7 @@ return [
     |
     */
 
-    'cloud' => env('FILESYSTEM_CLOUD', 's3'),
+    'cloud' => env('FILESYSTEM_CLOUD', 'dropbox'),
 
     /*
     |--------------------------------------------------------------------------
@@ -65,7 +64,7 @@ return [
         ],
         'dropbox' => [
             'driver' => 'dropbox',
-            'accessToken' => env('DROPBOX_ACCESS_TOKEN'),
+            'accessToken' => env('DROPBOX_APP_TOKEN'),
             'appSecret' => env('DROPBOX_APP_SECRET'),
         ]
 

@@ -85,3 +85,11 @@ Route::get('/suppliers', 'SupplierController@index');
 Route::post('/suppliers', 'SupplierController@store');
 Route::put('/suppliers/{supplier}', 'SupplierController@update');
 Route::delete('/suppliers/{supplier}', 'SupplierController@destroy');
+
+
+Route::get('/admin/users', 'AdminController@index');
+Route::get('/admin/users/{user}', 'AdminController@show');
+Route::put('/admin/users/{user}/assign-role', 'AdminController@assignRole');
+Route::delete('/admin/users/{user}', 'AdminController@destroy');
+Route::get('/admin/create-backup', 'AdminController@createBackup');
+Route::get('/admin/restore-backup/{backup}', 'AdminController@restoreBackup');

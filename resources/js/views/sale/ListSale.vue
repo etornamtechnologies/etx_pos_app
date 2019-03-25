@@ -60,32 +60,36 @@
                                             {{ (saleEntryTotalCost(props.item)/100).toFixed(2) }}
                                         </td>
                                         <td class="text-xs-right">
-                                            {{ (props.item.paid/100) }}
+                                            {{ (props.item.paid/100).toFixed(2) }}
                                         </td>
                                         <td class="text-xs-right">
                                             {{ (saleEntryBalance(props.item)/100).toFixed(2) }}
                                         </td>
                                         <td class="text-xs-right">
                                             <v-btn
+                                            small
                                             :disabled="saleEntryBalance(props.item) >= 0 || props.item.status == 'inactive'"
                                             @click.stop="openMakePaymentModal(props.item, props.index)">
                                                 pay
                                             </v-btn>
 
                                             <v-btn
+                                            small
                                             icon
                                             color="warning"
                                             :disabled="props.item.status == 'inactive' || filter_type!='all'"
                                             @click.stop="cancelSale(props.item, props.index)">
-                                                <v-icon>close</v-icon>
+                                                <v-icon small>close</v-icon>
                                             </v-btn>
 
                                             <v-btn
                                             icon
+                                            small
                                             :disabled="isDetailLoading"
-                                            color="primary"
+                                            color="success"
+                                            dark
                                             @click.stop="getDetail(props.item, props.index)">
-                                                <v-icon>chevron_right</v-icon>
+                                                <v-icon small>info</v-icon>
                                             </v-btn>
                                         </td>
                                     </template>

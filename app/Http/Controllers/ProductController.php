@@ -96,9 +96,9 @@ class ProductController extends Controller
     public function update(Request $request, $productId)
     {
         $request->validate([
-            'label'=>'required|unique:products, label,'.$productId.'id',
+            'label'=>'required|unique:products,label,'.$productId.'id',
             'category_id'=> 'required',
-            'barcode'=> 'unique:products, barcode,'.$productId.'id'
+            'barcode'=> 'unique:products,barcode,'.$productId.'id'
         ]);
         $product = Product::findOrFail($productId);
         $result = [];

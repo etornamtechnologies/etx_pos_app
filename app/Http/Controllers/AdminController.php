@@ -2,23 +2,26 @@
 
 namespace App\Http\Controllers;
 
+use File;
+use Excel;
+use Session;
 use App\Role;
 use App\User;
+use App\Batch;
 use App\Product;
 use App\Category;
 use App\StockUnit;
-use File;
-use Excel;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
-use Session;
+use Illuminate\Support\Facades\Input;
+use Illuminate\Support\Facades\Artisan;
 
 class AdminController extends Controller
 {
     public function __construct()
     {
-        $this->middleware('auth');
+        $this->middleware('api_auth');
     }
 
     public function indexPage()
@@ -28,16 +31,8 @@ class AdminController extends Controller
 
     public function index(Request $request)
     {
-        $result = [];
-        try{
-            $users = User::all();
-            $result['code'] = 0;
-            $result['users'] = $users;
-        } catch(Exception $e) {
-            $result['code'] = 1;
-            $result['message'] = "Server error..please contact admin";
-        }
-        return response()->json($result);
+        $users = User::all();
+        return response()->json(['code'=> 0, 'users'=> $users], 200);
     }
 
     public function userPage()
@@ -47,23 +42,15 @@ class AdminController extends Controller
 
     public function show(Request $request, $id)
     {
-        $result = [];
-        try{
-            $user = User::where('id', $id)->with('roles')->first();
-            $result['code'] = 0;
-            $result['user'] = $user;
-        } catch(Exception $e) {
-            $result['code'] = 1;
-            $result['message'] = "Server error..please contact admin";
-        }
-        return response()->json($result);
+        $user = User::where('id', $id)->with(['roles'])->first();
+        return response()->json(['code'=> 0, 'user'=> $user]);
     }
 
     public function assignRole(Request $request, $id)
     {
-        try{
-            $userId = $id;
+        DB::transaction(function () use($request) {
             $input = $request->all();
+            $userId = $input['id'];
             $myuser = User::findOrFail($userId);
             $myuser->roles()->detach();
             if($request->has('sales_rep')) {
@@ -75,14 +62,9 @@ class AdminController extends Controller
             if($request->has('admin')) {
                 $myuser->roles()->attach(Role::where('label', 'admin')->first());
             }
-            $result = [];
-            $result['code'] = 0;
-            return response()->json($result);
-        } catch(Exception $e) {
-            $result['code'] = 1;
-            $result['message'] = "Server error";
-        }
-
+        });
+        $user = User::where('id', $id)->with(['roles'])->first();
+        return response()->json(['code'=>0, 'user'=> $user, 'message'=> 'user roles updated'], 200);
     }
 
     public function loadCsvPage()
@@ -205,5 +187,17 @@ class AdminController extends Controller
                         ->where('products_id', $product_id)
                         ->where('stock_units_id', $sku_id)->first();
         return $cat;
+    }
+
+    public function createBackup() 
+    {
+        Artisan::call('backup:run');
+        return response()->json(['code'=> 0, 'message'=> 'backup created successfully']);
+    }
+
+    public function restoreBackup() 
+    {
+        //Artisan::call('backup:run');
+        return response()->json(['code'=> 0, 'message'=> 'backup created successfully']);
     }
 }

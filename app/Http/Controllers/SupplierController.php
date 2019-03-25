@@ -28,7 +28,7 @@ class SupplierController extends Controller
         try{
             $q = null;
             $suppliers = [];
-            $q = Supplier::where('label', 'LIKE', '%'.$filter.'%');
+            $q = Supplier::where('name', 'LIKE', '%'.$filter.'%');
             if($request->has('paginate')) {
                 $suppliers = $q->paginate(10);
             } else {

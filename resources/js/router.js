@@ -21,6 +21,8 @@ import CreatePurchase from './views/purchase/CreatePurchase'
 import ListPurchase from './views/purchase/ListPurchase'
 import ShopSetup from './views/config/ShopSetup'
 import BackupAndRestore from './views/config/BackupAndRestore'
+import UserList from './views/admin/UserList'
+import User from './views/admin/User'
 import store from './store';
 
 Vue.use(Router)
@@ -86,6 +88,7 @@ export default new Router({
                         },
                         {
                             path: 'products/create/entries',
+                            name: 'create_product_entries',
                             component: ProductCreateEntries
                         },
                         {
@@ -117,6 +120,15 @@ export default new Router({
                 {
                     path: 'settings/backup-and-restore',
                     component: BackupAndRestore
+                },
+                {
+                    path:'admin/users',
+                    component: UserList
+                },
+                {
+                    path:'admin/users/:id',
+                    name: 'user_detail',
+                    component: User
                 }
             ]
         }

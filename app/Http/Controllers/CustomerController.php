@@ -28,7 +28,7 @@ class CustomerController extends Controller
             $filter = $request->query('filter');
         }
         try{
-            $customers = Customer::where('label', 'LIKE', '%'.$filter.'%')->get();
+            $customers = Customer::where('name','LIKE','%'.$filter.'%')->get();
             $result['code'] = 0;
             $result['customers'] = $customers;
             $status = 200;

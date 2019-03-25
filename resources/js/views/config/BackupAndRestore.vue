@@ -34,6 +34,7 @@
     </v-layout>
 </template>
 <script>
+    import { CreateBackup, RestoreBackup } from '../../utils/admin'
     export default {
         data(){
             return {
@@ -42,7 +43,13 @@
         },
         methods: {
             createBackup: function(){
-                console.log('create backup')
+                CreateBackup({})
+                    .then(result=> {
+                        console.log(result);
+                    })
+                    .catch(err=> {
+                        console.log(err)
+                    })
             }
         }
     }
