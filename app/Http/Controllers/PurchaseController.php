@@ -30,41 +30,21 @@ class PurchaseController extends Controller
     {
         $result = [];
         $filter = $request->has('filter') ? $request->query('filter') : "";
-        try{
-            $purchases = [];
-            $credits = [];
-            if($request->query('type') == 'creditors') {
-                $query = Purchase::where('reference_number', 'LIKE', '%'.$filter.'%')
-                                ->with('out_payments')->latest()->get();
-                foreach($query as $qq) {
-                    $sum = 0;
-                    $payments = $qq->out_payments;
-                    foreach($payments as $payment) {
-                        $sum = $sum + $payment->count;
-                    }
-                    if($sum < $qq->invoice_total_cost) {
-                        array_push($credits, Purchase::where('id', $qq->id)
-                                    ->with(['out_payments', 'user', 'supplier'])->first());
-                    }
-                }
-                $result['credits'] = $credits;
-                $result['code'] = 0;
-            } else{
-                $q = Purchase::where('reference_number', 'LIKE', '%'.$filter.'%')
-                ->with(['user', 'supplier', 'out_payments'])->orderBy('created_at', 'DES'); 
-                if($request->has('paginate')) {
-                    $purchases = $q->paginate(10);
-                } else {
-                    $purchases = $q->get();
-                }     
-                $result['code'] = 0;
-                $result['purchases'] = $purchases;          
-            }
-        } catch (Exception $e) {
-            $result['code'] = 1;
-            $result['message'] = "Something went wrong";
+        $refCode = $request->has('ref_code') ? $request->query('ref_code') : "";
+        $supplierId = $request->has('supplier_id') ? $request->query('supplier_id') : "";
+        $purchasesQuery = Purchase::when($refCode, function($query, $refCode) {
+                                return $query->where('ref_code', 'LIKE', '%'.$refCode.'%');
+                            })
+                            ->when($supplierId, function($query, $supplierId) {
+                                return $query->where('supplier_id', $supplierId);
+                            })
+                            ->with(['user', 'supplier', 'out_payments'])
+                            ->orderBy('created_at', 'DESC');
+        if($request->has('paginate')) {
+            return response()->json(['purchases'=> $purchasesQuery->paginate(15), 'code'=>0], 200);
+        } else {
+            return response()->json(['code'=>0, 'purchases'=> $purchasesQuery->take(100)->get()]);
         }
-        return response()->json($result);
     }
 
 
@@ -72,16 +52,11 @@ class PurchaseController extends Controller
     {
         $res = [];
         try{
-            $query = DB::table('purchase_entries')->where('purchase_id', $purchaseId)
-                            ->leftJoin('stock_units', 'purchase_entries.stock_unit_id', '=', 'stock_units.id')
-                            ->leftJoin('products', 'purchase_entries.product_id', '=', 'products.id')
-                            ->select('purchase_entries.quantity as quantity', 'products.label as product'
-                                        ,'stock_units.label as stock_unit', 'purchase_entries.amount as sum'
-                                        ,'purchase_entries.cost_price as cost_price');
-            $entries = $query->get();
-            $payments = OutPayment::where('purchase_id', $purchaseId)->with(['user'])->get();
+            $purchase = Purchase::showPurchase($purchaseId);
+            $payments = OutPayment::getPaymentsForPurchase($purchaseId);
             $res['code'] = 0;
-            $res['entries'] = $entries;
+            $res['entries'] = $purchase['purchase_entries'];
+            $res['purchase'] = $purchase['purchase'];
             $res['payments'] = $payments;                            
         } catch(Exception $e) {
             $res['code'] = 1;

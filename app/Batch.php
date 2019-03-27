@@ -40,7 +40,8 @@ class Batch extends Model
         Batch::where('quantity', 0)->delete();
         $query = DB::table('batches')->where('product_id', $product_id)
                                     ->where('quantity', '>', 0)
-                                    ->orderBy('expiry_date', 'ASC')->get();                       
+                                    ->orderBy('expiry_date', 'ASC')->get();  
+        $expiryDateForEntry = $query->first();                                                 
         $remainingQty = $quantity;  
         $done = 0;                
         foreach($query as $b) {
@@ -56,6 +57,20 @@ class Batch extends Model
                 $q = 0;
                 $remainingQty = $remainingQty-$bQty;
                 $batchData->update(['quantity' => $q]);
+            }
+        }
+        return $expiryDateForEntry;
+    }
+
+    public static function addSaleEntriesBatches($saleId)
+    {
+        $q = DB::table('sale_entries')->where('sale_id', $saleId);
+        $entries = $q->get();
+        foreach($entries as $entry) {
+            $isExpiryDateExist = $entry->expiry_date;
+            if($isExpiryDateExist) {
+                $qty = $entry->metric_quantity;
+                $batch = Batch::where('expiry_date', $entry->expiry_date)->increment('quantity', $qty);
             }
         }
     }

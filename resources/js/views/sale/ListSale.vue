@@ -3,217 +3,235 @@
         <div class="row">
             <div class="col-md-12">
                 <div class="card">
-                    <div class="card-header py-1">
-                        Sales
-                    </div>
-                    <div class="card-body" style="position: relative">
-                        <div class="page-loader" v-if="isLoading"></div>
-                        <div class="row mb-2">
-                            <div class="col-md-6">
-                                <form @submit.prevent = "fetchSales">
-                                    <v-text-field
-                                    v-model="filter"
-                                    prepend-inner-icon="search"></v-text-field>
-                                </form>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="row">
-                                    <div class="col-md-3"><span class="float-right">sale type</span></div>
-                                    <div class="col-md-9">
-                                        <select v-model="filter_type" class="form-control form-control-sm">
-                                            <option v-for="type in filter_types" :value="type.id" :key="type.id">
-                                                {{ type.label }}
+                    <div class="card-body py-0">
+                        <form @submit.prevent="fetchSales" class="py-0">
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label>reference code</label>
+                                        <input type="text" class="form-control" v-model="search.ref_code">
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label>customer</label>
+                                        <select v-model="search.customer_id" class="form-control">
+                                            <option value="">All</option>
+                                            <option v-for="customer in customers" :key="customer.id" :value="customer.id">
+                                                {{ customer.name }}
                                             </option>
                                         </select>
                                     </div>
                                 </div>
+                                <div class="col-md-4">
+                                    <button class="btn btn-success" 
+                                    type="submit"
+                                    style="margin-top:26px">
+                                        filter
+                                    </button>
+                                </div>
                             </div>
-                        </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row mt-2">
+            <div class="col-md-12">
+                <div class="card">
+                    <div class="card-body">
                         <div class="row">
-                            <div class="col-md-12" style="max-height:730px; overflow-y:auto">
-                                <v-data-table
-                                :headers="headers"
-                                :items="getTableByType"
-                                :search="filter"
-                                >
-                                    <template v-slot:items="props">
-                                        <td>
-                                            {{ props.item.ref_code }}
-                                        </td>
-                                        <td>
-                                            {{ props.item.created_at }}
-                                        </td>
-                                        <td>
-                                            {{ (props.item.user || {}).name }}
-                                        </td>
-                                        <td>
-                                            {{ (props.item.customer || {}).name }}
-                                        </td>
-                                        <td>
-                                            <div
-                                            class="text-white py-0 px-1 text-center" style="border-radius:10px"
-                                            :class="props.item.status == 'active' ? 'bg-info' : 'bg-danger'">
-                                                {{ props.item.status }}
-                                            </div>
-                                        </td>
-                                        <td>
-                                            {{ (saleEntryTotalCost(props.item)/100).toFixed(2) }}
-                                        </td>
-                                        <td class="text-xs-right">
-                                            {{ (props.item.paid/100).toFixed(2) }}
-                                        </td>
-                                        <td class="text-xs-right">
-                                            {{ (saleEntryBalance(props.item)/100).toFixed(2) }}
-                                        </td>
-                                        <td class="text-xs-right">
-                                            <v-btn
-                                            small
-                                            :disabled="saleEntryBalance(props.item) >= 0 || props.item.status == 'inactive'"
-                                            @click.stop="openMakePaymentModal(props.item, props.index)">
-                                                pay
-                                            </v-btn>
+                            <div class="col-md-12">
+                                <table class="table table-bordered">
+                                    <thead>
+                                        <tr>
+                                            <th>Reference code</th>
+                                            <th>Sale rep</th>
+                                            <th>Customer</th>
+                                            <th>Date</th>
+                                            <th>Status</th>
+                                            <th>Amount due</th>
+                                            <th>Amount Paid</th>
+                                            <th>Balance</th>
+                                            <th></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr v-for="(sale,index) in sales" :key="sale.id">
+                                            <td>
+                                                {{ sale.ref_code }}
+                                            </td>
+                                            <td>
+                                                {{ (sale.user || {}).name }}
+                                            </td>
+                                            <td>
+                                                {{ (sale.customer || {}).name }}
+                                            </td>
+                                            <td>
+                                                {{ sale.created_at }}
+                                            </td>
+                                            <td>
+                                                <div
+                                                class="text-white py-0 px-1 text-center" style="border-radius:10px"
+                                                :class="sale.status == 'active' ? 'bg-info' : 'bg-danger'">
+                                                    {{ sale.status }}
+                                                </div>
+                                            </td>
+                                            <td>
+                                                {{ (saleEntryTotalCost(sale)/100).toFixed(2) }}
+                                            </td>
+                                            <td>
+                                                {{ (sale.paid/100).toFixed(2) }}
+                                            </td>
+                                            <td class="text-xs-right">
+                                                {{ (saleEntryBalance(sale)/100).toFixed(2) }}
+                                            </td>
+                                            <td style="min-width:180px">
+                                                <button class="btn btn-secondary btn-sm"
+                                                :disabled="saleEntryBalance(sale) >= 0 || sale.status == 'inactive'"
+                                                @click.stop="openMakePaymentModal(sale, index)"
+                                                >Pay</button>
 
-                                            <v-btn
-                                            small
-                                            icon
-                                            color="warning"
-                                            :disabled="props.item.status == 'inactive' || filter_type!='all'"
-                                            @click.stop="cancelSale(props.item, props.index)">
-                                                <v-icon small>close</v-icon>
-                                            </v-btn>
 
-                                            <v-btn
-                                            icon
-                                            small
-                                            :disabled="isDetailLoading"
-                                            color="success"
-                                            dark
-                                            @click.stop="getDetail(props.item, props.index)">
-                                                <v-icon small>info</v-icon>
-                                            </v-btn>
-                                        </td>
-                                    </template>
-                                    <v-alert v-slot:no-results :value="true" color="error" icon="warning">
-                                        Your search for "{{ search }}" found no results.
-                                    </v-alert>
-                                </v-data-table>
-                            </div>
-                        </div>
-                        <div class="row" v-if="filter_type == 'all'">
-                            <div class="col-md-12 block justify-content-center">
+                                                <button
+                                                class="btn-sm btn btn-warning"
+                                                :disabled="sale.status == 'cancelled' || filter_type!='all'"
+                                                @click.stop="cancelSale(sale, index)">
+                                                    cancel
+                                                </button>
+
+                                                <button
+                                                class="btn btn-primary btn-sm"
+                                                :disabled="isDetailLoading"
+                                                @click.stop="getDetail(sale, index)">
+                                                    <v-icon small color="white">info</v-icon>
+                                                </button>
+                                            </td>                                            
+                                        </tr>
+                                    </tbody>
+                                </table>
                                 <el-pagination
-                                    layout="prev, pager, next"
-                                    background
-                                    :page-size="perPage"
-                                    :total="totalRows"
-                                    :current-page.sync="currentPage"
-                                    :pager-count="11"
-                                    @current-change="fetchSales">
+                                background
+                                :current-page.sync="currentPage"
+                                :page-size="perPage"
+                                :pager-count="21"
+                                layout="prev, pager, next"
+                                :total="totalRows">
                                 </el-pagination>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
-
-            <el-dialog
-                title="make payment"
-                :visible.sync="showMakePaymentModal"
-                width="30%"
-                center>
-                <form @submit.prevent="makePayment">
-                    <div class="form-group">
-                        <label>amount:</label>
-                        <input type="number" step="0.01" class="form-control" v-model="payment.count">
-                    </div>
-                    <button class="btn btn-success btn-block" type="submit">
-                        <el-icon class="el-icon-circle-plus"></el-icon>
-                        pay
-                    </button>
-                </form>
-            </el-dialog>
-
-            <el-dialog
-                title="sale entries" 
-                :visible.sync="showEntryDetailModal">
-                <div class="row py-3">
-                    <div class="col-md-8">
-                        {{ (sale_detail.sale || {}).reference_number || "" }}
-                    </div>
-                    <div class="col-md-4">
-                        {{ (sale_detail.sale || {}).status || "" }}
-                    </div>
-                </div>
-                <div class="row">
-                    <div class="col-md-12">
-                        <table class="table table-striped">
-                            <thead>
-                                <tr>
-                                    <th>Product</th>
-                                    <th>Quantity</th>
-                                    <th>Unit-Price</th>
-                                    <th>Sum</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr v-for="(entry,index) in sale_detail.entries" :key="index">
-                                    <td>{{ entry.product }}</td>
-                                    <td>
-                                        {{entry.quantity}} {{ entry.stock_unit }}
-                                    </td>
-                                    <td>{{ ((entry.selling_price || 0)/100).toFixed(2) }}</td>
-                                    <td>{{ ((entry.sum || 0)/100).toFixed(2) }}</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-                <div class="row mt-3">
-                    <div class="col-md-12">
-                        <span> Payment history </span>
-                    </div>
-                </div>
-                <div class="row">
-                    <div class="col-md-12">
-                        <table class="table">
-                            <thead>
-                                <tr>
-                                    <th>Paid By</th>
-                                    <th>Date</th>
-                                    <th>Amount (GHC)</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr v-for="payment in sale_detail.payments" :key="payment.id">
-                                    <td>{{ (payment.user || {}).name }}</td>
-                                    <td>{{ payment.created_at }}</td>
-                                    <td>{{ (payment.count/100).toFixed(2) }}</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>            
-            </el-dialog>
         </div>
+
+
+        <el-dialog
+            title="make payment"
+            :visible.sync="showMakePaymentModal"
+            width="30%"
+            center>
+            <form @submit.prevent="makePayment">
+                <div class="form-group">
+                    <label>amount:</label>
+                    <input type="number" step="0.01" class="form-control" v-model="payment.count"
+                    style="width:100% !important">
+                </div>
+                <button class="btn btn-success btn-block" type="submit">
+                    <el-icon class="el-icon-circle-plus"></el-icon>
+                    pay
+                </button>
+            </form>
+        </el-dialog>
+
+        <el-dialog
+            title="sale entries" 
+            :visible.sync="showEntryDetailModal">
+            <div class="row py-3">
+                <div class="col-md-8">
+                    {{ (sale_detail.sale || {}).reference_number || "" }}
+                </div>
+                <div class="col-md-4">
+                    {{ (sale_detail.sale || {}).status || "" }}
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-12">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Product</th>
+                                <th>Status</th>
+                                <th>Quantity</th>
+                                <th>Unit-Price</th>
+                                <th>Sum</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr v-for="(entry,index) in sale_detail.entries" :key="index">
+                                <td>{{ entry.product }}</td>
+                                <td>{{ entry.status }}</td>
+                                <td>
+                                    {{entry.quantity}} {{ entry.stock_unit }}
+                                </td>
+                                <td>{{ ((entry.selling_price || 0)/100).toFixed(2) }}</td>
+                                <td>{{ ((entry.sum || 0)/100).toFixed(2) }}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="row mt-3">
+                <div class="col-md-12">
+                    <span> Payment history </span>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-12">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Paid By</th>
+                                <th>Date</th>
+                                <th>Amount (GHC)</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr v-for="payment in sale_detail.payments" :key="payment.id">
+                                <td>{{ (payment.user || {}).name }}</td>
+                                <td>{{ payment.created_at }}</td>
+                                <td>{{ (payment.count/100).toFixed(2) }}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>            
+        </el-dialog>
     </div>
 </template>
 
 <script>
     import {GetProduct} from '../../utils/product'
-    import { GetSale, ShowSale } from '../../utils/pos'
+    import { GetSale, ShowSale, CreateInPayment, CancelSale } from '../../utils/pos'
+    import { GetCustomer, } from '../../utils/inventory'
     import { Message } from 'element-ui';
     export default {
         mounted() {
+            this.fetchCustomers();
             this.fetchSales();
         },
         watch: {
             filter_type: function() {
+                this.fetchPurchases();
+            },
+            currentPage: function() {
                 this.fetchSales();
             }
         },
         data() {
             return {
                 filter: '',
+                search: {ref_code:'', customer_id:'',paginate:true},
                 sales: [],
                 headers: [{value:'reference_number', text:'reference number'}, {value:'created_at', text:'date'}
                                 , {value:'user', text:'sales rep'}, {value:'customer', text:'customer'}
@@ -221,6 +239,7 @@
                                 , {value:'in_payments', text:'total payment'},{value:'balance', text:'balance'}
                                 , {value:'actions', text:'actions'}],
                 debts: [],
+                customers: [],
                 currentPage: 1,
                 perPage: 2,
                 totalRows: null,
@@ -233,25 +252,34 @@
                 showEntryDetailModal: false,
                 filter_type: 'all',
                 filter_types: [{id:'all', label:'All Sales'}, {id:'debts', label:'Sales with debtors'}],
+                paymentLoading: false,
 
             }
         },
         methods: {
             fetchSales: function(){
                 this.isLoading = true;
-                GetSale({filter:this.filter, type: this.filter_type})
+                let saleData = this.search;
+                saleData.page = this.currentPage;
+                GetSale(saleData)
                     .then(result=> {
-                        this.sales = [];
-                        this.bebts = [];
-                        console.log(result.sales);
-                        if(this.filter_type == 'all') {
-                            this.sales = result.sales || []
-                        } else {
-                            this.debts = result.debts || [];
-                        }
+                        console.log(result.sales.data)
+                        this.sales = result.sales.data || [];
+                        this.perPage = result.sales.per_page;
+                        this.currentPage = result.sales.current_page;
+                        this.totalRows = result.sales.total;  
                     })
                     .catch((err)=> {
                         this.isLoading = false;
+                    })
+            },
+            fetchCustomers: function() {
+                GetCustomer({})
+                    .then(result=> {
+                        this.customers = result.customers || [];
+                    })
+                    .catch(err=> {
+
                     })
             },
             openMakePaymentModal: function(row, index){
@@ -261,32 +289,27 @@
                 this.showMakePaymentModal = true;
             },
             makePayment: function() {
-                axios.post(`/in-payments`, this.payment)
-                    .then((result)=> {
-                        let res = result.data || {};
-                        if(res.code == 0) {
-                            location .reload(true);
-                        } else {
-                            Notifier.error(res.message);
-                        }
-                    })
-                    .catch((err)=> {
-                        handleAjaError(err);
-                    })
+                if(confirm('Are you sure you want to make payment')) {
+                    this.paymentLoading = true;
+                    CreateInPayment(this.payment)
+                        .then(result=> {
+                            this.paymentLoading = false;
+                            location.reload(true)
+                        })
+                        .catch(err=> {
+                            this.paymentLoading = false;
+                        })
+                }    
             },
             cancelSale: function(row) {
-                axios.put(`/sales/${row.id}/cancel`, {status:'inactive'})
-                    .then((result)=> {
-                        let res = result.data || {};
-                        if(res.code == 0) {
-                            location.reload(true);
-                        } else {
-                            Notifier.error(res.message || "");
-                        }
+                let data = row;
+                data.status = 'cancelled';
+                if(confirm(`Are you sure you want to cancel sale quote (${row.ref_code})`)) {
+                    CancelSale(data)
+                    .then(result=> {
+                        location.reload(true)
                     })
-                    .catch((err)=> {
-                        handleAjaxError(err);
-                    })
+                }
             },
             getDetail: function(row) {
                 this.isDetailLoading = true;

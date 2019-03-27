@@ -100,7 +100,7 @@
                         item-text="label"
                         item-value="id"
                         :rules="[v => !!v || 'default sku is required']"
-                        v-model="product.category_id"
+                        v-model="product.default_stock_unit"
                         :items="stock_units"></v-select>
                 </v-card-text>
                 <v-card-actions>

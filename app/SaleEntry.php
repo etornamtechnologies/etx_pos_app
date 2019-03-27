@@ -3,6 +3,9 @@
 namespace App;
 
 
+use App\Product;
+use App\SaleEntry;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Database\Eloquent\Model;
 
 class SaleEntry extends Model
@@ -11,7 +14,7 @@ class SaleEntry extends Model
 
     protected $fillable = ["sale_id", "product_id", "stock_unit_id", "selling_price"
                             , "cost_price", "quantity", "amount", "metric_quantity", "product_label"
-                            ,"stock_unit_label"];
+                            ,"stock_unit_label", "expiry_date"];
 
     public function sale()
     {
@@ -31,5 +34,18 @@ class SaleEntry extends Model
     public function user()
     {
         return $this->belongsToManyThrough('App\User', 'App\Sale', 'user_id', 'sale_id');
+    }
+
+    public static function cancelEntries($saleId)
+    {
+        $q = DB::table('sale_entries')->where('sale_id', $saleId);
+        $entries = $q->get();
+        foreach($entries as $entry) {
+            SaleEntry::where('id', $entry->id)->update([
+                'status'=>'cancelled'
+            ]);
+            $metricQty = $entry->metric_quantity;
+            Product::where('id', $entry->product_id)->increment('stock_quantity', $metricQty);
+        }
     }
 }

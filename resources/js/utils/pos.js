@@ -63,6 +63,18 @@ export function GetPurchase( _data ) {
     })
 }
 
+export function ShowPurchase( _data ) {
+    return new Promise((resolve, reject) => {
+        posApi.showPurchase(_data)
+        .then(response => {
+            const data = response || {}
+            resolve(data)
+        }).catch(error => {
+            reject(error)
+        })
+    })
+}
+
 export function CreatePurchase( _data ) {
     return new Promise((resolve, reject) => {
         posApi.createPurchase(_data)
@@ -78,6 +90,30 @@ export function CreatePurchase( _data ) {
 export function CancelPurchase( _data ) {
     return new Promise((resolve, reject) => {
         posApi.cancelPurchase(_data)
+        .then(response => {
+            const data = response || {}
+            resolve(data)
+        }).catch(error => {
+            reject(error)
+        })
+    })
+}
+
+export function CreateOutPayment( _data ) {
+    return new Promise((resolve, reject) => {
+        posApi.postOutPayment(_data)
+        .then(response => {
+            const data = response || {}
+            resolve(data)
+        }).catch(error => {
+            reject(error)
+        })
+    })
+}
+
+export function CreateInPayment( _data ) {
+    return new Promise((resolve, reject) => {
+        posApi.postInPayment(_data)
         .then(response => {
             const data = response || {}
             resolve(data)

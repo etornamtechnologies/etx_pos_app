@@ -23,6 +23,7 @@ import ShopSetup from './views/config/ShopSetup'
 import BackupAndRestore from './views/config/BackupAndRestore'
 import UserList from './views/admin/UserList'
 import User from './views/admin/User'
+import SaleReport from './views/report/SaleReport'
 import store from './store';
 
 Vue.use(Router)
@@ -129,6 +130,10 @@ export default new Router({
                     path:'admin/users/:id',
                     name: 'user_detail',
                     component: User
+                },
+                {
+                    path: 'reports/sale',
+                    component: SaleReport
                 }
             ]
         }

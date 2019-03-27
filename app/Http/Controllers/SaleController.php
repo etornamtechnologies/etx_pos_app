@@ -35,42 +35,21 @@ class SaleController extends Controller
     {
         $result = [];
         $filter = $request->has('filter') ? $request->query('filter') : "";
-        try{
-            $slaes = [];
-            $debts = [];
-            if($request->query('type') == 'debts') {
-                $query = Sale::where('ref_code', 'LIKE', '%'.$filter.'%')
-                                ->with('in_payments')->latest()->get();
-                foreach($query as $qq) {
-                    $sum = 0;
-                    $payments = $qq->in_payments;
-                    foreach($payments as $payment) {
-                        $sum = $sum + $payment->count;
-                    }
-                    if($sum < $qq->total_cost) {
-                        array_push($debts, Sale::where('id', $qq->id)
-                                    ->with(['in_payments', 'user', 'customer'])->first());
-                    }
-                }
-                $result['debts'] = $debts;
-                $result['code'] = 0;
-            } else {
-                $q = Sale::where('reference_number', 'LIKE', '%'.$filter.'%')
-                ->orderBy('created_at', 'DESC')
-                ->with(['user', 'customer','in_payments']);
-                if($request->has('paginate')) {
-                    $sales = $q->paginate(10);
-                } else {
-                    $sales = $q->get();
-                }               
-                $result['code'] = 0;
-                $result['sales'] = $sales;
-            }
-        } catch (Exception $e) {
-            $result['code'] = 1;
-            $result['message'] = "Something went wrong";
+        $refCode = $request->has('ref_code') ? $request->query('ref_code') : "";
+        $customerId = $request->has('customer_id') ? $request->query('customer_id') : "";
+        $salesQuery = Sale::when($refCode, function($query, $refCode) {
+                                return $query->where('ref_code', 'LIKE', '%'.$refCode.'%');
+                            })
+                            ->when($customerId, function($query, $customerId) {
+                                return $query->where('customer_id', $customerId);
+                            })
+                            ->with(['user', 'customer', 'in_payments'])
+                            ->orderBy('created_at', 'DESC');
+        if($request->has('paginate')) {
+            return response()->json(['sales'=> $salesQuery->paginate(15), 'code'=>0], 200);
+        } else {
+            return response()->json(['code'=>0, 'sales'=> $salesQuery->take(100)->get()]);
         }
-        return response()->json($result);
     }
 
     public function store(Request $request)
@@ -131,7 +110,7 @@ class SaleController extends Controller
                             ->leftJoin('products', 'sale_entries.product_id', '=', 'products.id')
                             ->select('sale_entries.quantity as quantity', 'products.label as product'
                                         ,'stock_units.label as stock_unit', 'sale_entries.amount as sum'
-                                        ,'sale_entries.selling_price as selling_price');
+                                        ,'sale_entries.selling_price as selling_price', 'sale_entries.status as status');
             $entries = $query->get();
             $payments = InPayment::where('sale_id', $saleId)->with('user')->get();
             $res['code'] = 0;
@@ -144,18 +123,19 @@ class SaleController extends Controller
         return response()->json($res);
     }
 
-    public function cancelSale(Request $request, $saleId)
+    public function cancel(Request $request, $saleId)
     {
         $result = [];
         try{
             DB::transaction(function () use($saleId, &$result, $request){
+                $status = $request->query('status');
                 $sale = Sale::findOrFail($saleId);
-                $sale->update([
-                    'status'=> $request->status
-                ]);
+                $sale->status = $status;
+                $sale->save();
+                Batch::addSaleEntriesBatches($saleId);
                 InPayment::where('sale_id', $sale->id)->delete();
+                SaleEntry::cancelEntries($sale->id);
                 $result['code'] = 0;
-                $this->cancelEntries($sale->id);
             });
         } catch(Exception $e) {
             $result['code'] = 1;
@@ -205,6 +185,11 @@ class SaleController extends Controller
             $sellingPrice = $productStockUnitQuery->selling_price;
             $costPrice = $productStockUnitQuery->cost_price ?:0;
             $amount = $quantity * $sellingPrice;
+            $exp = null;
+            $entryBatchD = Batch::removeFirstBatch($productId, $metricQty);
+            if(isset($entryBatchD)) {
+                $exp = $entryBatchD->expiry_date;
+            }
             SaleEntry::create([
                 'sale_id'=> $saleId,
                 'product_id'=> $productId,
@@ -216,9 +201,9 @@ class SaleController extends Controller
                 'quantity'=> $quantity,
                 'metric_quantity'=> $metricQty,
                 'amount'=> $amount, 
+                'expiry_date'=> $exp
             ]);
             //make deduction
-            Batch::removeFirstBatch($productId, $metricQty);
             Product::where('id', $productId)->decrement('stock_quantity', $metricQty);
         }
     }
@@ -260,17 +245,4 @@ class SaleController extends Controller
             'sale_id'=> $saleId
         ]);
     } 
-
-    public function cancelEntries($saleId)
-    {
-        $q = DB::table('sale_entries')->where('sale_id', $saleId);
-        $entries = $q->get();
-        foreach($entries as $entry) {
-            SaleEntry::where('id', $entry->id)->update([
-                'status'=>'inactive'
-            ]);
-            $metricQty = $entry->metric_quantity;
-            Product::where('id', $entry->product_id)->increment('stock_quantity', $metricScale);
-        }
-    }
 }

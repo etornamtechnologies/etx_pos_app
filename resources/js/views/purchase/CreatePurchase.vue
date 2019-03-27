@@ -3,30 +3,9 @@
         <div class="row">
             <div class="col-md-12">
                 <div class="card">
-                    <div class="card-header py-1">
-                        Create Purchase Invoice  ksksk
-                        <button 
-                        class="btn btn-info float-right btn-sm"
-                        :disabled="cart.length < 1 || isLoading"
-                        @click="createPurchase">Submit Invoice</button>
-                    </div>
-                    <div class="card-body">
+                    <div class="card-body py-0">
                         <div class="row">
-                            <div class="col-md-3 col-xs-12">
-                                
-                            </div>
-                            <div class="col-md-3 col-xs-12">
-
-                            </div>
-                            <div class="col-md-3 col-xs-12">
-                                
-                            </div>
-                            <div class="col-md-3 col-xs-12">
-                                
-                            </div>
-                        </div>
-                        <div class="row mb-2">
-                            <div class="col-md-6">
+                            <div class="col-md-3">
                                 <div class="form-group">
                                     <label for="">
                                         Supplier
@@ -42,7 +21,56 @@
                                     </select>
                                 </div>
                             </div>
-                            <div class="col-md-6" style="position:relative">
+                            <div class="col-md-2">
+                                <div class="form-group">
+                                    <label for="">supplier invoice #</label>
+                                    <input
+                                    type="text"
+                                    class="form-control"
+                                    v-model="summary.supplier_invoice">
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="form-group">
+                                    <label for="">invoice amount</label>
+                                    <input
+                                    type="number"
+                                    step="0.01"
+                                    class="form-control"
+                                    style="width:100%"
+                                    v-model="summary.invoice_amount"/>
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="form-group">
+                                    <label>Amount Paid</label>
+                                    <input
+                                    type="number"
+                                    class="form-control"
+                                    style="width:100%"
+                                    step="0.01"
+                                    v-model="summary.amount_paid">
+                                </div>
+                                
+                            </div>
+                            <div class="col-md-3">
+                                <button 
+                                style="margin-top:26px"
+                                class="btn btn-info"
+                                :disabled="cart.length < 1 || isLoading"
+                                @click="createPurchase">CREATE INVOICE</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row mt-2">
+            <div class="col-md-12">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="row mb-2">
+                            <div class="col-md-6 offset-md-6" style="position:relative">
                                 <form @submit.prevent="searchProduct">
                                     <v-text-field
                                     label="search"
@@ -95,7 +123,7 @@
                                     <tbody>
                                         <tr v-for="(entry, index) in cart" :key="entry.id">
                                             <td>{{ index+1 }}</td>
-                                            <td>{{ entry.data.label }}</td>
+                                            <td style="min-width:200px">{{ entry.data.label }}</td>
                                             <td>
                                                 <input style="width:100px !important" 
                                                     type="text" class="form-control" v-model="entry.batch_number">
@@ -107,51 +135,35 @@
                                                 type="text" class="form-control" 
                                                 v-model="entry.expiry_date">
                                             </td>
-                                            <td style="width:150px">
-                                                <input type="number" class="form-control" min="1" v-model="entry.quantity">
+                                            <td style="max-width:150px; min-width:150px">
+                                                <input type="number"
+                                                style="width:100%"
+                                                class="form-control" min="1" v-model="entry.quantity">
                                             </td>
-                                            <td style="width:170px">
+                                            <td style="min-width:170px">
                                                 <select 
                                                 class="form-control"
+                                                style="width:100%"
                                                 v-model="entry.selected_sku">
                                                     <option v-for="sku in getEntryStockUnits(entry)" :value="sku.id" :key="sku.id">
                                                         {{ sku.label }}
                                                     </option>
                                                 </select>
                                             </td>
-                                            <td style="width:150px">
-                                                <input type="number" class="form-control" min="1" v-model="entry.cost_price">
+                                            <td style="max-width:150px; min-width:150px">
+                                                <input 
+                                                style="width:100%"
+                                                type="number" class="form-control" min="1" v-model="entry.cost_price">
                                             </td>
                                             <td>{{ (getEntrySum(entry)).toFixed(2) }}</td>
                                             <td>
                                                 <el-button 
                                                 type="danger"
-                                                @click="removeCartEntry(index)">remove</el-button>
+                                                @click="removeCartEntry(index)">X</el-button>
                                             </td>
                                         </tr>
                                     </tbody>
                                 </table>
-                            </div>
-                        </div>
-                        <div class="row bg-light py-2">
-                            <div class="col-md-4">
-                                <v-text-field
-                                v-model="summary.supplier_invoice"
-                                label="Supplier Invoice #"></v-text-field>
-                            </div>
-                            <div class="col-md-4">
-                                <v-text-field
-                                type="number"
-                                step="0.01"
-                                v-model="summary.invoice_amount"
-                                label="Invoice Total"></v-text-field>
-                            </div>
-                            <div class="col-md-4">
-                                <v-text-field
-                                type="number"
-                                step="0.01"
-                                v-model="summary.amount_paid"
-                                label="Amount paid"></v-text-field>
                             </div>
                         </div>
                     </div>

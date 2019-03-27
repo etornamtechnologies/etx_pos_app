@@ -64,6 +64,7 @@ Route::get('/sales/{sale}/', 'SaleController@show');
 Route::get('/sales/{sale}/cancel', 'SaleController@cancel');
 
 Route::get('/purchases', 'PurchaseController@index');
+Route::get('/purchases/{purchase}', 'PurchaseController@show');
 Route::post('/purchases', 'PurchaseController@store');
 Route::get('/purchases/{purchase}/cancel', 'PurchaseController@cancel');
 
@@ -93,3 +94,6 @@ Route::put('/admin/users/{user}/assign-role', 'AdminController@assignRole');
 Route::delete('/admin/users/{user}', 'AdminController@destroy');
 Route::get('/admin/create-backup', 'AdminController@createBackup');
 Route::get('/admin/restore-backup/{backup}', 'AdminController@restoreBackup');
+
+Route::post('/out-payments', 'OutPaymentController@store');
+Route::post('/in-payments', 'InPaymentController@store');

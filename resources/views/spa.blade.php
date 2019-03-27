@@ -8,11 +8,17 @@
     <link rel="stylesheet" href="/css/bootstrap.min.css">
     <style>
         body, html {
-            overflow-y: hidden;
+            overflow-y: hidden !important;
         }
         .form-icon {
             width: 70px;
             height: 70px;
+        }
+        input.form-control, select.form-control {
+            border-radius: 0 !important;
+        }
+        .btn, .card {
+            border-radius: 0 !important;
         }
     </style>
 </head>

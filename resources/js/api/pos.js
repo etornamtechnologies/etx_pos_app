@@ -42,8 +42,9 @@ export function createSale(sale_data) {
 
 export function cancelSale(sale_data) {
     const data = sale_data || {};
+    let qStrin = makeQueryString(data);
     return request({
-        url: `/api/sales/${data.id}/cancel`,
+        url: `/api/sales/${data.id}/cancel?${qStrin}`,
         method: 'get',
     })
 }
@@ -52,7 +53,20 @@ export function cancelSale(sale_data) {
 export function getPurchase(purchase_data) {
     const data = purchase_data || {};
     let queryString = makeQueryString(data)
-    let url = '/api/sales'
+    let url = '/api/purchases'
+    if(queryString) {
+        url = `${url}?${queryString}`
+    }
+    return request({
+        url,
+        method: 'get',
+    })
+}
+
+export function showPurchase(purchase_data) {
+    const data = purchase_data || {};
+    let queryString = makeQueryString(data)
+    let url = `/api/purchases/${data.id}`
     if(queryString) {
         url = `${url}?${queryString}`
     }
@@ -90,4 +104,24 @@ export function getStockAdjustment(reason_data) {
         data
     })
 }
+
+export function postOutPayment(_data) {
+    const data = _data || null;
+    return request({
+        url: '/api/out-payments',
+        method: 'post',
+        data
+    })
+}
+
+export function postInPayment(_data) {
+    const data = _data || null;
+    return request({
+        url: '/api/in-payments',
+        method: 'post',
+        data
+    })
+}
+
+
 

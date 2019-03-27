@@ -47,7 +47,8 @@ class ProductController extends Controller
         $this->validate($request, [
             'label'=>'required|unique:products',
             'category_id'=> 'required',
-            'barcode'=> 'unique:products'
+            'barcode'=> 'unique:products',
+            'default_stock_unit'=> 'required'
         ]);
         $result = [];
         $status = null;
@@ -63,7 +64,7 @@ class ProductController extends Controller
             ]);
             $product->stock_units()->attach($request->default_stock_unit, ['metric_scale'=>1]);
             $result['code'] = 0;
-            $result['product'] = $product;
+            $result['product'] = Product::where('id',$product->id)->with(['category','stock_units','defaultSku'])->first();
             $status = 200;
         } catch (Exception $e) {
             $result['code'] = 1;
