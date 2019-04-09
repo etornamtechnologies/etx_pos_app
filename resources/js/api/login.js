@@ -34,10 +34,10 @@ export function logOutUser() {
     })
 }
 
-export function getUserInfo(token) {
+
+export function getUsers(token) {
     return request({
-        url: 'api/user/info',
+        url: 'api/users',
         method: 'get',
-        params: { token }
     })
 }

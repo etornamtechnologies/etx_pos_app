@@ -7,6 +7,7 @@ use App\User;
 use App\Purchase;
 use App\SaleEntry;
 use Carbon\Carbon;
+use App\PurchaseEntry;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
@@ -15,7 +16,8 @@ class ReportController extends Controller
 {
     public function __construct()
     {
-        $this->middleware('auth');
+        $this->middleware('api_auth');
+        $this->middleware('api_role:manager,admin');
     }
 
     public function indexPage()
@@ -104,151 +106,223 @@ class ReportController extends Controller
         return response()->json($result);
     }
 
-    public function getSaleReportByTransaction($input)
+    public function getSaleReportByTransaction(Request $request)
     {
-        $invoiceType = $input['type'];
-        $isRange = $input['is_range'];
-        $reportBy = $input['by'];
+
+        $input = $request->all();
+        $isRange = $input['is_date_range'];
+        $reportBy = $input['filter_by'];
         $date = $input['date'];
         $fromDate = $input['from_date'];
         $product = $input['product'];
-        $referenceNumber = $input['reference_number'];
-        $user = $input['user'];
+        $referenceNumber = $input['invoice_number'];
+        $userId = $input['user_id'];
         $toDate = $input['to_date'];
-        $reportQuery = Sale::when($user, function($query, $user){
-                            return $query->where('sales.user_id', $user);
+        $info = "sale report by transaction";
+        $user = " sold by all sales reps";
+        $duration = "";
+        $fil = " for all transactions ";
+        if($userId) {
+            $user = " sold by ".User::findOrFail($userId)->name;
+        }
+        if($referenceNumber) {
+            $fil = " for invoice number ".$referenceNumber;
+        }
+        if(!$isRange && $date) {
+            $duration = " on ".$date;
+        }
+        if($isRange) {
+            $duration = " from ".$fromDate." to ".$toDate;
+        }
+        $reportQuery = Sale::when($userId, function($query, $userId) use($user) {
+                            return $query->where('sales.user_id', $userId);
                         })
                         ->when($referenceNumber, function($query, $referenceNumber){
-                            return $query->where('sales.reference_number', 'LIKE', '%'.$referenceNumber.'%');
+                            return $query->where('sales.ref_code', 'LIKE', '%'.$referenceNumber.'%');
                         })
                         ->when($date, function($query, $date){
-                            $d = new Carbon($date);
+                            $d = Carbon::createFromFormat('d/m/Y',$date);
                             return $query->whereDate('sales.created_at', $d);
                         })
                         ->when($fromDate, function($query, $fromDate){
-                            $d = new Carbon(strval($fromDate));
+                            $d = Carbon::createFromFormat('d/m/Y',$fromDate);
                             return $query->where('sales.created_at', '>=', $d);
                         })
                         ->when($toDate, function($query, $toDate){
-                            $d = new Carbon(strval($toDate));
+                            $d = Carbon::createFromFormat('d/m/Y',$toDate);
                             return $query->where('sales.created_at', '<=', $d);
                         })
-                        ->with(['in_payments', 'customer', 'user']);
+                        ->with(['in_payments','customer', 'user']);
+        $totalAmount = $reportQuery->sum('total_cost');                
         $reports = $reportQuery->get();
-        $header = [['key'=>'reference_number', 'label'=>'reference_number'], ['key'=> 'created_at', 'label'=> 'date']
-                    , ['key'=> 'user', 'label'=> 'sales rep'], ['key'=> 'customer', 'label'=> 'customer']
-                    , ['key'=> 'total_cost', 'label'=> 'invoice total']];
-        $reportData = ['reports'=> $reports, 'header'=> $header];            
-        return $reportData;                    
+        $info = $info.$fil.$user.$duration;
+        $header = [['value'=>'reference_number', 'text'=>'reference_number'], ['value'=> 'created_at', 'text'=> 'date']
+                    , ['value'=> 'user', 'text'=> 'sales rep'], ['value'=> 'customer', 'text'=> 'customer']
+                    , ['value'=> 'total_cost', 'text'=> 'invoice total']];
+        return response()->json(['code'=> 0, 'reports'=> $reports, 'headers'=> $header, 'info'=>$info, 'total_amount'=> $totalAmount]);   
     }
 
-    public function getSaleReportByProduct($input)
+    public function getSaleReportByProduct(Request $request)
     {
-        $invoiceType = $input['type'];
-        $isRange = $input['is_range'];
-        $reportBy = $input['by'];
+        $input = $request->all();
+        $isRange = $input['is_date_range'];
+        $reportBy = $input['filter_by'];
         $date = $input['date'];
         $fromDate = $input['from_date'];
         $product = $input['product'];
-        $referenceNumber = $input['reference_number'];
-        $user = $input['user'];
+        $referenceNumber = $input['invoice_number'];
+        $userId = $input['user_id'];
         $toDate = $input['to_date'];
+        $info = "sale report by product ";
+        $user = " sold by all users ";
+        $duration = "";
+        $fil = "for all products";
+        if($userId) {
+            $user = " sold by ".User::findOrFail($userId)->name;
+        }
+        if($product) {
+            $fil = "for product ".$product;
+        }
+        if(!$isRange && $date) {
+            $duration = " on ".$date;
+        }
+        if($isRange) {
+            $duration = " from ".$fromDate." to ".$toDate;
+        }
         $reportQuery = SaleEntry::when($product, function($query, $product){
-                            return $query->where('sales.product', 'LIKE', '%'.$product.'%');
+                            return $query->join('products', 'products.id', '=', 'sale_entries.product_id')
+                                            ->where('products.label', 'LIKE', '%'.$product.'%');
                         })
                         ->when($date, function($query, $date){
-                            $d = new Carbon($date);
+                            $d = Carbon::createFromFormat('d/m/Y',$date);
                             return $query->whereDate('sale_entries.created_at', $d);
                         })
                         ->when($fromDate, function($query, $fromDate){
-                            $d = new Carbon($fromDate);
+                            $d = Carbon::createFromFormat('d/m/Y',$fromDate);
                             return $query->where('sale_entries.created_at', '>=', $d);
                         })
                         ->when($toDate, function($query, $toDate){
-                            $d = new Carbon($toDate);
+                            $d = Carbon::createFromFormat('d/m/Y',$toDate);
                             return $query->where('sale_entries.created_at', '<=', $d);
                         })
                         ->with(['sale', 'product', 'stock_unit']);
         $reports = $reportQuery->get();
-        $header = [['key'=> 'product.label', 'label'=> 'product'], ['key'=>'created_at', 'label'=>'date']
-                    ,['key'=> 'quantity', 'label'=> 'quantity']
-                    , ['key'=> 'selling_price', 'label'=> 'selling-price'], ['key'=> 'amount', 'label'=> 'amount']];
-        $reportData = ['reports'=> $reports, 'header'=>$header];            
-        return $reportData;                    
+        $totalAmount = $reportQuery->sum('amount');
+        $header = [['value'=> 'product.label', 'text'=> 'product'], ['value'=>'created_at', 'text'=>'date']
+                    ,['value'=> 'quantity', 'text'=> 'quantity'], ['value'=> 'selling_price', 'text'=> 'selling-price']
+                    ,['value'=> 'amount', 'text'=>'sub-total']];
+        $info = $info.$fil.$user.$duration;
+        return response()->json(['code'=> 0, 'reports'=> $reports, 'info'=> $info, 'header'=> $header, 'total_amount'=> $totalAmount], 200);
     }
 
-    public function getPurchaseReportByTransaction($input)
+    public function getPurchaseReportByTransaction(Request $request)
     {
-        $reports = [];
-        $header = [];
-        $invoiceType = $input['type'];
-        $isRange = $input['is_range'];
-        $reportBy = $input['by'];
+        $input = $request->all();
+        $isRange = $input['is_date_range'];
+        $reportBy = $input['filter_by'];
         $date = $input['date'];
         $fromDate = $input['from_date'];
         $product = $input['product'];
-        $referenceNumber = $input['reference_number'];
-        $user = $input['user'];
+        $referenceNumber = $input['invoice_number'];
+        $userId = $input['user_id'];
         $toDate = $input['to_date'];
-        $reportQuery = Purchase::when($user, function($query, $user, $userInfo){
-                            $userInfo = User::findOrFail($user)->name;
-                            return $query->where('purchases.user_id', $user);
+        $info = "purchase report by transaction";
+        $user = " entered by all users";
+        $duration = "";
+        $fil = " for all transactions ";
+        if($userId) {
+            $user = "entered by ".User::findOrFail($userId)->name;
+        }
+        if($referenceNumber) {
+            $fil = " for invoice number ".$referenceNumber;
+        }
+        if(!$isRange && $date) {
+            $duration = " on ".$date;
+        }
+        if($isRange) {
+            $duration = " from ".$fromDate." to ".$toDate;
+        }
+        $reportQuery = Purchase::when($userId, function($query, $userId){
+                            return $query->where('purchases.user_id', $userId);
                         })
                         ->when($referenceNumber, function($query, $referenceNumber){
-                            return $query->where('purchases.reference_number', 'LIKE', '%'.$referenceNumber.'%');
+                            return $query->where('purchases.ref_code', 'LIKE', '%'.$referenceNumber.'%');
                         })
                         ->when($date, function($query, $date){
-                            $d = new Carbon($date);
+                            $d = Carbon::createFromFormat('d/m/Y',$date);
                             return $query->whereDate('purchases.created_at', $d);
                         })
                         ->when($fromDate, function($query, $fromDate){
-                            $d = new Carbon(strval($fromDate));
+                            $d = Carbon::createFromFormat('d/m/Y',$fromDate);
                             return $query->where('purchases.created_at', '>=', $d);
                         })
                         ->when($toDate, function($query, $toDate){
-                            $d = new Carbon(strval($toDate));
+                            $d = Carbon::createFromFormat('d/m/Y',$toDate);
                             return $query->where('purchases.created_at', '<=', $d);
                         })
                         ->with(['out_payments', 'supplier', 'user']);
         $reports = $reportQuery->get();
-        $header = [['key'=>'reference_number', 'label'=>'reference_number'], ['key'=> 'created_at', 'label'=> 'date']
-                    , ['key'=> 'user', 'label'=> 'sales rep'], ['key'=> 'supplier', 'label'=> 'supplier']
-                    , ['key'=> 'invoice_total_cost', 'label'=> 'invoice total cost']];
-        $reportData = ['reports'=> $reports, 'header'=> $header];            
-        return $reportData;          
+        $totalAmount = $reportQuery->sum('total');
+        $headers = [['value'=>'ref_code', 'text'=>'reference number'], ['value'=> 'created_at', 'text'=> 'date']
+                    , ['value'=> 'user', 'text'=> 'sales rep'], ['value'=> 'supplier', 'text'=> 'supplier']
+                    , ['value'=> 'invoice_total_cost', 'text'=> 'invoice total cost']];
+        $info = $info.$fil.$user.$duration;
+        return response()->json(['code'=>0,'reports'=> $reports, 'headers'=> $headers
+                                , 'info'=> $info, 'total_amount'=> $totalAmount]);         
     }
-    public function getPurchaseReportByProduct($input)
+
+
+    public function getPurchaseReportByProduct(Request $request)
     {
-        $invoiceType = $input['type'];
-        $isRange = $input['is_range'];
-        $reportBy = $input['by'];
+        $input = $request->all();
+        $isRange = $input['is_date_range'];
+        $reportBy = $input['filter_by'];
         $date = $input['date'];
         $fromDate = $input['from_date'];
         $product = $input['product'];
-        $referenceNumber = $input['reference_number'];
-        $user = $input['user'];
+        $referenceNumber = $input['invoice_number'];
+        $userId = $input['user_id'];
         $toDate = $input['to_date'];
+        $info = "purchase report by transaction";
+        $user = " entered by all users";
+        $duration = "";
+        $fil = " for all transactions ";
+        if($userId) {
+            $user = "entered by ".User::findOrFail($userId)->name;
+        }
+        if($referenceNumber) {
+            $fil = " for invoice number ".$referenceNumber;
+        }
+        if(!$isRange && $date) {
+            $duration = " on ".$date;
+        }
+        if($isRange) {
+            $duration = " from ".$fromDate." to ".$toDate;
+        }
         $reportQuery = PurchaseEntry::when($product, function($query, $product){
-                            return $query->where('purchase_entries.product', 'LIKE', '%'.$product.'%');
+                            return $query->join('products', 'products.id', '=', 'purchase_entries.product_id')
+                                            ->where('products.label', 'LIKE', '%'.$product.'%');
                         })
                         ->when($date, function($query, $date){
-                            $d = new Carbon($date);
+                            $d = Carbon::createFromFormat('d/m/Y',$date);
                             return $query->whereDate('purchase_entries.created_at', $d);
                         })
                         ->when($fromDate, function($query, $fromDate){
-                            $d = new Carbon($fromDate);
+                            $d = Carbon::createFromFormat('d/m/Y',$fromDate);
                             return $query->where('purchase_entries.created_at', '>=', $d);
                         })
                         ->when($toDate, function($query, $toDate){
-                            $d = new Carbon($toDate);
+                            $d = Carbon::createFromFormat('d/m/Y',$toDate);
                             return $query->where('purchase_entries.created_at', '<=', $d);
                         })
                         ->with(['purchase', 'product', 'stock_unit']);
         $reports = $reportQuery->get();
-        $header = [['key'=> 'product.label', 'label'=> 'product'], ['key'=>'created_at', 'label'=>'date']
-                    ,['key'=> 'quantity', 'label'=> 'quantity']
-                    , ['key'=> 'cost_price', 'label'=> 'cost-price'], ['key'=> 'amount', 'label'=> 'amount']];
-        $reportData = ['reports'=> $reports, 'header'=>$header];            
-        return $reportData;   
+        $info = $info.$fil.$user.$duration;
+        $totalAmount = $reportQuery->sum('amount');
+        $header = [['value'=> 'product.label', 'text'=> 'product'], ['value'=>'created_at', 'text'=>'date']
+                    ,['value'=> 'quantity', 'text'=> 'quantity']
+                    , ['value'=> 'cost_price', 'text'=> 'cost-price'], ['value'=> 'amount', 'text'=> 'amount']];
+        return response()->json(['code'=> 0, 'reports'=> $reports, 'header'=>$header, 'info'=> $info
+                                    ,'total_amount'=> $totalAmount], 200);
     }
 }

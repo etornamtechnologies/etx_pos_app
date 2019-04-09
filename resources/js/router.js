@@ -13,17 +13,23 @@ import Inventory from './views/inventory/Inventory'
 import InventoryIndex from './views/inventory/InventoryIndex'
 import ProductCreateEntries from './views/inventory/ProductCreateEntries'
 import ProductCreate from './views/inventory/ProductCreate'
+import PriceTemplate from './views/inventory/PriceTemplate'
+import PriceTemplateCreate from './views/inventory/PriceTemplateCreate'
 import ProductDetail from './views/inventory/ProductDetail'
 import StockAdjustmentCreate from './views/inventory/StockAdjustmentCreate'
 import CreateSale from './views/sale/CreateSale'
 import ListSale from './views/sale/ListSale'
 import CreatePurchase from './views/purchase/CreatePurchase'
 import ListPurchase from './views/purchase/ListPurchase'
+import ListSupplier from './views/client/ListSupplier'
+import ListCustomer from './views/client/ListCustomer'
 import ShopSetup from './views/config/ShopSetup'
 import BackupAndRestore from './views/config/BackupAndRestore'
 import UserList from './views/admin/UserList'
 import User from './views/admin/User'
 import SaleReport from './views/report/SaleReport'
+import PurchaseReport from './views/report/PurchaseReport'
+import PermissionError from './views/PermissionError'
 import store from './store';
 
 Vue.use(Router)
@@ -95,6 +101,15 @@ export default new Router({
                         {
                             path: 'stock-adjustments/create',
                             component: StockAdjustmentCreate
+                        },
+                        {
+                            path: 'price-templates',
+                            component: PriceTemplate
+                        },
+                        {
+                            path: 'price-templates/create',
+                            component: PriceTemplateCreate,
+                            name: 'create-price-template'
                         }
                     ]
                 },
@@ -134,6 +149,30 @@ export default new Router({
                 {
                     path: 'reports/sale',
                     component: SaleReport
+                },
+                {
+                    path: 'reports/purchase',
+                    component: PurchaseReport
+                },
+                {
+                    path: 'clients/customers',
+                    component: ListCustomer,
+                    name: 'list-customer'
+                },
+                {
+                    path: 'clients/suppliers',
+                    component: ListSupplier,
+                    name: 'list-supplier'
+                },
+                {
+                    path: 'dashboard',
+                    component: DashBoard,
+                    name: 'dashboard'
+                },
+                {
+                    path: '403',
+                    component: PermissionError,
+                    name: '403'
                 }
             ]
         }

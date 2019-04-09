@@ -23,11 +23,10 @@ class CreateProductStockUnitTable extends Migration
             $table->integer('stock_unit_id')->unsigned();
             $table->foreign('stock_unit_id')
                   ->references('id')->on('stock_units')
-                  ->onDelete('cascade');
-                  
+                  ->onDelete('cascade');      
             $table->integer('metric_scale')->required();
-            $table->integer('selling_price')->nullable();
-            $table->integer('cost_price')->nullable();
+            $table->integer('selling_price')->default(0);
+            $table->integer('cost_price')->default(0);
             $table->timestamps();
         });
     }

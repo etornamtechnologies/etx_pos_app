@@ -112,8 +112,16 @@
                                 <td>{{ sku.label }}</td>
                                 <td>{{ sku.pivot.metric_scale }}</td>
                                 <td>{{ metricQuantity(sku) }}</td>
-                                <td>{{ entryPrice(sku.pivot.cost_price || 0) }}</td>
-                                <td>{{ entryPrice(sku.pivot.selling_price || 0) }}</td>
+                                <td>
+                                    {{ entryPrice(sku.pivot.cost_price || 0) }}
+                                    <v-icon class="float-right"
+                                    @click="openStockCostPriceUpdateDialog(sku)">edit</v-icon>
+                                </td>
+                                <td>
+                                    {{ entryPrice(sku.pivot.selling_price || 0) }}
+                                    <v-icon class="float-right"
+                                    @click="openStockSellingPriceUpdateDialog(sku)">edit</v-icon>
+                                </td>
                                 <td>
                                     <v-btn icon color="red" dark @click="removeStockUnitFromProduct(sku)" small>
                                         <v-icon small>remove</v-icon>
@@ -151,12 +159,50 @@
                 </form>
             </v-card>
         </v-dialog>
+
+        <v-dialog v-model="isUpdateCostPriceDialog" persistent width="500">
+            <v-card>
+                <form @submit.prevent="updateStockCostPrice">
+                    <v-card-title class="headline">UPDATE STOCK COST PRICE</v-card-title>
+                    <v-card-text>
+                        <v-text-field
+                        label="cost price"
+                        v-model="stock_cost_price_data.cost_price"
+                        ></v-text-field>
+                    </v-card-text>
+                    <v-card-actions>
+                        <v-spacer></v-spacer>
+                        <v-btn color="red darken-1" flat ripple @click="isUpdateCostPriceDialog = false">CANCEL</v-btn>
+                        <v-btn color="green darken-1" flat type="submit">SUBMIT</v-btn>
+                    </v-card-actions>
+                </form>
+            </v-card>
+        </v-dialog>
+
+        <v-dialog v-model="isUpdateSellingPriceDialog" persistent width="500">
+            <v-card>
+                <form @submit.prevent="updateStockSellingPrice">
+                    <v-card-title class="headline">UPDATE STOCK SELLING PRICE</v-card-title>
+                    <v-card-text>
+                        <v-text-field
+                        label="selling price"
+                        v-model="stock_selling_price_data.selling_price"
+                        ></v-text-field>
+                    </v-card-text>
+                    <v-card-actions>
+                        <v-spacer></v-spacer>
+                        <v-btn color="red darken-1" flat ripple @click="isUpdateSellingPriceDialog = false">CANCEL</v-btn>
+                        <v-btn color="green darken-1" flat type="submit">SUBMIT</v-btn>
+                    </v-card-actions>
+                </form>
+            </v-card>
+        </v-dialog>
     </div>
 </template>
 <script>
     import {GetProduct, CreateProduct, UpdateProduct, DeleteProduct, GetProductDetail} from '../../utils/product'
     import {GetStockUnit} from '../../utils/stock-unit'
-    import {AddStockUnitToProduct, RemoveStockUnitFromProduct} from '../../utils/inventory'
+    import {AddStockUnitToProduct, RemoveStockUnitFromProduct, UpdateStockCostPrice, UpdateStockSellingPrice} from '../../utils/inventory'
     export default {
         mounted(){
             this.fetchStockUnits()
@@ -171,6 +217,11 @@
                 stock_units: [],
                 product_data: {},
                 status: false,
+                isUpdateCostPriceDialog: false,
+                isUpdateSellingPriceDialog: false,
+                stock_selling_price_data: {},
+                stock_cost_price_data: {},
+                isPricingLoading: false,
             }
         },
         methods: {
@@ -239,7 +290,45 @@
             entryPrice: function(price) {
                 let s = (price/100)
                 return s.toFixed(2);
-            }
+            },
+            openStockCostPriceUpdateDialog: function(entry) {
+                let pivot = Vue.util.extend({}, entry.pivot || {})
+                this.stock_cost_price_data.product_id = pivot.product_id || null;
+                this.stock_cost_price_data.stock_unit_id = pivot.stock_unit_id || null
+                this.stock_cost_price_data.cost_price = "";
+                this.isUpdateCostPriceDialog = true;
+            },
+            openStockSellingPriceUpdateDialog: function(entry) {
+                let pivot = Vue.util.extend({}, entry.pivot || {})
+                this.stock_selling_price_data.product_id = pivot.product_id || null;
+                this.stock_selling_price_data.stock_unit_id = pivot.stock_unit_id || null
+                this.stock_selling_price_data.selling_price = "";
+                this.isUpdateSellingPriceDialog = true;
+            },
+            updateStockCostPrice: function() {
+                this.isPricingLoading = true;
+                UpdateStockCostPrice(this.stock_cost_price_data)
+                    .then(result=> {
+                        this.isPricingLoading = false;
+                        this.product = result.product || {};
+                        this.isUpdateCostPriceDialog = false;
+                    })
+                    .catch(err=> {
+                        this.isPricingLoading = false;
+                    })
+            },
+            updateStockSellingPrice: function() {
+                this.isPricingLoading = true;
+                UpdateStockSellingPrice(this.stock_selling_price_data)
+                    .then(result=> {
+                        this.isPricingLoading = false;
+                        this.product = result.product || {};
+                        this.isUpdateSellingPriceDialog = false;
+                    })
+                    .catch(err=> {
+                        this.isPricingLoading = false;
+                    })
+            },
         },
         computed:  {
             getBasicStockUnits: function() {

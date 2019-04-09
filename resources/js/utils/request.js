@@ -75,13 +75,15 @@ service.interceptors.response.use(
     } 
     else if(status == 401) {
         router.push('/account/login')
+    } else if(status = 403) {
+        router.push('/403')
     } else {
         Message({
-            message: error.message,
+            message: (errResponse.data || {}).message || "Server Error" ,
             type: 'error',
             duration: 2 * 1000
         })
-    }
+    } 
     return Promise.reject(error)
   }
 )

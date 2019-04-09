@@ -21,21 +21,20 @@ class UserController extends Controller
             $result["message"] = "Could not fetch logged in user";
         }
         return response()->json($result);
-
     }
 
-    public function index()
+    public function index(Request $request)
     {
-        $result = [];
-        try {
-            $users = User::all();
-            $result['code'] = 0;
-            $result['users'] = $users;
-        } catch(Exception $e) {
-            $result['code'] = 1;
-            $result['message'] = "Server error";
+        $users = User::all();
+        return response()->json(['code'=> 0, 'users'=> $users], 200);
+    }
+
+    public function getAuthUserInfo(Request $request) {
+        $user = User::getAuthUser($request);
+        if($user) {
+            return response()->json(['code'=> 0, 'user'=> $user], 200);
         }
-        return response()->json($result);
+        return abort(404, 'not logged in');
     }
 
 

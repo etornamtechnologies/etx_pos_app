@@ -77,7 +77,7 @@ class SaleController extends Controller
             $receiptEntries = $this->getTotalSaleCost($entries)['receipt_entries'];
             $receiptSummary = ['reference_number'=> $refCode, 'amount_paid'=> $paid/100
                                 ,'total_cost'=> $totalCost/100, 'change'=> $change/100
-                                ,'user'=> $user->id];
+                                ,'user'=> $user];
             //create sale
             $sale = Sale::create([
                 'customer_id'=>$customerId,

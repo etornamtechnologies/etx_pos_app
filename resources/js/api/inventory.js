@@ -86,3 +86,56 @@ export function deleteSupplier(_data){
         method: 'delete',
     })
 }
+
+export function putStockCostPrice(_data){
+    let data = _data || {};
+    return request({
+        url: `/api/inventory/products/${data.product_id}/stock-units/${data.stock_unit_id}/update-cost-price`,
+        method: 'put',
+        data
+    })
+}
+
+export function putStockSellingPrice(_data){
+    let data = _data || {};
+    return request({
+        url: `/api/inventory/products/${data.product_id}/stock-units/${data.stock_unit_id}/update-selling-price`,
+        method: 'put',
+        data
+    })
+}
+
+export function getPriceTemplate(_data){
+    let data = _data || {};
+    return request({
+        url: '/api/price-templates',
+        method: 'get',
+        data
+    })
+}
+
+export function postPriceTemplate(_data){
+    let data = _data || {};
+    return request({
+        url: '/api/price-templates',
+        method: 'post',
+        data
+    })
+}
+
+export function deletePriceTemplate(_data){
+    let data = _data || {};
+    return request({
+        url: `/api/price-templates/${data.id}`,
+        method: 'delete',
+    })
+}
+
+export function applyPriceTemplate(_data){
+    let data = _data || {};
+    return request({
+        url: `/api/inventory/price-templates/${data.template_id}/apply`,
+        method: 'post',
+        data
+    })
+}

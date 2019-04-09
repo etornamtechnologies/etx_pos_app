@@ -3,11 +3,10 @@ import { loginUser, logOutUser, registerUser} from '../../api/login'
 
 const user = {
     state: {
-        first_name: "etornam",
-        middle_name: 'kojo',
-        last_name: 'anyidoho',
-        username: "etoretornam",
-        roles: ['admin', 'user'],
+        user: {name:''},
+        name: '',
+        username: "",
+        roles: [],
         token: getApiToken(),
         roles: [],
         permissions: [],
@@ -18,27 +17,21 @@ const user = {
         SET_TOKEN: (state, token)=> {
             state.token = token;
         },
-        SET_FIRST_NAME: (state, first_name)=> {
-            state.first_name = first_name;
+        SET_USER: (state, user_data)=> {
+            state.user = user_data;
         },
-        SET_MIDDLE_NAME: (state, middle_name)=> {
-            state.middle_name = middle_name;
+        SET_NAME: (state, name)=> {
+            state.name = name;
         },
-        SET_LAST_NAME: (state, last_name)=> {
-            state.last_name = last_name;
+        SET_USERNAME: (state, name)=> {
+            state.username = name;
         },
         SET_ROLES: (state, roles)=> {
             state.roles = roles;
         },
-        SET_PERMISSIONS: (state, permissions)=> {
-            state.permissions = permissions;
-        },
         SET_AVATAR: (state, avatar)=> {
             state.avatar = avatar;
         },
-        SET_USERNAME: (state, username)=> {
-            state.username = username;
-        }
     },
     actions: {
         LoginUser({ commit }, userInfo) {
@@ -48,6 +41,12 @@ const user = {
                     const data = response || {}
                     const token = data.user.api_token;
                     commit('SET_TOKEN', token)
+                    commit('SET_USER', data.user)
+                    let userRoles = data.user.roles || []
+                    let roles = userRoles.map((r)=> {
+                        return r.id;
+                    }) || [];
+                    commit('SET_ROLES', roles);
                     setApiToken(token)
                     resolve(data)
                 }).catch(error => {
@@ -77,11 +76,9 @@ const user = {
         LogOutUser({ commit, state }) {
             return new Promise((resolve, reject) => {
                 logOutUser(state.token).then(() => {
-                    console.log('logiut_data')
                     commit('SET_TOKEN', '')
                     commit('SET_ROLES', [])
                     removeApiToken()
-                    console.log('token', getApiToken())
                     resolve()
                 }).catch(error => {
                     reject(error)
@@ -96,6 +93,18 @@ const user = {
                 this.$router.psuh('account/login')
             })
         },
+        setUser({commit}, userData) {
+            return new Promise(resolve=> {
+                commit('SET_NAME', userData.name)
+                commit('SET_USERNAME', userData.username)
+                commit('SET_USER', userData);
+            })
+        },
+        setRoles({commit}, roles) {
+            return new Promise(resolve=> {
+                commit('SET_ROLES', roles);
+            })
+        }
     }
 }
 

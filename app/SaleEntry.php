@@ -48,4 +48,10 @@ class SaleEntry extends Model
             Product::where('id', $entry->product_id)->increment('stock_quantity', $metricQty);
         }
     }
+
+    public static function topSales()
+    {
+        //$query = DB::table('sale_entries')
+                    
+    }
 }

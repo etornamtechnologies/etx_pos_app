@@ -123,3 +123,76 @@ export function DeleteSupplier( _data ) {
         })
     })
 }
+
+export function UpdateStockCostPrice( _data ) {
+    return new Promise((resolve, reject) => {
+        inventoryAPi.putStockCostPrice(_data)
+        .then(response => {
+            const data = response || {}
+            resolve(data)
+        }).catch(error => {
+            reject(error)
+        })
+    })
+}
+
+export function UpdateStockSellingPrice( _data ) {
+    return new Promise((resolve, reject) => {
+        inventoryAPi.putStockSellingPrice(_data)
+        .then(response => {
+            const data = response || {}
+            resolve(data)
+        }).catch(error => {
+            reject(error)
+        })
+    })
+}
+
+export function GetPriceTemplate( _data ) {
+    return new Promise((resolve, reject) => {
+        inventoryAPi.getPriceTemplate(_data)
+        .then(response => {
+            const data = response || {}
+            resolve(data)
+        }).catch(error => {
+            reject(error)
+        })
+    })
+}
+
+export function CreatePriceTemplate( _data ) {
+    return new Promise((resolve, reject) => {
+        inventoryAPi.postPriceTemplate(_data)
+        .then(response => {
+            const data = response || {}
+            resolve(data)
+        }).catch(error => {
+            reject(error)
+        })
+    })
+}
+
+export function DeletePriceTemplate( _data ) {
+    return new Promise((resolve, reject) => {
+        inventoryAPi.deletePriceTemplate(_data)
+        .then(response => {
+            const data = response || {}
+            resolve(data)
+        }).catch(error => {
+            reject(error)
+        })
+    })
+}
+
+
+export function ApplyPriceTemplate( _data ) {
+    return new Promise((resolve, reject) => {
+        inventoryAPi.applyPriceTemplate(_data)
+        .then(response => {
+            const data = response || {}
+            resolve(data)
+        }).catch(error => {
+            reject(error)
+        })
+    })
+}

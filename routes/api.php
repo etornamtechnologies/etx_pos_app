@@ -17,6 +17,7 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
     return $request->user();
 });
 
+Route::get('/user/info', 'UserController@getAuthUserInfo');
 
 Route::post('/auth/login', 'AuthController@login');
 Route::post('/auth/logout', 'AuthController@logout');
@@ -48,6 +49,12 @@ Route::post('/products/entries', 'ProductController@storeEntries');
 
 Route::get('/inventory/products/{product}/stock-units/{stock_unit}/add', 'InventoryController@addStockUnit');
 Route::get('/inventory/products/{product}/stock-units/{stock_unit}/remove', 'InventoryController@removeStockUnit');
+Route::put('/inventory/products/{product}/stock-units/{stock_unit}/update-cost-price', 'InventoryController@updateCostPrice');
+Route::put('/inventory/products/{product}/stock-units/{stock_unit}/update-selling-price', 'InventoryController@updateSellingPrice');
+
+Route::post('/inventory/price-templates/{templates}/apply', 'InventoryController@applyPriceTemplate');
+
+Route::apiResource('/price-templates', 'PriceTemplateController');
 
 
 Route::get('/stock-adjustment-reasons', 'AdjustmentReasonController@index');
@@ -78,7 +85,7 @@ Route::get('/seetings/restore', 'ConfigController@restoreBackup');
 
 Route::get('/customers', 'CustomerController@index');
 Route::post('/customers', 'CustomerController@store');
-Route::put('/customers{customer}', 'CustomerController@update');
+Route::put('/customers/{customer}', 'CustomerController@update');
 Route::delete('/customers/{customer}', 'CustomerController@destroy');
 
 
@@ -95,5 +102,19 @@ Route::delete('/admin/users/{user}', 'AdminController@destroy');
 Route::get('/admin/create-backup', 'AdminController@createBackup');
 Route::get('/admin/restore-backup/{backup}', 'AdminController@restoreBackup');
 
+Route::get('/users', 'UserController@index');
+
 Route::post('/out-payments', 'OutPaymentController@store');
 Route::post('/in-payments', 'InPaymentController@store');
+
+Route::get('/dashboard', 'DashboardController@index');
+
+Route::post('reports/sale/transaction', 'ReportController@getSaleReportByTransaction');
+Route::post('reports/sale/product', 'ReportController@getSaleReportByProduct');
+
+Route::post('reports/purchase/transaction', 'ReportController@getPurchaseReportByTransaction');
+Route::post('reports/purchase/product', 'ReportController@getPurchaseReportByProduct');
+
+
+Route::post('reports/stock-adjustment/transaction', 'ReportController@getStockAdjustmentReportByTransaction');
+Route::post('reports/stock-adjustment/product', 'ReportController@getStockAdjustmentReportByProduct');

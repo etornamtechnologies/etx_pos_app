@@ -98,7 +98,7 @@ export default{
             return this.$store.getters.is_sidebar_closed
         },
         username: function() {
-            return this.$store.getters.user_username;
+            return this.$store.getters.user.username;
         },
     }
 }

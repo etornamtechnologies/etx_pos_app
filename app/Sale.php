@@ -9,6 +9,8 @@
 namespace App;
 
 
+use App\Sale;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 
 class Sale extends Model
@@ -40,5 +42,28 @@ class Sale extends Model
     public function products()
     {
         return $this->hasManyThrough('App\Product', 'App\SaleEntry', 'product_id');
+    }
+
+    public static function todaySaleCount()
+    {
+        $date = Carbon::now();
+        $query = Sale::whereDate('created_at', $date)->get();
+        return count($query);
+    }
+
+    public static function todaySaleAmount()
+    {
+        $date = Carbon::now();
+        $sales = Sale::whereDate('created_at', $date)->get();
+        $total = 0;
+        foreach($sales as $sale) {
+            $total = $total + $sale->total_cost;
+        }
+        return $total;
+    }
+
+    public static function topSales()
+    {
+        //$query = DB::table('sales')->join()
     }
 }

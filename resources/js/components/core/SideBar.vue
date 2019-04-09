@@ -25,6 +25,10 @@
             <img src="/img/icons/home.svg" class="el-icon" alt="">
             <span slot="title" class="menu-title">Home</span>
         </el-menu-item>
+        <el-menu-item index="/dashboard" class="menu-object">
+            <img src="/img/icons/home.svg" class="el-icon" alt="">
+            <span slot="title" class="menu-title">Dashboard</span>
+        </el-menu-item>
         <hr class="menu-divider">
         <el-submenu index="/inventory" class="menu-object">
             <template slot="title">
@@ -35,6 +39,7 @@
                 <el-menu-item index="/inventory/products">Products</el-menu-item>
                 <el-menu-item index="/inventory/categories">Categories</el-menu-item>
                 <el-menu-item index="/inventory/stock-units">Stock-Units</el-menu-item>
+                <el-menu-item index="/inventory/price-templates">Price Templates</el-menu-item>
                 <el-menu-item index="/inventory/stock-adjustments/create">+ Create Stock-Adjustment</el-menu-item>
             </el-menu-item-group>
         </el-submenu>
@@ -61,7 +66,7 @@
             </el-menu-item-group>
         </el-submenu> 
         <hr class="menu-divider">
-        <el-submenu index="/reports" class="menu-object">
+        <el-submenu index="/reports" class="menu-object" v-if="hasAnyRole(['admin'])">
             <template slot="title">
                 <img src="/img/icons/statistics.svg" class="el-icon" alt="">
                 <span slot="title" class="menu-title">Reports</span>
@@ -70,6 +75,17 @@
                 <el-menu-item index="/reports/sale">sale report</el-menu-item>
                 <el-menu-item index="/reports/purchase">purchase report</el-menu-item>
                 <el-menu-item index="/reports/adjustments">adjustment report</el-menu-item>
+            </el-menu-item-group>
+        </el-submenu> 
+        <hr class="menu-divider">
+        <el-submenu index="/clients" class="menu-object">
+            <template slot="title">
+                <img src="/img/icons/admin.svg" class="el-icon" alt="">
+                <span slot="title" class="menu-title">clients</span>
+            </template>
+            <el-menu-item-group>
+                <el-menu-item index="/clients/customers">customers</el-menu-item>
+                <el-menu-item index="/clients/suppliers">suppliers</el-menu-item>
             </el-menu-item-group>
         </el-submenu> 
         <hr class="menu-divider">
@@ -100,11 +116,15 @@
 </template>
 
 <script>
+    import { checkRole } from '../../utils/role'
     export default {
         watch: {
             $route(to, from) {
                 this.activeLink = to.path;
             }
+        },
+        created() {
+            
         },
         mounted() {
             this.activeLink = this.$route.path;
@@ -121,13 +141,16 @@
             },
             handleClose(key, keyPath) {
                 console.log(key, keyPath);
+            },
+            hasAnyRole: function(roles) {
+                checkRole(roles);
             }
         },
         computed: {
             isSideBarClosed: function() {
                 return this.$store.getters.is_sidebar_closed;
             },
-        }
+        },
     }
 </script>
 

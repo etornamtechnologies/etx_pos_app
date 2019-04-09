@@ -59,6 +59,7 @@ class SupplierController extends Controller
             ]);
             $result['code'] = 0;
             $result['supplier'] = $supplier;
+            $result['message'] = "Supplier created successfully";
         } catch (Exception $e) {
             $result['code'] = 1;
             $result['message'] = "Something went wrong";
@@ -69,8 +70,8 @@ class SupplierController extends Controller
     public function update(Request $request, $supplierId)
     {
         $this->validate($request, [
-            'name'=>'required|unique:suppliers, name,'.$supplierId.'id',
-            'phone'=> 'required|unique:suppliers, phone,'.$supplierId.'id'
+            'name'=>'required|unique:suppliers,name,'.$supplierId.'id',
+            'phone'=> 'required|unique:suppliers,phone,'.$supplierId.'id'
         ]);
         $supplier = Supplier::findOrFail($supplierId);
         $result = [];
@@ -83,7 +84,8 @@ class SupplierController extends Controller
                 'address'=>$request->address
             ]);
             $result['code'] = 0;
-            $result['supplier'] = $supplier;
+            $result['suppliers'] = Supplier::all();
+            $result['message'] = "Supplier updated successfully";
             $status = 200;
         } catch (Exception $e) {
             $result['code'] = 1;
@@ -101,6 +103,7 @@ class SupplierController extends Controller
             Supplier::destroy($supplierId);
             $result['code'] = 0;
             $status = 200;
+            $result['message'] = "Supplier deleted successfully";
         } catch (Exception $e) {
             $result['code'] = 1;
             $result['message'] = "Something went wrong";

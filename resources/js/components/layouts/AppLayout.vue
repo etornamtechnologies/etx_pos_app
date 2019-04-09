@@ -17,29 +17,51 @@
 </template>
 
 <script>
-import Header from "../../components/core/Header";
-import Sidebar from "../../components/core/SideBar"
+    import Header from "../../components/core/Header";
+    import Sidebar from "../../components/core/SideBar"
+    import { GetUserInfo } from '../../utils/user'
 
-export default {
-    name: "App",
-    components: {
-        sidebar: Sidebar,
-        'header-component': Header,
-    },
-    data() {
-        return {
-        //
-        };
-    },
-    methods: {
+    export default {
+        name: "App",
+        components: {
+            sidebar: Sidebar,
+            'header-component': Header,
+        },
+        created() {
+            this.getUserInfo();
+        },
+        data() {
+            return {
+            //
+            };
+        },
+        methods: {
+            getUserInfo: function() {
+                    GetUserInfo({})
+                        .then(result=> {
+                            console.log('reeeee', result)
+                            if(result.code == 0) {
+                                let user = result.user;
+                                let token = user.api_token || "";
+                                let userRoles = user.roles || [];
+                                let roles = userRoles.map(r=> {
+                                    return r.label;
+                                }) || [];
+                                this.$store.dispatch('setUser', user);
+                                this.$store.dispatch('setRoles', roles);
+                            }
+                        })
+                        .catch(err=> {
 
-    },
-    computed: {
-        sideBarOpened: function() {
-            return this.$store.state.app.sidebar.opened
+                        })
+                }
+        },
+        computed: {
+            sideBarOpened: function() {
+                return this.$store.state.app.sidebar.opened
+            }
         }
-    }
-};
+    };
 </script>
 <style scoped>
     .app {

@@ -156,7 +156,7 @@
                     <div class="header-item">{{ (receipt_data.shop_info || {}).shop_name }}</div>
                     <div class="header-item">{{ (receipt_data.shop_info || {}).shop_address }}</div>
                     <div class="header-item">{{ (receipt_data.shop_info || {}).shop_phone }}</div>
-                    <div class="header-item">attendant: {{ (receipt_data.summary || {}).user}}</div>
+                    <div class="header-item">attendant: {{ ((receipt_data.summary || {}).user || {}).name}}</div>
                 </div>
                 <div class="receipt-invoice-wrapper">
                     <span>invoice#: {{ (receipt_data.summary || {}).reference_number }}</span>
@@ -332,7 +332,8 @@
                 return qty*price;
             },
             createSale: function() {
-                let entries = this.getCartEntries();
+                let entriesData = this.getCartEntries();
+                let entries = entriesData.entries || [];
                 if(entries.length < 1) {
                     return Message({
                         message: 'cart is empty',
@@ -342,11 +343,15 @@
                 }
                 let summaryData = this.summary;
                 let data = {summary: summaryData, entries: entries};
-                CreateSale(data)
+                let ss = 6
+                console.log('errList',entriesData.errors);
+                if(entriesData.errors.length > 0) {
+                    return false;
+                } else {
+                    CreateSale(data)
                     .then(result=> {
                         if(result.code == 0) {
                             this.receipt_data = result.receipt_data;
-                            console.log(this.receipt_data)
                             this.$nextTick(()=> {
                                 window.print();
                                 this.cart = [];
@@ -358,16 +363,23 @@
                         } else {
                         }
                     })
+                }
             },
             getCartEntries: function() {
                 let entries = [];
+                let errors = [];
                 (this.cart || []).forEach((entry)=> {
                     let d = {};
                     d.product_id = entry.data.id;
                     d.stock_unit_id = entry.selected_sku;
                     d.quantity = entry.quantity;
                     if(entry.quantity <= 0) {
-                        return Notifier.warning("You cannot sell item with zero quantity!");
+                        errors.push('null quantity')
+                        return Message({
+                            message: "You cant sell item with null quantity",
+                            type: 'error',
+                            duration: 2 * 1000
+                        })
                     }
                     let stockUnits = (entry.data.stock_units || []);
                     let stockUnit = ((stockUnits.filter((sku)=> {
@@ -375,11 +387,16 @@
                     })||[])[0]) || {};
                     let sp = (stockUnit.pivot || {}).selling_price;
                     if(!sp || sp <= 0) {
-                        return Notifier.info('Please you cannot sell non-priced item');
+                        errors.push('null price')
+                        Message({
+                            message: "You cant sell item with null price",
+                            type: 'error',
+                            duration: 2 * 1000
+                        })
                     }
                     entries.push(d);
                 })
-                return entries;
+                return {entries:entries, errors:errors};
             },
             resetSalePage: function(){
                 this.cart = [];

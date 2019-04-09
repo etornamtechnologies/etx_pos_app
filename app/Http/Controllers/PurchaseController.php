@@ -68,7 +68,6 @@ class PurchaseController extends Controller
 
     public function store(Request $request)
     {
-        // dd($request->all());
         $result = [];
         $status = null;
         try{
@@ -134,6 +133,7 @@ class PurchaseController extends Controller
             $metricCostPrice = round($costPrice/$metricScale, 0, PHP_ROUND_HALF_UP);
             InventoryController::setCostPriceFor($productId, $metricCostPrice);
             if($entry['batch_number'] && $entry['expiry_date']) {
+                dd('yup');
                 BatchController::addBatch($entry['batch_number'], $entry['expiry_date'], $productId, $metricQty);
             }
         }

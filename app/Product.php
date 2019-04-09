@@ -13,6 +13,7 @@ use Illuminate\Database\Eloquent\Model;
 use App\Category;
 use App\Manufacturer;
 use App\StockUnit;
+use App\Product;
 
 class Product extends Model
 {
@@ -35,11 +36,16 @@ class Product extends Model
     public function stock_units()
     {
         return $this->belongsToMany('App\StockUnit', 'product_stock_unit')
-            ->withPivot('selling_price', 'metric_scale');
+            ->withPivot('selling_price', 'metric_scale', 'cost_price');
     }
 
     public function defaultSku()
     {
         return $this->belongsTo('App\StockUnit', 'default_stock_unit');
+    }
+
+    public static function totalProducts()
+    {
+        return Product::count();
     }
 }

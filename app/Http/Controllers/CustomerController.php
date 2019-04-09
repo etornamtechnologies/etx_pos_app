@@ -62,6 +62,7 @@ class CustomerController extends Controller
             ]);
             $result['code'] = 0;
             $result['customer'] = $Customer;
+            $result['message'] = "Customer created successfully";
             $status = 200;
         } catch (Exception $e) {
             $result['code'] = 1;
@@ -75,7 +76,7 @@ class CustomerController extends Controller
     {
         $this->validate($request, [
             'name'=>'required',
-            'phone'=> 'required|unique:customers, phone,'.$customerId.'id'
+            'phone'=> 'required|unique:customers,phone,'.$customerId.'id'
         ]);
         $customer = Customer::findOrFail($customerId);
         $result = [];
@@ -88,7 +89,8 @@ class CustomerController extends Controller
                 'address'=>$request->address
             ]);
             $result['code'] = 0;
-            $result['customer'] = $customer;
+            $result['customers'] = Customer::all();
+            $result['message'] = "Customer updated successfully";
             $status = 200;
         } catch (Exception $e) {
             $result['code'] = 1;
@@ -106,11 +108,12 @@ class CustomerController extends Controller
             Customer::destroy($CustomerId);
             $result['code'] = 0;
             $status = 200;
+            $result['message'] = "Customer deleted successfully";
         } catch (Exception $e) {
             $result['code'] = 1;
             $result['message'] = "Something went wrong";
-            $status=401;
+            $status=500;
         }
-        return response()->json($result);
+        return response()->json($result, $status);
     }
 }

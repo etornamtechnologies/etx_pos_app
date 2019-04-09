@@ -4,13 +4,14 @@
             <v-card>
                 <v-layout column justify-center>
                     <v-flex xs12>
-                        <v-toolbar flat color="cyan" dark>
+                        <v-toolbar flat color="cyan" dark dense>
                             <v-toolbar-side-icon></v-toolbar-side-icon>
                             <v-toolbar-title>SHOP CONFIGURATION</v-toolbar-title>
                         </v-toolbar>
                     </v-flex>
                     <v-flex>
-                        <v-form @submit.prevent="handleSubmit">
+                        <v-form @submit.prevent="handleSubmit" 
+                        style="max-width:500px; margin:auto; margin-top:20px; margin-bottom:20px">
                             <v-layout column>
                                 <v-flex xs12>
                                     <v-text-field

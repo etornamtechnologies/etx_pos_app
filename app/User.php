@@ -66,7 +66,7 @@ class User extends Model
     public static function getAuthUser($request)
     {
         $token = $request->header('Authorization');
-        return User::where('api_token', $token)->first();
+        return User::where('api_token', $token)->with(['roles'])->first();
     }
 
 }

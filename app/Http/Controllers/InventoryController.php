@@ -10,6 +10,7 @@ namespace App\Http\Controllers;
 
 
 use App\Product;
+use App\PriceTemplate;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
@@ -49,7 +50,24 @@ class InventoryController extends Controller
 
     public static function setCostPriceFor($productId, $metricCostPrice)
     {
-        // dd(DB::table('product_stock_unit')->where('product_id', $productId));
+        dd($metricCostPrice);
+        DB::table('product_stock_unit')->where('product_id', $productId)
+                                        ->orderBy('product_id')
+                                        ->get()
+                                        ->each(function($stockUnitData, $key) use ($productId, &$metricCostPrice) {
+                                            $stockUnitId = $stockUnitData->stock_unit_id;
+                                            $metricScale = $stockUnitData->metric_scale;
+                                            $costPrice = $metricScale * $metricCostPrice;
+                                            DB::table('product_stock_unit')
+                                                    ->where('product_id', $productId)
+                                                    ->where('stock_unit_id', $stockUnitId)
+                                                    ->update(['cost_price'=>$costPrice]);
+                                        });
+
+    }
+
+    public static function setSellingPriceFor($productId, $metricCostPrice)
+    {
         DB::table('product_stock_unit')->where('product_id', $productId)
                                         ->orderBy('product_id')
                                         ->get()
@@ -61,7 +79,7 @@ class InventoryController extends Controller
                                             DB::table('product_stock_unit')
                                                     ->where('product_id', $productId)
                                                     ->where('stock_unit_id', $stockUnitId)
-                                                    ->update(['cost_price'=>$costPrice, 'selling_price'=>$sellingPrice]);
+                                                    ->update(['selling_price'=>$selling]);
                                         });
 
     }
@@ -131,23 +149,67 @@ class InventoryController extends Controller
         return false;
     }
 
-    public function updateSellingPrice(Request $request, $productId, $stockUnitId)
+    public function updateCostPrice(Request $request, $productId, $stockUnitId)
     {
-        //dd($request->all());
-        $result = [];
-        $request->validate([
-            'price'=> 'required'
-        ]);
-        try {
-            DB::table('product_stock_unit')
-                ->where('product_id', $productId)
-                ->where('stock_unit_id', $stockUnitId)
-                ->update(['selling_price'=> $request->price*100]);
-            $result['code'] = 0;    
-        } catch(Exception $e) {
-            $result['code'] = 1;
-            $result['message'] = "Could not update selling price";
+        $input = $request->all();
+        DB::table('product_stock_unit')
+            ->where('product_id', $productId)
+            ->where('stock_unit_id', $stockUnitId)
+            ->update(['cost_price'=> $input['cost_price']*100]);
+        $product = Product::where('id', $productId)->with(['stock_units', 'category','defaultSku'])->first();
+        return response()->json(['code'=> 0, 'message'=>'price updated', 'product'=> $product], 200);
+    }
+
+    public static function updateSellingPrice(Request $request, $productId, $stockUnitId)
+    {
+        $input = $request->all();
+        DB::table('product_stock_unit')
+            ->where('product_id', $productId)
+            ->where('stock_unit_id', $stockUnitId)
+            ->update(['selling_price'=> $input['selling_price']*100]);
+        $product = Product::where('id', $productId)->with(['stock_units', 'category','defaultSku'])->first();
+        return response()->json(['code'=> 0, 'message'=>'price updated', 'product'=> $product], 200);
+    }
+
+
+    public function applyPriceTemplate(Request $request, $priceTemplateId)
+    {
+        $priceTemplate = PriceTemplate::findOrFail($priceTemplateId);
+        $categoryId = $priceTemplate->category_id;
+        $baseValue = $priceTemplate->base_value;
+        $percentValue = ($priceTemplate->percent_value/100);
+        $constantValue = $priceTemplate->constant_value;
+        $applyOn = $priceTemplate->apply_on;
+        $stocks = DB::table('product_stock_unit')
+                        ->join('products', 'products.id', '=', 'product_stock_unit.product_id')
+                        ->when($categoryId, function($query, $categoryId){
+                            return $query->where('products.category_id', '=',$categoryId);
+                        })
+                        ->get();
+
+        foreach($stocks as $stock) {
+            $costPrice = $stock->cost_price;
+            $sellingPrice = $stock->selling_price;
+            $priceValue = 0;
+            $applicant = 0;
+            $pValue = null;
+            if($baseValue == 'cost_price') {
+                $pValue = $percentValue*$costPrice;
+            } else {
+                $pValue = $percentValue*$sellingPrice;
+            }
+            if($applyOn == 'cost_price') {
+                $applicant = $costPrice;
+            } else {
+                $applicant = $sellingPrice;
+            }   
+            $pValue = $applicant + $pValue + $constantValue;
+            DB::table('product_stock_unit')->where('stock_unit_id', $stock->stock_unit_id)
+                                           ->where('product_id', $stock->product_id) 
+                                            ->update([
+                                                'selling_price'=> $pValue
+                                            ]);
         }
-        return response()->json($result);
+        return response()->json(['code'=> 0, 'message'=> 'price template applied']);                
     }
 }

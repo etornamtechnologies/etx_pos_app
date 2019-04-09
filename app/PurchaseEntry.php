@@ -26,12 +26,12 @@ class PurchaseEntry extends Model
 
     public function product()
     {
-        return $this->hasOne("App\Product", "product_id");
+        return $this->belongsTo("App\Product", "product_id");
     }
 
     public function stock_unit()
     {
-        return $this->hasOne("App\StockUnit", "stock_unit_id");
+        return $this->belongsTo("App\StockUnit", "stock_unit_id");
     }
 
     public static function createPurchaseEntries($purchase_id, $entries) {
@@ -60,7 +60,9 @@ class PurchaseEntry extends Model
             ]);
             $metricCostPrice = round($costPrice/$metricScale, 0, PHP_ROUND_HALF_UP);
             InventoryController::setCostPriceFor($productId, $metricCostPrice);
-            Batch::addProductToBatch($entry['batch_number'], $entry['expiry_date'], $productId, $metricQty);
+            if(isset($entry['batch']) && isset($entry['expiry_date'])) {
+                Batch::addProductToBatch($entry['batch_number'], $entry['expiry_date'], $productId, $metricQty);
+            }
         }
     }
 }

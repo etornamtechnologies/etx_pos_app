@@ -116,7 +116,7 @@ class ProductController extends Controller
                 return response()->json($result);
             }
             $product->update([
-                'name'=>strtoupper($request->label),
+                'label'=>strtoupper($request->label),
                 'barcode'=>$request->barcode,
                 'category_id'=>$request->category_id,
                 'manufacturer_id'=>$request->manufacturer_id,
