@@ -152,6 +152,7 @@ class ReportController extends Controller
                             $d = Carbon::createFromFormat('d/m/Y',$toDate);
                             return $query->where('sales.created_at', '<=', $d);
                         })
+                        ->where('sales.status', '=', 'active')
                         ->with(['in_payments','customer', 'user']);
         $totalAmount = $reportQuery->sum('total_cost');                
         $reports = $reportQuery->get();
@@ -205,6 +206,7 @@ class ReportController extends Controller
                             $d = Carbon::createFromFormat('d/m/Y',$toDate);
                             return $query->where('sale_entries.created_at', '<=', $d);
                         })
+                        ->where('sale_entries.status', '=', 'active')
                         ->with(['sale', 'product', 'stock_unit']);
         $reports = $reportQuery->get();
         $totalAmount = $reportQuery->sum('amount');

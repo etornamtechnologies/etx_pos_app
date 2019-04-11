@@ -25,12 +25,13 @@
             <img src="/img/icons/home.svg" class="el-icon" alt="">
             <span slot="title" class="menu-title">Home</span>
         </el-menu-item>
-        <el-menu-item index="/dashboard" class="menu-object">
+        <hr class="menu-divider">
+        <el-menu-item index="/dashboard" class="menu-object" v-if="showDashboard">
             <img src="/img/icons/home.svg" class="el-icon" alt="">
             <span slot="title" class="menu-title">Dashboard</span>
         </el-menu-item>
-        <hr class="menu-divider">
-        <el-submenu index="/inventory" class="menu-object">
+        <hr class="menu-divider" v-if="showDashboard">
+        <el-submenu index="/inventory" class="menu-object" v-if="showInventoryModule">
             <template slot="title">
                 <img src="/img/icons/inventory.svg" class="el-icon" alt="">
                 <span slot="title" class="menu-title">INVENTORY</span>
@@ -43,19 +44,19 @@
                 <el-menu-item index="/inventory/stock-adjustments/create">+ Create Stock-Adjustment</el-menu-item>
             </el-menu-item-group>
         </el-submenu>
-        <hr class="menu-divider">
-        <el-submenu index="/sales" class="menu-object">
+        <hr class="menu-divider" v-if="showInventoryModule">
+        <el-submenu index="/sales" class="menu-object" v-if="showSalesModule">
             <template slot="title">
                 <img src="/img/icons/shopping-cart.svg" class="el-icon" alt="">
                 <span slot="title" class="menu-title">Sales</span>
             </template>
             <el-menu-item-group>
                 <el-menu-item index="/sales/create">+ Create-Sale</el-menu-item>
-                <el-menu-item index="/sales">Sales</el-menu-item>
+                <el-menu-item index="/sales" v-if="showSalesList">Sales</el-menu-item>
             </el-menu-item-group>
         </el-submenu> 
-        <hr class="menu-divider">
-        <el-submenu index="/purchases" class="menu-object">
+        <hr class="menu-divider" v-if="showSalesModule">
+        <el-submenu index="/purchases" class="menu-object" v-if="showPurchaseModule">
             <template slot="title">
                 <img src="/img/icons/shopping.svg" class="el-icon" alt="">
                 <span slot="title" class="menu-title">Purchases</span>
@@ -65,8 +66,8 @@
                 <el-menu-item index="/purchases">Purchase Invoices</el-menu-item>
             </el-menu-item-group>
         </el-submenu> 
-        <hr class="menu-divider">
-        <el-submenu index="/reports" class="menu-object" v-if="hasAnyRole(['admin'])">
+        <hr class="menu-divider" v-if="showPurchaseModule">
+        <el-submenu index="/reports" class="menu-object" v-if="showReportModule">
             <template slot="title">
                 <img src="/img/icons/statistics.svg" class="el-icon" alt="">
                 <span slot="title" class="menu-title">Reports</span>
@@ -77,10 +78,10 @@
                 <el-menu-item index="/reports/adjustments">adjustment report</el-menu-item>
             </el-menu-item-group>
         </el-submenu> 
-        <hr class="menu-divider">
-        <el-submenu index="/clients" class="menu-object">
+        <hr class="menu-divider" v-if="showReportModule">
+        <el-submenu index="/clients" class="menu-object" v-if="showClientsModule">
             <template slot="title">
-                <img src="/img/icons/admin.svg" class="el-icon" alt="">
+                <img src="/img/icons/customer.svg" class="el-icon" alt="">
                 <span slot="title" class="menu-title">clients</span>
             </template>
             <el-menu-item-group>
@@ -88,8 +89,8 @@
                 <el-menu-item index="/clients/suppliers">suppliers</el-menu-item>
             </el-menu-item-group>
         </el-submenu> 
-        <hr class="menu-divider">
-        <el-submenu index="/admin" class="menu-object">
+        <hr class="menu-divider" v-if="showClientsModule">
+        <el-submenu index="/admin" class="menu-object" v-if="showAdminModule">
             <template slot="title">
                 <img src="/img/icons/admin.svg" class="el-icon" alt="">
                 <span slot="title" class="menu-title">admin</span>
@@ -99,8 +100,8 @@
                 <el-menu-item index="/admin/invnetory-csv">Upload Inventory using csv</el-menu-item>
             </el-menu-item-group>
         </el-submenu> 
-        <hr class="menu-divider">
-        <el-submenu index="/settings" class="menu-object">
+        <hr class="menu-divider" v-if="showAdminModule">
+        <el-submenu index="/settings" class="menu-object" v-if="showConfigModule">
             <template slot="title">
                 <img src="/img/icons/settings.svg" class="el-icon" alt="">
                 <span slot="title" class="menu-title">Configuration</span>
@@ -110,13 +111,14 @@
                 <el-menu-item index="/settings/tax">Tax settings</el-menu-item>
                 <el-menu-item index="/settings/backup-and-restore">Backup and Restore</el-menu-item>
             </el-menu-item-group>
-        </el-submenu>                       
+        </el-submenu> 
+        <hr class="menu-divider" v-if="showConfigModule">                      
     </el-menu>
 </div>
 </template>
 
 <script>
-    import { checkRole } from '../../utils/role'
+    import { HasAnyRole } from '../../utils/role'
     export default {
         watch: {
             $route(to, from) {
@@ -143,12 +145,66 @@
                 console.log(key, keyPath);
             },
             hasAnyRole: function(roles) {
-                checkRole(roles);
+                HasAnyRole(roles);
             }
         },
         computed: {
             isSideBarClosed: function() {
                 return this.$store.getters.is_sidebar_closed;
+            },
+            showReportModule: function() {
+                if(HasAnyRole(['admin', 'manager'])) {
+                    return true;
+                }
+                return false;
+            },
+            showInventoryModule: function() {
+                if(HasAnyRole(['admin', 'manager'])) {
+                    return true;
+                }
+                return false;
+            },
+            showPurchaseModule: function() {
+                if(HasAnyRole(['admin', 'manager'])) {
+                    return true;
+                }
+                return false;
+            },
+            showAdminModule: function() {
+                if(HasAnyRole(['admin'])) {
+                    return true;
+                }
+                return false;
+            },
+            showConfigModule: function() {
+                if(HasAnyRole(['admin', 'manager'])) {
+                    return true;
+                }
+                return false;
+            },
+            showDashboard: function() {
+                if(HasAnyRole(['admin', 'manager'])) {
+                    return true;
+                }
+                return false;
+            },
+            showSalesModule: function() {
+                if(HasAnyRole(['admin', 'manager','sales-rep'])) {
+                    return true;
+                }
+                return false;
+            },
+            showSalesList: function() {
+                if(HasAnyRole(['admin', 'manager'])) {
+                    return true;
+                }
+                return false;
+            },
+            showClientsModule: function() {
+                if(HasAnyRole(['admin', 'manager', 'sales-rep'])) {
+                    return true;
+                }
+                return false;
             },
         },
     }

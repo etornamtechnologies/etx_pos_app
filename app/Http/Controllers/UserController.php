@@ -34,7 +34,7 @@ class UserController extends Controller
         if($user) {
             return response()->json(['code'=> 0, 'user'=> $user], 200);
         }
-        return abort(404, 'not logged in');
+        return abort(401, 'not logged in');
     }
 
 

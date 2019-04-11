@@ -46,7 +46,7 @@ class SaleController extends Controller
                             ->with(['user', 'customer', 'in_payments'])
                             ->orderBy('created_at', 'DESC');
         if($request->has('paginate')) {
-            return response()->json(['sales'=> $salesQuery->paginate(15), 'code'=>0], 200);
+            return response()->json(['sales'=> $salesQuery->paginate(10), 'code'=>0], 200);
         } else {
             return response()->json(['code'=>0, 'sales'=> $salesQuery->take(100)->get()]);
         }
