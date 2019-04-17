@@ -11,6 +11,7 @@ namespace App;
 
 use App\Sale;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Database\Eloquent\Model;
 
 class Sale extends Model
@@ -65,5 +66,52 @@ class Sale extends Model
     public static function topSales()
     {
         //$query = DB::table('sales')->join()
+    }
+
+    public static function totalSaleAmount()
+    {
+        $sales = Sale::all();
+        $total = 0;
+        foreach($sales as $sale) {
+            $amt = $sale->total_cost;
+            $total += $amt;
+        }
+        return $total;
+    }
+
+    public static function yesterdayTotalSale()
+    {
+        $yesterday = Carbon::yesterday();
+        $sales = Sale::where('status', 'active')->whereDate('created_at',$yesterday)->get();
+        $total = 0;
+        foreach($sales as $sale) {
+            $amt = $sale->total_cost;
+            $total += $amt;
+        }
+        return $total;
+    }
+
+    public static function thisMonthTotalSale()
+    {
+        $sales = Sale::where('status', 'active')->whereMonth('created_at', Carbon::now()->month)->get();
+        $total = 0;
+        foreach($sales as $sale) {
+            $amt = $sale->total_cost;
+            $total += $amt;
+        }
+        return $total;
+    }
+
+    public static function topCategorySale()
+    {
+        $q = DB::table('categories')
+                ->leftjoin('products', 'products.category_id', '=', 'categories.id')
+                ->leftjoin('sale_entries', 'sale_entries.product_id', '=', 'products.id')
+                ->select('categories.label as category', DB::raw('SUM(sale_entries.metric_quantity) as quantity'))
+                ->groupBy('categories.id')
+                ->orderBy(DB::raw('SUM(sale_entries.metric_quantity)'), 'DESC')
+                ->take(10)
+                ->get();
+        return $q;        
     }
 }

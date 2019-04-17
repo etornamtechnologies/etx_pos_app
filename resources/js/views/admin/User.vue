@@ -4,11 +4,12 @@
             <v-card height="600px">
                 <v-card-title>
                     <v-btn
-                    color="primary"
+                    color="pink"
+                    dark
                     @click="goBack"
                     >
                         <v-icon>arrow_back</v-icon>
-                        Back
+                        Users
                         </v-btn>
                 </v-card-title>
                 <v-card-text>

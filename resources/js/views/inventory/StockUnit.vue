@@ -44,13 +44,25 @@
                     Your search for "{{ search }}" found no results.
                 </v-alert>
                 </v-data-table>
+                <v-btn
+                        color="pink"
+                        dark
+                        small
+                        absolute
+                        bottom
+                        right
+                        fab
+                        @click="isOpenCreateStockUnitDialog = true"
+                >
+                    <v-icon>add</v-icon>
+                </v-btn>
             </v-card>
         </v-flex>
 
         <v-dialog v-model="isOpenCreateStockUnitDialog" persistent width="500">
             <v-card>
                 <form @submit.prevent="createStockUnit">
-                <v-card-title class="headline">create category</v-card-title>
+                <v-card-title class="headline">create stock unit</v-card-title>
                 <v-card-text>
                     <v-text-field
                     label="label"

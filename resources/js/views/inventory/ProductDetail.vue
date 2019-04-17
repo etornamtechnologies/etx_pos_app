@@ -81,6 +81,12 @@
                                 </option>
                             </select>
                         </div>
+                        <div class="form-group">
+                            <label>Restock Alert Quantity</label>
+                            <input 
+                            style="width:100%"
+                            type="number" class="form-control" v-model="product_data.reorder_quantity"/>
+                        </div>
                     </div>
                 </div>
                 <div class="row mb-4">
@@ -127,6 +133,24 @@
                                         <v-icon small>remove</v-icon>
                                     </v-btn>
                                 </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <table class="table table-bordered">
+                        <thead>
+                            <tr>
+                                <th>Supplier</th>
+                                <th>Phone</th>
+                                <th>Email</th>
+                                <th>Address</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr v-for="supplier in suppliers" :key="supplier.id">
+                               <td> {{ supplier.supplier_name || '--' }} </td>
+                               <td> {{ supplier.supplier_phone || '--' }} </td> 
+                               <td> {{ supplier.supplier_email || '--' }} </td>
+                               <td> {{ supplier.supplier_address || '--' }} </td>
                             </tr>
                         </tbody>
                     </table>
@@ -222,6 +246,7 @@
                 stock_selling_price_data: {},
                 stock_cost_price_data: {},
                 isPricingLoading: false,
+                suppliers: []
             }
         },
         methods: {
@@ -231,6 +256,7 @@
                     .then(result=> {
                         console.log(result.product)
                         this.product = result.product
+                        this.suppliers = result.suppliers || []
                         this.initPage()
                     })
             },

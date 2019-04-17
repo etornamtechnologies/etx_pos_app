@@ -22,6 +22,7 @@ class CreatePriceTemplatesTable extends Migration
             $table->decimal('constant_value')->default(0);
             $table->enum('apply_on', ['cost_price', 'selling_price']);
             $table->integer('category_id')->unsigned()->nullable();
+            $table->enum('status', ['active', 'inactive'])->default('inactive');
             $table->foreign('category_id')
                   ->references('id')->on('categories')
                   ->onDelete('CASCADE')->nullable();

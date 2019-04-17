@@ -20,6 +20,7 @@ class InventoryController extends Controller
     public function __construct()
     {
         $this->middleware('api_auth');
+        $this->middleware('api_role');
     }
 
 
@@ -50,7 +51,6 @@ class InventoryController extends Controller
 
     public static function setCostPriceFor($productId, $metricCostPrice)
     {
-        dd($metricCostPrice);
         DB::table('product_stock_unit')->where('product_id', $productId)
                                         ->orderBy('product_id')
                                         ->get()

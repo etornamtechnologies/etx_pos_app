@@ -18,6 +18,7 @@ class CategoryController extends Controller
     public function __construct()
     {
         $this->middleware('api_auth');
+        $this->middleware('api_role:admin,manager')->except(['index']);
     }
 
     public function index(Request $request)

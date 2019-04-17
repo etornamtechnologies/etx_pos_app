@@ -30,12 +30,12 @@
                                 </v-flex>
                                 <v-flex xs12>
                                     <v-text-field
-                                    label="shope address"
+                                    label="shop address"
                                     v-model="info.shop_address"></v-text-field>
                                 </v-flex>
                                 <v-flex xs12>
                                     <v-text-field
-                                    label="shope message"
+                                    label="shop message"
                                     v-model="info.shop_message"></v-text-field>
                                 </v-flex>
                                 <v-flex xs12>

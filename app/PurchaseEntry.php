@@ -60,7 +60,7 @@ class PurchaseEntry extends Model
             ]);
             $metricCostPrice = round($costPrice/$metricScale, 0, PHP_ROUND_HALF_UP);
             InventoryController::setCostPriceFor($productId, $metricCostPrice);
-            if(isset($entry['batch']) && isset($entry['expiry_date'])) {
+            if($entry['batch_number'] && $entry['expiry_date']) {
                 Batch::addProductToBatch($entry['batch_number'], $entry['expiry_date'], $productId, $metricQty);
             }
         }

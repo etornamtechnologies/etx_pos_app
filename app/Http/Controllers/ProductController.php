@@ -18,12 +18,14 @@ class ProductController extends Controller
 {
     public function __construct()
     {
-//        $this->middleware('auth');
+       $this->middleware('api_auth');
+       $this->middleware('api_role:manager,admin')->except(['index','show']);
     }
 
     public function index(Request $request)
     {
         $input = $request->all();
+        $products = [];
         $filter = "";
         if($request->has('filter')) {
             $filter = $input['filter'];
@@ -31,15 +33,20 @@ class ProductController extends Controller
         $query = Product::where('label', 'LIKE', '%'.$filter.'%')
                         ->orWhere('barcode', 'LIKE', '%'.$filter.'%')
                         ->orderBy('label', 'ASC')
-                        ->with(['category', 'manufacturer', 'stock_units','defaultSku']);
-        $products = $query->get();                
+                        ->with(['category', 'manufacturer', 'stock_units','defaultSku']);               
+        if($request->has('paginate')) {
+            $products = $query->paginate(10);
+        } else {
+            $products = $query->get(); 
+        }
         return response()->json(['code'=> 0, 'products'=> $products]);
     }
 
     public function show($id)
     {
         $product = Product::where('id', $id)->with(['stock_units', 'category','defaultSku'])->first();
-        return response()->json(['code'=>0, 'product'=>$product]);
+        $suppliers = Product::getProductSuppliers($id);
+        return response()->json(['code'=>0, 'product'=>$product, 'suppliers'=>$suppliers]);
     }
 
     public function store(Request $request)

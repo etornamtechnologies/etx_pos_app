@@ -6,12 +6,6 @@
                     <v-toolbar-side-icon></v-toolbar-side-icon>
                     <v-toolbar-title>CATEGORIES</v-toolbar-title>
                     <v-spacer></v-spacer>
-                    <v-btn icon color="cyan" dark>
-                        <v-icon
-                        @click="createCategoryDialog = true">
-                            add
-                        </v-icon>
-                    </v-btn>
                 </v-toolbar>
                 <v-card-title>
                     Categories
@@ -45,6 +39,18 @@
                     Your search for "{{ search }}" found no results.
                 </v-alert>
                 </v-data-table>
+                <v-btn
+                        color="pink"
+                        dark
+                        small
+                        absolute
+                        bottom
+                        right
+                        fab
+                        @click="createCategoryDialog = true"
+                >
+                    <v-icon>add</v-icon>
+                </v-btn>
             </v-card>
         </v-flex>
 

@@ -1,5 +1,7 @@
 import * as reportApi from '../api/report'
 
+
+
 export function GetSaleReportByTransaction( product_data ) {
     return new Promise((resolve, reject) => {
         reportApi.getSaleReportByTransaction(product_data)
@@ -50,12 +52,12 @@ export function GetPurcahseReportByProduct( product_data ) {
 }
 
 
-export function GetStockAdjusmentReportByTransaction( product_data ) {
+export function GetStockAdjustmentReportByTransaction( product_data ) {
     return new Promise((resolve, reject) => {
-        reportApi.geStockAdjustmentReportByTransaction(product_data)
+        reportApi.getStockAdjustmentReportByTransaction(product_data)
         .then(response => {
             const data = response || {}
-            resolve(data)
+            resolve(data);
         }).catch(error => {
             reject(error)
         })

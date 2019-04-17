@@ -24,6 +24,7 @@ class PurchaseController extends Controller
     public function __construct()
     {
         $this->middleware('api_auth');
+        $this->middleware('api_role:manager,admin');
     }
 
     public function index(Request $request)
@@ -108,34 +109,34 @@ class PurchaseController extends Controller
         return response()->json($result);
     }
 
-    public function createPurchaseEntries($purchase_id, $entries) {
-        foreach($entries as $entry) {
-            $stockUnitId = $entry['stock_unit_id'];
-            $productId = $entry['product_id'];
-            $quantity = $entry['quantity'];
-            $costPrice = $entry['cost_price']*100;
-            $sum = $costPrice * $quantity;
-            $stockData = DB::table('product_stock_unit')
-                            ->where('product_id', $productId)
-                            ->where('stock_unit_id', $stockUnitId)->first();
-            $metricScale = $stockData->metric_scale;
-            $metricQty = $quantity * $metricScale;   
-            Product::where('id', $productId)->increment('stock_quantity', $metricQty);             
-            PurchaseEntry::create([
-                'purchase_id'=> $purchase_id,
-                'product_id'=> $productId,
-                'stock_unit_id'=> $stockUnitId,
-                'cost_price'=> $costPrice,
-                'quantity'=> $quantity,
-                'amount'=> $sum,
-                'metric_quantity'=> $metricQty
-            ]);
-            $metricCostPrice = round($costPrice/$metricScale, 0, PHP_ROUND_HALF_UP);
-            InventoryController::setCostPriceFor($productId, $metricCostPrice);
-            if($entry['batch_number'] && $entry['expiry_date']) {
-                dd('yup');
-                BatchController::addBatch($entry['batch_number'], $entry['expiry_date'], $productId, $metricQty);
-            }
-        }
-    }
+    // public function createPurchaseEntries($purchase_id, $entries) {
+    //     foreach($entries as $entry) {
+    //         $stockUnitId = $entry['stock_unit_id'];
+    //         $productId = $entry['product_id'];
+    //         $quantity = $entry['quantity'];
+    //         $costPrice = $entry['cost_price']*100;
+    //         $sum = $costPrice * $quantity;
+    //         $stockData = DB::table('product_stock_unit')
+    //                         ->where('product_id', $productId)
+    //                         ->where('stock_unit_id', $stockUnitId)->first();
+    //         $metricScale = $stockData->metric_scale;
+    //         $metricQty = $quantity * $metricScale;   
+    //         Product::where('id', $productId)->increment('stock_quantity', $metricQty);             
+    //         PurchaseEntry::create([
+    //             'purchase_id'=> $purchase_id,
+    //             'product_id'=> $productId,
+    //             'stock_unit_id'=> $stockUnitId,
+    //             'cost_price'=> $costPrice,
+    //             'quantity'=> $quantity,
+    //             'amount'=> $sum,
+    //             'metric_quantity'=> $metricQty
+    //         ]);
+    //         $metricCostPrice = round($costPrice/$metricScale, 0, PHP_ROUND_HALF_UP);
+    //         InventoryController::setCostPriceFor($productId, $metricCostPrice);
+    //         if($entry['batch_number'] && $entry['expiry_date']) {
+    //             dd('batch exist');
+    //             Batch::addProductToBatch($entry['batch_number'], $entry['expiry_date'], $productId, $metricQty);
+    //         }
+    //     }
+    // }
 }

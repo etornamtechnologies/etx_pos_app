@@ -27,7 +27,7 @@
         </el-menu-item>
         <hr class="menu-divider">
         <el-menu-item index="/dashboard" class="menu-object" v-if="showDashboard">
-            <img src="/img/icons/home.svg" class="el-icon" alt="">
+            <img src="/img/icons/dashboard.svg" class="el-icon" alt="">
             <span slot="title" class="menu-title">Dashboard</span>
         </el-menu-item>
         <hr class="menu-divider" v-if="showDashboard">
@@ -76,6 +76,7 @@
                 <el-menu-item index="/reports/sale">sale report</el-menu-item>
                 <el-menu-item index="/reports/purchase">purchase report</el-menu-item>
                 <el-menu-item index="/reports/adjustments">adjustment report</el-menu-item>
+                <el-menu-item index="/reports/finance">financies</el-menu-item>
             </el-menu-item-group>
         </el-submenu> 
         <hr class="menu-divider" v-if="showReportModule">
@@ -97,7 +98,6 @@
             </template>
             <el-menu-item-group>
                 <el-menu-item index="/admin/users">User Management</el-menu-item>
-                <el-menu-item index="/admin/invnetory-csv">Upload Inventory using csv</el-menu-item>
             </el-menu-item-group>
         </el-submenu> 
         <hr class="menu-divider" v-if="showAdminModule">
@@ -108,7 +108,6 @@
             </template>
             <el-menu-item-group>
                 <el-menu-item index="/settings/shopsetup">Shop Set-Up</el-menu-item>
-                <el-menu-item index="/settings/tax">Tax settings</el-menu-item>
                 <el-menu-item index="/settings/backup-and-restore">Backup and Restore</el-menu-item>
             </el-menu-item-group>
         </el-submenu> 

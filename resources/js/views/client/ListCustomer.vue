@@ -62,6 +62,18 @@
                         Your search for "{{ search }}" found no results.
                     </v-alert>
                     </v-data-table>
+                    <v-btn
+                            color="pink"
+                            dark
+                            small
+                            absolute
+                            bottom
+                            right
+                            fab
+                            @click="openCreateCustomerDialog"
+                    >
+                        <v-icon>person_add</v-icon>
+                    </v-btn>
                 </v-card>
             </v-flex>
         </v-layout>
@@ -207,7 +219,8 @@
             deleteCustomer: function(entry) {
                 this.deleteLoading = true;
                 let index = this.customers.indexOf(entry);
-                DeleteCustomer(entry)
+                if(confirm('Are you sure you want to delete customer?')) {
+                    DeleteCustomer(entry)
                     .then(result=> {
                         this.deleteLoading = false;
                         if(index > -1) {
@@ -217,6 +230,7 @@
                     .catch(err=> {
                         this.deleteLoading = false;
                     })
+                }
             },
             prettyDate: function(date_str) {
                 return formatDate(date_str) || '--';

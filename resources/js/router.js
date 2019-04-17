@@ -29,6 +29,7 @@ import UserList from './views/admin/UserList'
 import User from './views/admin/User'
 import SaleReport from './views/report/SaleReport'
 import PurchaseReport from './views/report/PurchaseReport'
+import FinanceReport from './views/report/FinanceReport'
 import PermissionError from './views/PermissionError'
 import store from './store';
 
@@ -83,7 +84,8 @@ export default new Router({
                         },
                         {
                             path: 'products',
-                            component: Product
+                            component: Product,
+                            name: 'product_list'
                         },
                         {
                             path: 'products/:id',
@@ -115,7 +117,8 @@ export default new Router({
                 },
                 {
                     path: 'sales',
-                    component: ListSale
+                    component: ListSale,
+                    name: 'sale_list'
                 },
                 {
                     path: 'sales/create',
@@ -123,7 +126,8 @@ export default new Router({
                 },
                 {
                     path: 'purchases',
-                    component: ListPurchase
+                    component: ListPurchase,
+                    name: 'purchase_list'
                 },
                 {
                     path: 'purchases/create',
@@ -153,6 +157,10 @@ export default new Router({
                 {
                     path: 'reports/purchase',
                     component: PurchaseReport
+                },
+                {
+                    path: 'reports/finance',
+                    component: FinanceReport
                 },
                 {
                     path: 'clients/customers',

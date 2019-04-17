@@ -58,6 +58,6 @@ export function getStockAdjustmentReportByProduct(_data) {
     return request({
         url: `/api/reports/stock-adjustment/product?${qStr}`,
         method: 'get',
-        data
+        data,
     });
 }

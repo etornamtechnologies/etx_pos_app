@@ -8,6 +8,11 @@ use App\Http\Controllers\Controller;
 
 class PriceTemplateController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('api_auth');
+        $this->middleware('api_role:admin,manager');
+    }
     /**
      * Display a listing of the resource.
      *

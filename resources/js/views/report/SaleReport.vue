@@ -22,9 +22,11 @@
                                                 :label="user.name"></el-option>
                                             </el-select>
 
-                                            <el-select v-model="search.filter_by" placeholder="view by" class="my-input">
+                                            <el-select
+                                             v-model="search.filter_by"
+                                            @change="handleFilterByChange($event)" 
+                                            placeholder="view by" class="my-input">
                                                 <el-option
-                                                @change="handleFilterByChange"
                                                 v-for="filter in filterByList"
                                                 :key="filter.id"
                                                 :value="filter.id"
@@ -83,10 +85,10 @@
                                 </div>
                                 <div class="row" style="border-bottom: solid grey 1px">
                                     <div class="col-md-12">
-                                        <span>TOTAL SALE: GHC{{ getMoney(total_amount) }} </span>
+                                        <span style="font-weight:bold">TOTAL SALE AMOUNT: GHC{{ getMoney(total_amount) }} </span>
                                     </div>
                                 </div>
-                                <div class="row" style="height:500px; overflow-y:auto">
+                                <div class="row" style="height:600px; overflow-y:auto">
                                     <div class="col-md-12">
                                         <v-data-table
                                         :items="report_by_transaction"
@@ -122,10 +124,10 @@
                                 </div>
                                 <div class="row">
                                     <div class="col-md-12">
-                                        <span>{{ getMoney(product_total_amount) }}</span>
+                                        <span style="font-weight:bold">TOTAL SALE AMOUNT: GHC{{ getMoney(product_total_amount) }}</span>
                                     </div>
                                 </div>
-                                <div class="row" style="height:500px; overflow-y:auto">
+                                <div class="row" style="height:600px; overflow-y:auto">
                                     <div class="col-md-12">
                                         <v-data-table
                                         :items="report_by_products"
@@ -239,7 +241,6 @@
             fetchByTransaction: function(_data) {
                 GetSaleReportByTransaction(_data)
                     .then(result=> {
-                        console.log(result.reports)
                         this.report_by_transaction = result.reports;
                         this.transaction_headers = result.headers
                         this.transaction_info = result.info;
@@ -255,9 +256,7 @@
                         this.report_by_products = result.reports;
                         this.product_headers = result.header;
                         this.product_report_info = result.info
-                        this.product_report_info = result.info
                         this.product_total_amount = result.total_amount || 0;
-                        console.log('head', this.product_headers)
                     })
                     .catch(err=> {
 
@@ -271,7 +270,17 @@
                 }
             },
             handleFilterByChange: function(event){
-                console.log('heye')
+                if(event == 'transaction') {
+                    this.report_by_products = [];
+                    this.product_headers = [];
+                    this.product_report_info = ""
+                    this.product_total_amount = 0;
+                } else {
+                    this.report_by_transaction = [];
+                    this.transaction_headers = []
+                    this.transaction_info = "";
+                    this.total_amount = 0;
+                }    
             },
             getMoney: function(val) {
                 let amt = val/100;

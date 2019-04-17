@@ -1,10 +1,12 @@
 import request from '../utils/request'
+import { makeQueryString } from '../utils/helpers'
 
 
-export function getProduct(product_data) {
+export function getProduct(_data) {
     let url = '/api/products';
-    if(product_data.filter) {
-        url = `/api/products?filter=${product_data.filter}`
+    let qStr = makeQueryString(_data)
+    if(qStr) {
+        url = url+`?${qStr}`;
     }
     return request({
         url: url,

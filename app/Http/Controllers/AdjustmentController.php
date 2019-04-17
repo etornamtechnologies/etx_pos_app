@@ -23,6 +23,12 @@ use App\Http\Controllers\BatchController;
 
 class AdjustmentController extends Controller
 {
+    public function __contruct()
+    {
+        $this->middleware('api_auth');
+        $this->middleware('api_role:manager,admin');
+    }
+
     public function index(Request $request)
     {
         $result = [];

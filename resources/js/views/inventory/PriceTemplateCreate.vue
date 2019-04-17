@@ -23,7 +23,7 @@
                                 <v-flex>
                                     <v-select
                                     v-model="template.apply_on"
-                                    label="apply on"
+                                    label="add to"
                                     :items="add_to_list"
                                     item-text="label"
                                     item-value="id"
@@ -48,6 +48,7 @@
                                         <v-flex xs3>
                                             <v-text-field
                                             type="number"
+                                            suffix="%"
                                             step="0.01"
                                             label="PERCENT VALUE"
                                             append-icon="percent"

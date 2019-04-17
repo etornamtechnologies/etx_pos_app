@@ -10,6 +10,12 @@ use App\Http\Controllers\Controller;
 
 class BatchController extends Controller
 {
+
+    public function __contruct()
+    {
+        $this->middleware('api_auth');
+    }
+
     public static function addBatch($batch_number, $expiry_date, $productId, $metricQty)
     {
         $expiryDate = null;

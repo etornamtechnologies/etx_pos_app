@@ -18,7 +18,13 @@ import 'material-design-icons-iconfont/dist/material-design-icons.css'
 import router from './router'
 import store from './store'
 
+import VueFusionCharts from 'vue-fusioncharts';
+import FusionCharts from 'fusioncharts';
+import AngularGauge from 'fusioncharts/fusioncharts.widgets';
+import FusionTheme from 'fusioncharts/themes/fusioncharts.theme.fusion';
+import ZuneTheme from 'fusioncharts/themes/fusioncharts.theme.zune';
 
+Vue.use(VueFusionCharts, FusionCharts, AngularGauge, FusionTheme, ZuneTheme);
 Vue.use(Vuetify)
 Vue.use(ElementUI, { locale })
 /**

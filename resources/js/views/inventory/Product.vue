@@ -9,9 +9,9 @@
                     <v-menu bottom left>
                         <template v-slot:activator="{ on }">
                             <v-btn
-                                dark
-                                icon
-                                v-on="on"
+                            dark
+                            icon
+                            v-on="on"
                             >
                                 <v-icon>more_vert</v-icon>
                             </v-btn>
@@ -22,33 +22,57 @@
                                 key="create_product"
                                 @click="openCreateProductModal"
                             >
-                                <v-list-tile-title>+ create product</v-list-tile-title>
+                                <v-list-tile-title>
+                                    <v-icon small>add</v-icon>
+                                    create product
+                                </v-list-tile-title>
                             </v-list-tile>
                             <v-list-tile
                                 key="create_product_entries"
                                 @click="goCreateProductEntries"
                             >
-                                <v-list-tile-title>+ create product(multiple)</v-list-tile-title>
+                                <v-list-tile-title>
+                                    <v-icon small>add</v-icon>
+                                    create product(multiple)
+                                </v-list-tile-title>
+                            </v-list-tile>
+                            <v-list-tile
+                            key="upload_product_csv">
+                                <v-list-tile-title>
+                                    <v-icon small>upload_file</v-icon>
+                                    Upload product (CSV)
+                                </v-list-tile-title>
                             </v-list-tile>
                         </v-list>
                     </v-menu>
                 </v-toolbar>
                 <v-card-title>
-                    Products
-                    <v-spacer></v-spacer>
-                    <v-text-field
-                    color="cyan"
-                    v-model="search"
-                    append-icon="search"
-                    label="Search"
-                    single-line
-                    hide-details
-                    ></v-text-field>
+                    <v-layout row wrap>
+                        <v-flex xs12 sm6 md6>
+                            <span style="margin-top:5px; margin-left:5px; font-size:17px">
+                                Products
+                            </span>
+                        </v-flex>
+                        <v-flex xs12 sm6 md6>
+                            <v-form
+                            style="width:100%"
+                            @submit.prevent="fetchProducts">
+                                <v-text-field
+                                color="cyan"
+                                v-model="search"
+                                append-icon="search"
+                                label="Search"
+                                single-line
+                                hide-details
+                                ></v-text-field>
+                            </v-form>
+                        </v-flex>
+                    </v-layout>
                 </v-card-title>
                 <v-data-table
                 :headers="headers"
                 :items="products"
-                :search="search"
+                hide-actions
                 >
                 <template v-slot:items="props">
                     <td>{{ props.item.label }}</td>
@@ -69,6 +93,26 @@
                     Your search for "{{ search }}" found no results.
                 </v-alert>
                 </v-data-table>
+                <el-pagination
+                background
+                :current-page.sync="currentPage"
+                :page-size="perPage"
+                :pager-count="21"
+                layout="prev, pager, next"
+                :total="totalRows">
+                </el-pagination>
+                <v-btn
+                        color="pink"
+                        dark
+                        small
+                        absolute
+                        bottom
+                        right
+                        fab
+                        @click="openCreateProductModal"
+                >
+                    <v-icon>add</v-icon>
+                </v-btn>
             </v-card>
         </v-flex>
 
@@ -156,6 +200,11 @@
             this.fetchCategories();
             this.fetchStockUnits();
         },
+        watch: {
+            currentPage: function() {
+                this.fetchProducts();
+            }
+        },
         data(){
             return {
                 search:'',
@@ -176,14 +225,24 @@
                     v => (v && v.length <= 50) || 'Name must be less than 50 characters'
                 ],
                 valid: true,
+                currentPage: 1,
+                perPage: 2,
+                totalRows: null,
             }
         },
         methods: {
             fetchProducts: function(){
-                GetProduct({})
+                let _data = {};
+                _data.paginate = true;
+                _data.filter = this.search;
+                _data.page = this.currentPage;
+                GetProduct(_data)
                     .then(result=> {
                         console.log('cats',result)
-                        this.products = result.products || []
+                        this.products = (result.products || {}).data || [];
+                        this.currentPage = (result.products || {}).current_page;
+                        this.perPage = (result.products || {}).per_page;
+                        this.totalRows = (result.products || {}).total
                     })
             },
             fetchCategories: function(){

@@ -9,7 +9,7 @@
                                 <div class="form-group">
                                     <label for="">
                                         Supplier
-                                        <span @click="openCreateSupplierModal" class="ml-2 create-link">create supplier</span>
+                                        <span @click="openCreateSupplierModal" class="ml-2 create-link text-primary">create supplier</span>
                                     </label>
                                     <select class="form-control"
                                     v-model="summary.supplier_id"
@@ -70,11 +70,17 @@
                 <div class="card">
                     <div class="card-body">
                         <div class="row mb-2">
-                            <div class="col-md-6 offset-md-6" style="position:relative">
+                            <div class="col-md-6">
+                                <span style="font-weight:bold; margin-top:10px">
+                                    CREATE PURCHASE INVOICE
+                                </span>
+                            </div>
+                            <div class="col-md-6" style="position:relative">
                                 <form @submit.prevent="searchProduct">
                                     <v-text-field
                                     label="search"
                                     v-model="filter"
+                                    color="cyan"
                                     id="search-input"
                                     autocomplete="off"
                                     autofocus></v-text-field>

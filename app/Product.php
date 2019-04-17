@@ -9,11 +9,12 @@
 namespace App;
 
 
-use Illuminate\Database\Eloquent\Model;
-use App\Category;
-use App\Manufacturer;
-use App\StockUnit;
 use App\Product;
+use App\Category;
+use App\StockUnit;
+use App\Manufacturer;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Database\Eloquent\Model;
 
 class Product extends Model
 {
@@ -21,7 +22,7 @@ class Product extends Model
     protected $table = "products";
 
     protected $fillable = ['label', 'barcode', 'description', 'category_id', 'manufacturer_id'
-                            , 'default_stock_unit', 'status'];
+                            , 'default_stock_unit', 'status', 'reorder_quantity'];
 
     public function category()
     {
@@ -47,5 +48,17 @@ class Product extends Model
     public static function totalProducts()
     {
         return Product::count();
+    }
+
+    public static function getProductSuppliers($productId)
+    {
+        $q = DB::table('purchase_entries')->where('product_id', $productId)
+                ->leftjoin('purchases', 'purchases.id', '=', 'purchase_entries.purchase_id')
+                ->leftjoin('suppliers', 'suppliers.id', '=', 'purchases.supplier_id')
+                ->distinct()
+                ->select('suppliers.name as supplier_name', 'suppliers.phone as supplier_phone'
+                            ,'suppliers.email as supplier_email', 'suppliers.address as supplier_address')
+                ->get();
+        return $q;        
     }
 }

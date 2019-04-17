@@ -3,6 +3,8 @@
 namespace App;
 
 
+use App\Purchase;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Database\Eloquent\Model;
 
@@ -44,4 +46,16 @@ class Purchase extends Model
                                         ,'purchase_entries.cost_price as cost_price')->get();
         return ['purchase'=> $purchase, 'purchase_entries'=> $purchase_entries];                                
     }
+
+    public static function thisMonthPurchaseTotalAmount()
+    {
+        $purchases = Purchase::where('status', 'active')->whereMonth('created_at', Carbon::now()->month)->get();
+        $total = 0;
+        foreach($purchases as $purchase) {
+            $amt = $purchase->total;
+            $total += $amt;
+        }
+        return $total;
+    }
+
 }

@@ -62,6 +62,18 @@
                         Your search for "{{ search }}" found no results.
                     </v-alert>
                     </v-data-table>
+                    <v-btn
+                            color="pink"
+                            dark
+                            small
+                            absolute
+                            bottom
+                            right
+                            fab
+                            @click="openCreateSupplierDialog"
+                    >
+                        <v-icon>person_add</v-icon>
+                    </v-btn>
                 </v-card>
             </v-flex>
         </v-layout>
@@ -117,12 +129,12 @@
                         v-model="edit_supplier.phone"></v-text-field>
 
                         <v-text-field
-                        label="label"
+                        label="email"
                         required
                         v-model="edit_supplier.email"></v-text-field>
 
                         <v-text-field
-                        label="label"
+                        label="address"
                         required
                         v-model="edit_supplier.address"></v-text-field>
                     </v-card-text>
@@ -207,7 +219,8 @@
             deleteSupplier: function(entry) {
                 this.deleteLoading = true;
                 let index = this.suppliers.indexOf(entry);
-                DeleteSupplier(entry)
+                if(confirm('Are you sure you want to delete supplier')) {
+                    DeleteSupplier(entry)
                     .then(result=> {
                         this.deleteLoading = false;
                         if(index > -1) {
@@ -217,6 +230,7 @@
                     .catch(err=> {
                         this.deleteLoading = false;
                     })
+                }
             },
             prettyDate: function(date_str) {
                 return formatDate(date_str) || ""

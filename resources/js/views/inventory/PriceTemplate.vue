@@ -62,9 +62,9 @@
                                     {{ productCategory(props.item) }}
                                 </td>
                                 <td>
-                                    {{ templateStatus(props.item) }}
+                                    {{ props.item.status }}
                                 </td>
-                                <td>
+                                <td style="min-width:260px">
                                     <v-btn
                                     small
                                     color="success"
