@@ -17,7 +17,7 @@
                     <img src="/img/icons/man.svg" alt="image">
                 </v-avatar>
             </div>
-            <v-badge overlap color="info" class="navbar-item">
+            <!-- <v-badge overlap color="info" class="navbar-item">
                 <span slot="badge">3</span>
                 <v-avatar size="20"
                     color="purple red--after"
@@ -26,8 +26,8 @@
                     @click="openNotificationMenu" 
                     dark>notifications</v-icon>
                 </v-avatar>
-            </v-badge>  
-            <v-img
+            </v-badge>   -->
+            <!-- <v-img
             src="/img/icons/settings.svg"
             class="my-3 navbar-item"
             color="primary"
@@ -35,7 +35,7 @@
             contain
             height="20"
             max-width="20"
-            ></v-img>   
+            ></v-img>    -->
             <v-img
             src="/img/icons/logout.svg"
             height="20"
@@ -59,13 +59,10 @@ export default{
     }, 
     methods: {
         openSettings: function(){
-            console.log('settings')
         },
         openNotificationMenu: function() {
-            console.log('notification');
         },
         logoutUser: function(){
-            console.log('logout')
         },
         toggleSideBar: function() {
             this.$store.dispatch('toggleSidebar').app;
@@ -77,7 +74,7 @@ export default{
             this.$store.dispatch('openSidebar').app;
         },
         openNotificationMenu: function() {
-            console.log('notification menu')
+
         },
         handleLogOut: function(){
             this.$store.dispatch('LogOutUser')
@@ -85,7 +82,7 @@ export default{
                     this.$router.push({ path: '/account/login' })
                 })
                 .catch((err)=> {
-                    console.log(err)
+                    
                 })
         },
     },

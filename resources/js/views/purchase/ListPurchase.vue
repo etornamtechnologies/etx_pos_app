@@ -39,7 +39,8 @@
 
         <div class="row mt-3">
             <div class="col-md-12">
-                <div class="card">
+                <div class="card" style="position:relative; min-height:500px">
+                    <div class="my-loader" v-if="isLoading"></div>
                     <div class="card-body">
                         <div class="row">
                             <div class="col-md-12">
@@ -100,6 +101,7 @@
                                 @current-change="changePage"
                                 :current-page.sync="currentPage"
                                 :page-size="perPage"
+                                background
                                 :pager-count="21"
                                 layout="prev, pager, next"
                                 :total="totalRows">
@@ -255,7 +257,6 @@
                 searchData.page = this.currentPage;
                 GetPurchase(searchData)
                     .then(result=> {
-                        console.log('res', result.purchases)
                         this.isLoading = false;
                         this.purchases = result.purchases.data || [];
                         this.perPage = result.purchases.per_page;
@@ -317,7 +318,6 @@
                 ShowPurchase({id:saleId})
                     .then(result=> {
                         let res = result;
-                        console.log('res', res)
                         if(res.code == 0) {
                             this.purchase_detail.entries = res.entries;
                             this.purchase_detail.payments = res.payments;
@@ -352,7 +352,7 @@
                 return (isNaN(balance) ? 0 : balance);
             },
             changePage: function() {
-                console.log('change', this.currentPage)
+
             }
         },
         computed: {

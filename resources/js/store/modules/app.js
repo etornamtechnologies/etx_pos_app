@@ -11,11 +11,9 @@ const app = {
         },
         OPEN_SIDEBAR: state => {
             state.sidebar.closed = false;
-            console.log(state.sidebar.closed);
         },
         CLOSE_SIDEBAR: state => {
             state.sidebar.closed = true;
-            console.log(state.sidebar.closed);
         },
         SET_APP_SEARCH: (state, value) => {
             state.app_search = value;

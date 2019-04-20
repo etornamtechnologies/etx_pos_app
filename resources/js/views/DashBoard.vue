@@ -10,23 +10,40 @@
                                 style="display:flex; flex-direction:row; text-align:center; font-size:20px">
                                     DASHBOARD <span style="margin-left:5px">
                                     <v-icon
+                                    v-if="!isLoading"
                                     color="cyan"
                                     @click="fetchDashboard">refresh</v-icon></span>
+                                    <img 
+                                    v-if="isLoading"
+                                    src="img/rolling.svg" alt="" width="23px" height="23px">
                                 </div>
                             </v-flex>
-                            <v-flex xs12 sm12 md6  style="display:flex; flex-direction:row; justify-content:flex-end; flex-wrap:wrap">
-                                <v-btn
-                                dark
-                                small
-                                color="success">
-                                    stock alert
-                                </v-btn>
-                                <v-btn
-                                dark
-                                small
-                                color="warning">
-                                    expiry alert
-                                </v-btn>
+                            <v-flex xs12 sm12 md6  
+                            style="display:flex; flex-direction:row; justify-content:flex-end; flex-wrap:wrap">
+                                <v-badge overlap color="red" style="margin-right:5px">
+                                    <span slot="badge" v-if="dashboard.restock_count">
+                                        {{ dashboard.restock_count || '' }}
+                                    </span>
+                                    <v-btn
+                                    @click="goToProductStockAlertListPage"
+                                    dark
+                                    small
+                                    color="success">
+                                        stock alert
+                                    </v-btn>
+                                </v-badge>
+                                <v-badge overlap color="cyan">
+                                    <span slot="badge" v-if="dashboard.expiry_count">
+                                        {{ dashboard.expiry_count || '' }}
+                                    </span>
+                                    <v-btn
+                                    @click="goToProductExpiryAlertListPage"
+                                    dark
+                                    small
+                                    color="warning">
+                                        expiry alert
+                                    </v-btn>
+                                </v-badge>
                             </v-flex>
                         </v-layout>
                     </v-flex>
@@ -181,6 +198,7 @@
 </template>
 <script>
     import { GetDashboard } from '../utils/dashboard'
+    import { hasAnyRole } from '../utils/helpers'
     import FusionCharts from "fusioncharts";
     import Charts from "fusioncharts/fusioncharts.charts";
     import { FCComponent } from "vue-fusioncharts";
@@ -188,6 +206,15 @@
     // Resolves charts dependancy
     Charts(FusionCharts);
     export default {
+        beforeRouteEnter (to, from, next) {
+            hasAnyRole(['admin','manager','sales-reps'], (res)=> {
+                if(res) {
+                    next()
+                } else {
+                    next(from)
+                }
+            })
+        },
         name: 'dashborad',
         created() {
             this.fetchDashboard();
@@ -200,17 +227,20 @@
                 width: "600",
                 height: "500",
                 dataFormat: "json",
+                isLoading: false,
             }
         },
         methods: {
             fetchDashboard: function() {
+                this.isLoading = true;
                 GetDashboard({})
                     .then(result=> {
                         console.log(result);
+                        this.isLoading = false;
                         this.dashboard = result.dashboard || {}
                     })      
                     .catch(err=> {
-
+                        this.isLoading = false;
                     })
             },
             getMoney: function(amt){
@@ -225,6 +255,12 @@
             },
             goToProductListPage: function(){
                 this.$router.push({ name: 'product_list' })
+            },
+            goToProductStockAlertListPage: function(){
+                this.$router.push({ name: 'product-restock-list' })
+            },
+            goToProductExpiryAlertListPage: function() {
+                this.$router.push({ name: 'product-expiry-list' });
             }
         },
         computed: {
@@ -253,7 +289,7 @@
                     decimals: "1",
                     plottooltext:
                     "<b>$percentValue</b> of top 10 category sale <b>$label</b>",
-                    centerlabel: "# Users: $value",
+                    centerlabel: "#$label: $value",
                     theme: "zune"
                 };
                 let dataValues = catFilter.map(category=> {

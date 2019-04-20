@@ -16,7 +16,7 @@ class CreatePurchasesTable extends Migration
         Schema::create('purchases', function (Blueprint $table) {
             $table->increments('id');
             $table->string('ref_code');
-            $table->string('invoice_number');
+            $table->string('invoice_number')->nullable();
             $table->integer('total');
             $table->integer('paid');
             $table->integer('user_id')->unsigned();

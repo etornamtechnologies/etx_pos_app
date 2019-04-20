@@ -36,7 +36,8 @@
                         prepend-inner-icon="search"
                         v-model="filter"></v-text-field>
                     </v-card-title>
-                    <v-card-text>
+                    <v-card-text style="position:relative; min-height:450px">
+                        <div class="my-loader" v-if="isLoading"></div>
                         <v-data-table
                         :items="templates"
                         :headers="template_headers"
@@ -86,8 +87,17 @@
 </template>
 <script>
     import { GetPriceTemplate, DeletePriceTemplate, ApplyPriceTemplate } from '../../utils/inventory'
-    import { formatDate } from '../../utils/helpers'
+    import { formatDate, hasAnyRole } from '../../utils/helpers'
     export default {
+        beforeRouteEnter (to, from, next) {
+            hasAnyRole(['admin','manager'], (res)=> {
+                if(res) {
+                    next()
+                } else {
+                    next(from)
+                }
+            })
+        },
         created() {
             this.fetchTemplates();
         },
@@ -99,14 +109,20 @@
                                     ,{text:'add to', value:'apply_on'}, {text:'created on', value:'created_at'}
                                     , {text:'formula', value:'formula'},{text:'apply on category', value:'category'}
                                     ,{text:'status', value:'status'},{text:'actions', value:'buttons'}],
-                isApplyLoading: false,                    
+                isApplyLoading: false,
+                isLoading: false,                    
             }
         },
         methods: {
             fetchTemplates: function() {
+                this.isLoading = true;
                 GetPriceTemplate({})
                     .then(result=> {
+                        this.isLoading = false;
                         this.templates = result.templates
+                    })
+                    .catch(err=> {
+                        this.isLoading = false;
                     })
             },
             goCreateTemplatePage: function(){

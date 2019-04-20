@@ -18,11 +18,12 @@ class AuthController extends Controller
         if(Hash::check($request->password, $user->password)) {
             $user->api_token = str_random(80);
             $user->save();
+            //dd($user);
             return response()->json(['code'=>0, 'message'=>'successfull', 'user'=> $user]);
         } else {
-            return response()->json(['message'=> 'Wrong username-password combination']);
+            return response()->json(['message'=> 'Wrong username-password combination'], 200);
         }
-        return response()->json(['code'=> 500, 'message'=> 'Server error']);
+        return response()->json(['code'=> 500, 'message'=> 'Server error'], 500);
     }
 
     public function logout(Request $request)

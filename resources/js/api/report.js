@@ -61,3 +61,12 @@ export function getStockAdjustmentReportByProduct(_data) {
         data,
     });
 }
+
+export function getFinancialReport(_data) {
+    const data = _data || null;
+    return request({
+        url: `/api/reports/financial`,
+        method: 'post',
+        data,
+    });
+}

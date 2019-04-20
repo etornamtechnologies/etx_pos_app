@@ -11,7 +11,7 @@ class AdjustmentEntry extends Model
     protected $table = "adjustment_entries";
 
     protected $fillable = ["product_id", "stock_unit_id", "adjustment_id"
-                                , "old_quantity", "new_quantity", "product_label", "stock_unit_label"];
+                            , "old_quantity", "new_quantity", "product_label", "stock_unit_label", "cost_price"];
 
     public function adjsutment()
     {
@@ -24,6 +24,10 @@ class AdjustmentEntry extends Model
             $productId = $entry['product_id'];
             $product = Product::findOrFail($productId);
             $stockUnit = StockUnit::findOrFail($product->default_stock_unit);
+            $productStockData = DB::table('product_stock_unit')
+                                ->where('product_id', $productId)
+                                ->where('stock_unit_id', $product->default_stock_unit)
+                                ->first();
             $stockQty = $product->stock_quantity;
             if($entry['batch_number'] && $entry['expiry_date']) {
                 Batch::addProductToBatch($entry['batch_number'], $entry['expiry_date'], $productId, $entry['difference']); 
@@ -36,6 +40,7 @@ class AdjustmentEntry extends Model
                 'adjustment_id'=> $adjId,
                 'product_label'=> $product->label,
                 'stock_unit_label'=> $stockUnit->label,
+                'cost_price'=> $productStockData->cost_price,
             ]);
             $qty = $stockQty + $entry['difference'];
             $product->stock_quantity = $qty;

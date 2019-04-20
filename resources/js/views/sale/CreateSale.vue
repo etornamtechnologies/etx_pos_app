@@ -53,7 +53,7 @@
                                 <button 
                                 class="btn btn-info mt-4" 
                                 type="submit"
-                                :disabled="cart.length < 1"
+                                :disabled="cart.length < 1 || !cartIsValid"
                                 @click="createSale">SELL</button>
                             </div>    
                         </div>
@@ -187,7 +187,7 @@
                     <div class="summary-item">CHANGE: {{ ((receipt_data.summary || {}).change || 0).toFixed(2) }}</div>
                 </div>
                 <div class="receipt-message text-center">
-                    <span><i>{{ ((receipt_data.summary || {}).shop_message) || "Thank you" }}</i></span>
+                    <span><i>{{ ((receipt_data.shop_info || {}).shop_message) || "Thank you" }}</i></span>
                 </div>
             </div>
 
@@ -351,6 +351,7 @@
                     CreateSale(data)
                     .then(result=> {
                         if(result.code == 0) {
+                            console.log('invoice',result)
                             this.receipt_data = result.receipt_data;
                             this.$nextTick(()=> {
                                 window.print();
@@ -415,6 +416,14 @@
             saleBalance: function() {
                 let paid = this.summary.amount_paid || 0;
                 return ((paid*100)-this.saleTotal);
+            },
+            cartIsValid: function(){
+                let balance = this.saleBalance;
+                let customer = this.summary.customer_id;
+                if((balance < 0) && !customer) {
+                    return false
+                }
+                return true
             }
         }
     }

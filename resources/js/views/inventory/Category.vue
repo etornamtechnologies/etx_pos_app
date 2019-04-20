@@ -19,26 +19,33 @@
                     hide-details
                     ></v-text-field>
                 </v-card-title>
-                <v-data-table
-                :headers="headers"
-                :items="categories"
-                :search="search"
-                >
-                <template v-slot:items="props">
-                    <td>{{ props.item.label }}</td>
-                    <td class="text-xs-left">{{ props.item.created_at }}</td>
-                    <td class="text-xs-left">{{ props.item.products_count }}</td>
-                    <td class="text-xs-left">
-                        <v-icon
-                        @click="openEditCategoryDialog(props.item, props.index)">edit</v-icon>
-                        <v-icon color="red"
-                        @click="deleteCategory(props.item)">delete</v-icon>
-                    </td>
-                </template>
-                <v-alert v-slot:no-results :value="true" color="error" icon="warning">
-                    Your search for "{{ search }}" found no results.
-                </v-alert>
-                </v-data-table>
+                <v-card-text style="position:relative; min-height:400px">
+                    <div class="my-loader" v-if="isLoading"></div>
+                    <v-layout column>
+                        <v-flex xs12>
+                            <v-data-table
+                            :headers="headers"
+                            :items="categories"
+                            :search="search"
+                            >
+                            <template v-slot:items="props">
+                                <td>{{ props.item.label }}</td>
+                                <td class="text-xs-left">{{ props.item.created_at }}</td>
+                                <td class="text-xs-left">{{ props.item.products_count }}</td>
+                                <td class="text-xs-left">
+                                    <v-icon
+                                    @click="openEditCategoryDialog(props.item, props.index)">edit</v-icon>
+                                    <v-icon color="red"
+                                    @click="deleteCategory(props.item)">delete</v-icon>
+                                </td>
+                            </template>
+                            <v-alert v-slot:no-results :value="true" color="error" icon="warning">
+                                Your search for "{{ search }}" found no results.
+                            </v-alert>
+                            </v-data-table>
+                        </v-flex>
+                    </v-layout>
+                </v-card-text>
                 <v-btn
                         color="pink"
                         dark
@@ -55,7 +62,8 @@
         </v-flex>
 
         <v-dialog v-model="createCategoryDialog" persistent width="500">
-            <v-card>
+            <v-card style="position:relative">
+                <div class="my-loader" v-if="isUpdating"></div>
                 <form @submit.prevent="createCategory">
                 <v-card-title class="headline">create category</v-card-title>
                 <v-card-text>
@@ -74,7 +82,8 @@
         </v-dialog>
 
         <v-dialog v-model="isOpenEditCategoryDialog" persistent width="500">
-            <v-card>
+            <v-card style="position:relative">
+                <div class="my-loader" v-if="isUpdating"></div>
                 <form @submit.prevent="updateCategory">
                 <v-card-title class="headline">edit category</v-card-title>
                 <v-card-text>
@@ -95,10 +104,21 @@
 </template>
 
 <script>
-import {GetCategory, CreateCategory, UpdateCategory, DeleteCategory} from '../../utils/category'
+    import {GetCategory, CreateCategory, UpdateCategory, DeleteCategory} from '../../utils/category'
+    import { hasAnyRole } from '../../utils/helpers'
+    import '../../store'
     export default {
         mounted() {
             this.fetchCategories();
+        },
+        beforeRouteEnter (to, from, next) {
+            hasAnyRole(['admin','manager','sales-reps'], (res)=> {
+                if(res) {
+                    next()
+                } else {
+                    next(from)
+                }
+            })
         },
         data(){
             return {
@@ -110,26 +130,35 @@ import {GetCategory, CreateCategory, UpdateCategory, DeleteCategory} from '../..
                             ,{text:'product_count', value:'product_count'}, {text:'', value:'buttons'}],
                 new_category: {label:''},
                 edit_category: {id:null, label:''},
+                isLoading: false,
+                isUpdating: false,
             }
         },
         methods: {
             fetchCategories: function(){
+                this.isLoading = true;
                 GetCategory({})
                     .then(result=> {
-                        console.log('cats',result)
+                        this.isLoading = false;
                         this.categories = result.categories || []
+                    })
+                    .catch(err=> {
+                        this.isLoading = false;
                     })
             },
             createCategory: function(){
                 let data = Vue.util.extend({}, this.new_category);
                 data.label = this.new_category.label.toUpperCase();
+                this.isUpdating = true;
                 CreateCategory(data)
                     .then(result=> {
+                        this.isUpdating = false;
                         this.categories.push(result.category || {});
                         this.createCategoryDialog = false;
                         this.new_category = {label:''}
                     })
                     .catch(err=> {
+                        this.isUpdating = false;
                         this.new_category = {label:''}
                     })
             },
@@ -139,11 +168,16 @@ import {GetCategory, CreateCategory, UpdateCategory, DeleteCategory} from '../..
                 this.isOpenEditCategoryDialog = true;
             },
             updateCategory: function(){
+                this.isUpdating = true;
                 UpdateCategory(this.edit_category)
                     .then(result=> {
+                        this.isUpdating = false;
                         this.categories= result.categories;
                         this.isOpenEditCategoryDialog = false;
                         this.$forceUpdate();
+                    })
+                    .catch(err=> {
+                        this.isUpdating = false;
                     })
             },
             deleteCategory: function(row) {
@@ -151,14 +185,16 @@ import {GetCategory, CreateCategory, UpdateCategory, DeleteCategory} from '../..
                     DeleteCategory(row)
                         .then(result=> {
                             let index = this.categories.indexOf(row);
-                            console.log(index);
                             this.categories.splice(index, 1);
                         })
                         .catch(err=> {
                             
                         })
                 }
-            }
+            },
+        },
+        computed: {
+
         }
     }
 </script>

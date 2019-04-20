@@ -57,7 +57,7 @@
                                 <button 
                                 style="margin-top:26px"
                                 class="btn btn-info"
-                                :disabled="cart.length < 1 || isLoading"
+                                :disabled="!cartValid"
                                 @click="createPurchase">CREATE INVOICE</button>
                             </div>
                         </div>
@@ -168,6 +168,17 @@
                                                 @click="removeCartEntry(index)">X</el-button>
                                             </td>
                                         </tr>
+                                        <tr v-if="cart.length > 0">
+                                            <td></td>
+                                            <td></td>
+                                            <td></td>
+                                            <td></td>
+                                            <td></td>
+                                            <td></td>
+                                            <td>Total:</td>
+                                            <td style="font-weight:bold">{{ totalCost }}</td>
+                                            <td></td>
+                                        </tr>
                                     </tbody>
                                 </table>
                             </div>
@@ -212,6 +223,7 @@
     import {GetProduct} from '../../utils/product'
     import { CreatePurchase } from '../../utils/pos'
     import { CreateSupplier, GetSupplier } from '../../utils/inventory';
+    import { Message } from 'element-ui'
     export default {
         mounted() {
             this.fetchSuppliers();
@@ -253,7 +265,11 @@
             handleProductSearchResult: function(products) {
                 let productLen = products.length;
                 if(productLen == 0) {
-                    Notifier.info("Search does not match any product!")
+                    Message({
+                        message: "Search does not match any product!",
+                        type: 'info',
+                        duration: 2 * 1000
+                    })
                 } else if(productLen == 1) {
                     let product = products[0];
                     this.search_result = [];
@@ -333,7 +349,8 @@
                 CreatePurchase(data)
                     .then(result=> {
                         this.isLoading = false;
-                        location.reload(true);
+                        this.cart = [];
+                        this.summary = {supplier_id:"", supplier_invoice:"", invoice_amount:null, amount_paid:null};
                     })
                     .catch(err=> {
                         this.isLoading = false;
@@ -341,7 +358,25 @@
             }
         },
         computed: {
-
+            totalCost: function() {
+                let total = 0;
+                let entries = this.cart || [];
+                entries.forEach(entry=> {
+                    let sum = this.getEntrySum(entry);
+                    total = Number(sum) + total;
+                })
+                return total.toFixed(2)
+            },
+            cartValid: function() {
+                let summary = this.summary;
+                let cartLen = this.cart.length
+                if(summary.supplier_id && summary.invoice_amount && summary.amount_paid && cartLen>0
+                        && !this.isLoading) 
+                {
+                    return true
+                }
+                return false;
+            }
         }
     }
 </script>

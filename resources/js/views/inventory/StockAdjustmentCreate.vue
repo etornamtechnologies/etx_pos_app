@@ -141,8 +141,18 @@
 
 <script>
     import {GetProduct} from '../../utils/product'
+    import { hasAnyRole } from '../../utils/helpers'
     import { CreateReason, GetReason, CreateStockAdjustment } from '../../utils/adjustment'
     export default {
+        beforeRouteEnter (to, from, next) {
+            hasAnyRole(['admin','manager'], (res)=> {
+                if(res) {
+                    next()
+                } else {
+                    next(from)
+                }
+            })
+        },
         mounted() {
             this.fetchReasons();
         },

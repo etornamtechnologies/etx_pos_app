@@ -25,25 +25,32 @@
                     hide-details
                     ></v-text-field>
                 </v-card-title>
-                <v-data-table
-                :headers="headers"
-                :items="stock_units"
-                :search="search"
-                >
-                <template v-slot:items="props">
-                    <td>{{ props.item.label }}</td>
-                    <td class="text-xs-left">{{ props.item.created_at }}</td>
-                    <td class="text-xs-left">
-                        <v-icon
-                        @click="openEditStockUnitDialog(props.item, props.index)">edit</v-icon>
-                        <v-icon color="red"
-                        @click="deleteStockUnit(props.item)">delete</v-icon>
-                    </td>
-                </template>
-                <v-alert v-slot:no-results :value="true" color="error" icon="warning">
-                    Your search for "{{ search }}" found no results.
-                </v-alert>
-                </v-data-table>
+                <v-card-text style="position:relative; min-height:400px">
+                    <div class="my-loader" v-if="isLoading"></div>
+                    <v-layout column>
+                        <v-flex xs12>
+                            <v-data-table
+                            :headers="headers"
+                            :items="stock_units"
+                            :search="search"
+                            >
+                            <template v-slot:items="props">
+                                <td>{{ props.item.label }}</td>
+                                <td class="text-xs-left">{{ props.item.created_at }}</td>
+                                <td class="text-xs-left">
+                                    <v-icon
+                                    @click="openEditStockUnitDialog(props.item, props.index)">edit</v-icon>
+                                    <v-icon color="red"
+                                    @click="deleteStockUnit(props.item)">delete</v-icon>
+                                </td>
+                            </template>
+                            <v-alert v-slot:no-results :value="true" color="error" icon="warning">
+                                Your search for "{{ search }}" found no results.
+                            </v-alert>
+                            </v-data-table>
+                        </v-flex>
+                    </v-layout>
+                </v-card-text>
                 <v-btn
                         color="pink"
                         dark
@@ -60,7 +67,8 @@
         </v-flex>
 
         <v-dialog v-model="isOpenCreateStockUnitDialog" persistent width="500">
-            <v-card>
+            <v-card style="position:relative">
+                <div class="my-loader" v-if="isUpdating"></div>
                 <form @submit.prevent="createStockUnit">
                 <v-card-title class="headline">create stock unit</v-card-title>
                 <v-card-text>
@@ -79,7 +87,8 @@
         </v-dialog>
 
         <v-dialog v-model="isOpenEditStockUnitDialog" persistent width="500">
-            <v-card>
+            <v-card style="position:relative">
+                <div class="my-loader" v-if="isUpdating"></div>
                 <form @submit.prevent="updateStockUnit">
                 <v-card-title class="headline">edit unit of measurement</v-card-title>
                 <v-card-text>
@@ -114,26 +123,36 @@ import {GetStockUnit, CreateStockUnit, UpdateStockUnit, DeleteStockUnit} from '.
                 headers: [{text:'label', value:'label'}, {text:'created on', value:'created_at'},{text:'', value:'buttons'}],
                 new_stock_unit: {label:''},
                 edit_stock_unit: {id:null, label:''},
+                isLoading: false,
+                isUpdating: false,
             }
         },
         methods: {
             fetchStockUnit: function(){
+                this.isLoading = true;
                 GetStockUnit({})
                     .then(result=> {
                         console.log('cats',result)
+                        this.isLoading = false;
                         this.stock_units = result.stock_units || []
+                    })
+                    .catch(err=> {
+                        this.isLoading = false;
                     })
             },
             createStockUnit: function(){
                 let data = Vue.util.extend({}, this.new_stock_unit);
                 data.label = this.new_stock_unit.label.toUpperCase();
+                this.isUpdating = true;
                 CreateStockUnit(data)
                     .then(result=> {
+                        this.isUpdating = false;
                         this.stock_units.push(result.stock_unit || {});
                         this.isOpenCreateStockUnitDialog = false;
                         this.new_stock_unit = {};
                     })
                     .catch(err=> {
+                        this.isUpdating = false;
                         this.new_stock_unit = {label:''};
                     })
             },
@@ -143,13 +162,16 @@ import {GetStockUnit, CreateStockUnit, UpdateStockUnit, DeleteStockUnit} from '.
                 this.isOpenEditStockUnitDialog = true;
             },
             updateStockUnit: function(){
+                this.isUpdating = true;
                 UpdateStockUnit(this.edit_stock_unit)
                     .then(result=> {
+                        this.isUpdating = false;
                         this.stock_units = result.stock_units || [];
                         this.isOpenEditStockUnitDialog = false;
                         this.$forceUpdate();
                     })
                     .catch(err=> {
+                        this.isUpdating = false;
                         this.new_stock_unit = {}
                     })
             },

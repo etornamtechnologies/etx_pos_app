@@ -62,7 +62,6 @@ const user = {
                     const data = response || {}
                     const userData = data.user || {};
                     const token = data.token;
-                    console.log(token);
                     commit('SET_TOKEN', token)
                     commit('SET_USERNAME', userData.username)
                     setApiToken(token)

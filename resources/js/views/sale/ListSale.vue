@@ -38,7 +38,8 @@
         </div>
         <div class="row mt-2">
             <div class="col-md-12">
-                <div class="card">
+                <div class="card" style="position:relative; min-height:500px">
+                    <div class="my-loader" v-if="isLoading"></div>
                     <div class="card-body">
                         <div class="row">
                             <div class="col-md-12">
@@ -56,7 +57,7 @@
                                             <th></th>
                                         </tr>
                                     </thead>
-                                    <tbody>
+                                    <tbody style="position:relative">
                                         <tr v-for="(sale,index) in sales" :key="sale.id">
                                             <td>
                                                 {{ sale.ref_code }}
@@ -264,6 +265,7 @@
                 GetSale(saleData)
                     .then(result=> {
                         console.log(result.sales.data)
+                        this.isLoading = false;
                         this.sales = result.sales.data || [];
                         this.perPage = result.sales.per_page;
                         this.currentPage = result.sales.current_page;

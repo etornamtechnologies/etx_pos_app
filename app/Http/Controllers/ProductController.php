@@ -54,7 +54,7 @@ class ProductController extends Controller
         $this->validate($request, [
             'label'=>'required|unique:products',
             'category_id'=> 'required',
-            'barcode'=> 'unique:products',
+            'barcode'=> 'unique:products||nullable',
             'default_stock_unit'=> 'required'
         ]);
         $result = [];
@@ -106,7 +106,7 @@ class ProductController extends Controller
         $request->validate([
             'label'=>'required|unique:products,label,'.$productId.'id',
             'category_id'=> 'required',
-            'barcode'=> 'unique:products,barcode,'.$productId.'id'
+            'barcode'=> 'nullable|unique:products,barcode,'.$productId.'id'
         ]);
         $product = Product::findOrFail($productId);
         $result = [];

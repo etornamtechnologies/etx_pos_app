@@ -39,7 +39,6 @@
             getUserInfo: function() {
                     GetUserInfo({})
                         .then(result=> {
-                            console.log('reeeee', result)
                             if(result.code == 0) {
                                 let user = result.user;
                                 let token = user.api_token || "";

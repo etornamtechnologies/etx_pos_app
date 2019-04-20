@@ -16,9 +16,9 @@
                 <v-img
                 max-height="50px"
                 max-width="60px"
-                src = "/img/icons/credit-card.png"
+                src = "/img/icons/online-shop.svg"
                 ></v-img>
-                <span>ETX-POS</span>
+                <span style="margin-left:5px">ETX-POS</span>
             </div>
         </div>
         <el-menu-item index="/" class="menu-object">
@@ -42,6 +42,19 @@
                 <el-menu-item index="/inventory/stock-units">Stock-Units</el-menu-item>
                 <el-menu-item index="/inventory/price-templates">Price Templates</el-menu-item>
                 <el-menu-item index="/inventory/stock-adjustments/create">+ Create Stock-Adjustment</el-menu-item>
+            </el-menu-item-group>
+        </el-submenu>
+        <hr class="menu-divider" v-if="showDashboard">
+        <el-submenu index="/ledgers" class="menu-object" v-if="showHistoryModule">
+            <template slot="title">
+                <img src="/img/icons/ledger.svg" class="el-icon" alt="">
+                <span slot="title" class="menu-title">History / Ledgers</span>
+            </template>
+            <el-menu-item-group>
+                <el-menu-item index="/ledgers/stock-adjustment">Stock-Adjustment History</el-menu-item>
+                <el-menu-item index="/ledgers/sales-with-debtors">Sales With Debtors</el-menu-item>
+                <el-menu-item index="/ledgers/purchases-with-creditors">Purchases With Creditors</el-menu-item>
+                <el-menu-item index="/ledgers/batches">All Batch Numbers</el-menu-item>
             </el-menu-item-group>
         </el-submenu>
         <hr class="menu-divider" v-if="showInventoryModule">
@@ -75,8 +88,7 @@
             <el-menu-item-group>
                 <el-menu-item index="/reports/sale">sale report</el-menu-item>
                 <el-menu-item index="/reports/purchase">purchase report</el-menu-item>
-                <el-menu-item index="/reports/adjustments">adjustment report</el-menu-item>
-                <el-menu-item index="/reports/finance">financies</el-menu-item>
+                <el-menu-item index="/reports/finance">financial report</el-menu-item>
             </el-menu-item-group>
         </el-submenu> 
         <hr class="menu-divider" v-if="showReportModule">
@@ -138,10 +150,8 @@
         },
         methods: {
             handleOpen(key, keyPath) {
-                console.log(key, keyPath);
             },
             handleClose(key, keyPath) {
-                console.log(key, keyPath);
             },
             hasAnyRole: function(roles) {
                 HasAnyRole(roles);
@@ -205,6 +215,12 @@
                 }
                 return false;
             },
+            showHistoryModule: function() {
+                if(HasAnyRole(['admin', 'manager'])) {
+                    return true;
+                }
+                return false;
+            }
         },
     }
 </script>

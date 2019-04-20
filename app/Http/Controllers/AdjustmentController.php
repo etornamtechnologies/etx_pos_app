@@ -31,25 +31,19 @@ class AdjustmentController extends Controller
 
     public function index(Request $request)
     {
-        $result = [];
-        $filter = "";
-        $status = null;
-        if($request->has('filter')) {
-            $filter = $request->query('filter');
-        }
-        try{
-            $adjustments = Adjustment::where('reference_number', 'LIKE', '%'.$filter.'%')
-                ->with('user')->get();
-            $result['code'] = 0;
-            $result['adjustments'] = $adjustments;
-            $status = 200;
-        } catch (Exception $e) {
-            return $e;
-            $result['code'] = 1;
-            $result['message'] = "Something went wrong";
-            $status = 402;
-        }
-        return response($result, $status);
+        $stockAdjustments = DB::table('adjustment_entries')
+                ->leftjoin('adjustments', 'adjustments.id', '=', 'adjustment_entries.adjustment_id')
+                ->leftjoin('users', 'users.id', '=', 'adjustments.user_id')
+                ->leftjoin('products', 'adjustment_entries.product_id', '=', 'products.id')
+                ->leftjoin('stock_units', 'stock_units.id', '=', 'adjustment_entries.stock_unit_id')
+                ->leftjoin('adjustment_reasons', 'adjustment_reasons.id', '=', 'adjustments.reason_id')
+                ->select('users.name as user', 'products.label as product', 'stock_units.label as stock_unit'
+                            ,'adjustment_entries.old_quantity as ols_quantity', 'adjustment_reasons.label as reason'
+                            , 'adjustment_entries.new_quantity as new_quantity', 'adjustments.created_at as created_at'
+                            ,DB::raw('adjustment_entries.new_quantity - adjustment_entries.old_quantity as quantity_balance'))
+                ->orderBy('adjustments.created_at', 'ASC')            
+                ->get();
+                return response()->json(['code'=> 0, 'stock_adjustments'=> $stockAdjustments]);
     }
 
     public function store(Request $request)

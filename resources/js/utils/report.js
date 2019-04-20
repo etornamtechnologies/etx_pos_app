@@ -27,6 +27,18 @@ export function GetSaleReportByProduct( product_data ) {
 }
 
 
+export function GetFinacialReport( _data ) {
+    return new Promise((resolve, reject) => {
+        reportApi.getFinancialReport(_data)
+        .then(response => {
+            const data = response || {}
+            resolve(data)
+        }).catch(error => {
+            reject(error)
+        })
+    })
+}
+
 export function GetPurchaseReportByTransaction( product_data ) {
     return new Promise((resolve, reject) => {
         reportApi.getPurchaseReportByTransaction(product_data)
@@ -39,7 +51,7 @@ export function GetPurchaseReportByTransaction( product_data ) {
     })
 }
 
-export function GetPurcahseReportByProduct( product_data ) {
+export function GetPurchaseReportByProduct( product_data ) {
     return new Promise((resolve, reject) => {
         reportApi.getPurchaseReportByProduct(product_data)
         .then(response => {

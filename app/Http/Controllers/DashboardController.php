@@ -11,10 +11,16 @@ use App\Purchase;
 use App\Supplier;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
 
 class DashboardController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('api_auth');
+        $this->middleware('api_role:admin,manager');
+    }
 
     public function index(Request $request)
     {
@@ -32,6 +38,8 @@ class DashboardController extends Controller
         $dashboard['customers_count'] = count(Customer::all());
         $dashboard['suppliers_count'] = count(Supplier::all());
         $dashboard['top_category_sale'] = Sale::topCategorySale();
+        $dashboard['restock_count'] = $this->restockProductCount();
+        $dashboard['expiry_count'] = $this->expiryListCount();
         $result['dashboard'] = $dashboard;
         return response()->json($result, 200);
     }
@@ -55,6 +63,25 @@ class DashboardController extends Controller
     public function saleTopTenCategories()
     {
         
+    }
+
+    public function restockProductCount()
+    {
+        $products = DB::table('products')
+                        ->where('status', 'active')
+                        ->whereRaw('products.stock_quantity <= products.reorder_quantity')
+                        ->get();
+        return count($products);                
+    }
+
+    public function expiryListCount() {
+        $batches = DB::table('batches')
+                        ->leftjoin('products', 'products.id', '=', 'batches.product_id')
+                        ->where('batches.expiry_date', '<=', Carbon::now()->addMonths(2))
+                        ->select('products.label as product', 'batches.expiry_date as expiry_date'
+                                    ,'batches.batch_no as batch_no')
+                        ->get();
+        return count($batches);                
     }
 
 }

@@ -1,233 +1,254 @@
 <template>
-    <div class="container fluid">
-        <div class="row">
-            <div class="col-md-12">
-                <div class="card">
-                    <div class="card-body py-0">
+    <v-container fluid>
+        <v-layout>
+            <v-flex xs12>
+                <v-card>
+                    <v-toolbar dense dark color="cyan">
+                        <v-toolbar-side-icon></v-toolbar-side-icon>
+                        <v-toolbar-title>Purchase Report</v-toolbar-title>
+                    </v-toolbar>
+                    <v-card-text>
                         <div class="row">
-                            <div class="col-md-3 bg-light" style="border-right:solid 1px gray">
-                                <div class="row mt-4" style="min-height:500px">
-                                    <div class="col-md-12">
-                                        <form @submit.prevent="generateReport">
-                                            <el-select 
-                                            v-if="search.filter_by == 'transaction'"
-                                            v-model="search.user_id" placeholder="sales-rep" class="my-input">
-                                                <el-option
-                                                value=""
-                                                label="All Users"></el-option>
-                                                <el-option
-                                                v-for="user in users"
-                                                :key="user.id"
-                                                :value="user.id"
-                                                :label="user.name"></el-option>
-                                            </el-select>
-
-                                            <el-select v-model="search.filter_by" placeholder="view by" class="my-input">
-                                                <el-option
-                                                @change="handleFilterByChange($event)"
-                                                v-for="filter in filterByList"
-                                                :key="filter.id"
-                                                :value="filter.id"
-                                                :label="filter.name"></el-option>
-                                            </el-select>
-                                            
-
-                                            <el-input
-                                            class="my-input"
-                                            v-if="search.filter_by == 'transaction'"
-                                            v-model="search.invoice_number"
-                                            placeholder="invoice number"></el-input>
-
-                                            <el-input
-                                            class="my-input"
-                                            v-if="search.filter_by == 'product'"
-                                            v-model="search.product"
-                                            placeholder="product"></el-input>
-
-                                            <el-checkbox
-                                            class="my-input"
-                                            @change="handleChangeRange"
-                                            v-model="search.is_date_range">Date range</el-checkbox>
-
-                                            <el-date-picker
-                                            :clearable=false
-                                            v-if="!search.is_date_range"
-                                            class="my-input"
+                            <div class="col-md-3 col-sm-12 col-xs-12">
+                                <v-form
+                                @submit.prevent="generateReport"
+                                >
+                                    <v-select
+                                    label="User / Sales-Rep"
+                                    :items="usersList"
+                                    item-text="name"
+                                    item-value="id"
+                                    v-model="search.user_id"></v-select>
+                                    <v-select
+                                    label="View By"
+                                    :items="filterByList"
+                                    item-text="name"
+                                    item-value="id"
+                                    v-model="search.filter_by"></v-select>
+                                    <v-text-field
+                                    v-if="search.filter_by == 'transaction'"
+                                    label="Invoice Number"
+                                    v-model="search.invoice_number"></v-text-field>
+                                    <v-text-field
+                                    v-if="search.filter_by == 'product'"
+                                    label="Product"
+                                    v-model="search.product"></v-text-field>
+                                    <v-checkbox
+                                    label="Date Range"
+                                    color="cyan"
+                                    v-model="search.is_date_range"></v-checkbox>
+                                    <v-menu
+                                    v-if="!search.is_date_range"
+                                    v-model="dateMenu"
+                                    :close-on-content-click="false"
+                                    full-width
+                                    max-width="290"
+                                    >
+                                        <template v-slot:activator="{ on }">
+                                            <v-text-field
+                                            :value="date"
+                                            label="DATE"
+                                            readonly
+                                            v-on="on"
+                                            ></v-text-field>
+                                        </template>
+                                        <v-date-picker
                                             v-model="date"
-                                            type="date"
-                                            placeholder="pick a date"></el-date-picker>
-
-                                            <el-date-picker
-                                            v-if="search.is_date_range"
-                                            class="my-input"
-                                            v-model="date_range"
-                                            type="daterange"
-                                            align="right"
-                                            unlink-panels
-                                            range-separator="-"
-                                            start-placeholder="Start date"
-                                            end-placeholder="End date"
-                                            :picker-options="rangeOptions"></el-date-picker>
-                                            <button class="btn btn-info btn-block" type="submit" style="margin-bottom:10px">
-                                                GENERATE REPPORT
-                                            </button>
-                                        </form>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-md-9" v-if="search.filter_by == 'transaction'">
-                                <div class="row bg-warning text-white">
-                                    <div class="col-md-12">
-                                        <span>: {{ transaction_info }}</span>
-                                    </div>
-                                </div>
-                                <div class="row">
-                                    <div class="col-md-12">
-                                        <span>TOTAL PURCHASE: GHC{{ getMoney(transaction_total_amount || 0) }} </span>
-                                    </div>
-                                </div>
-                                <div class="row">
-                                    <div class="col-md-12">
-                                        <v-data-table
-                                        :items="report_by_transaction"
-                                        :headers="transaction_headers"
-                                        :hide-actions="true">
-                                            <template v-slot:items="props">
-                                                <td>
-                                                    {{ props.item.ref_code }}
-                                                </td>
-                                                <td>
-                                                    {{ props.item.created_at }}
-                                                </td>
-                                                <td>
-                                                    {{ (props.item.user || {}).name }}
-                                                </td>
-                                                <td>
-                                                    {{ (props.item.supplier || {}).name || 'Anonymous' }}
-                                                </td>
-                                                <td>
-                                                    {{ getMoney(props.item.total) }}
-                                                </td>
+                                            @change="dateMenu = false"
+                                        ></v-date-picker>
+                                    </v-menu>
+                                    <div
+                                    v-if="search.is_date_range">
+                                        <v-menu
+                                        v-model="fromDateMenu"
+                                        :close-on-content-click="false"
+                                        full-width
+                                        max-width="290"
+                                        >
+                                            <template v-slot:activator="{ on }">
+                                                <v-text-field
+                                                :value="fromDate"
+                                                label="From Date"
+                                                readonly
+                                                v-on="on"
+                                                ></v-text-field>
                                             </template>
+                                            <v-date-picker
+                                                v-model="fromDate"
+                                                @change="fromDateMenu = false"
+                                            ></v-date-picker>
+                                        </v-menu>
+                                        <v-menu
+                                        v-model="toDateMenu"
+                                        :close-on-content-click="false"
+                                        full-width
+                                        max-width="290"
+                                        >
+                                            <template v-slot:activator="{ on }">
+                                                <v-text-field
+                                                :value="toDate"
+                                                label="To Date"
+                                                readonly
+                                                v-on="on"
+                                                ></v-text-field>
+                                            </template>
+                                            <v-date-picker
+                                                v-model="toDate"
+                                                @change="toDateMenu = false"
+                                            ></v-date-picker>
+                                        </v-menu>
+                                    </div>
+                                    <v-btn
+                                    type="submit"
+                                    color="cyan"
+                                    dark>
+                                        <v-icon>filter</v-icon> 
+                                        <span>generate</span>
+                                    </v-btn>
+                                </v-form>
+                            </div>
+                            <div
+                            v-if="search.filter_by == 'transaction'" 
+                            class="col-md-9 col-sm-12 col-xs-12 py-2" 
+                            style="background-color:#d8e6eb; position:relative; min-height:500px">
+                                <div class="my-loader" v-if="isLoading"></div>
+                                <div class="row px-3">
+                                    <div class="col-md-12 bg-light">
+                                        <span style="font-weight:bold">INFO: {{ info_transaction }} </span>
+                                    </div>
+                                </div>
+                                <div class="row px-3 mb-2">
+                                    <div class="col-md-12 bg-light">
+                                        <span style="font-weight:bold">
+                                            TOTAL AMOUNT SOLD: GHC{{ getMoney(total_amount_transaction) }} 
+                                        </span>
+                                        <span style="font-weight:bold; float:right">
+                                            TOTAL PAID: GHC{{ getMoney(total_paid_transaction || 0) }}
+                                        </span>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-12" style="height:550px; overflow-y:auto">
+                                        <v-data-table
+                                        :items="reports_transaction"
+                                        :headers="headers_transaction"
+                                        hide-actions>
+                                            <template v-slot:items="props">
+                                                <td>{{ props.item.ref_code }}</td>
+                                                <td class="text-xs-left">{{ props.item.created_at }}</td>
+                                                <td class="text-xs-left">{{ (props.item.user || {}).name || '--' }}</td>
+                                                <td class="text-xs-left">{{ (props.item.supplier || {}).name || '--' }}</td>
+                                                <td class="text-xs-left">{{ getMoney(props.item.total) || 0 }}</td>
+                                                <td class="text-xs-left">{{ getMoney(props.item.paid) || 0 }}</td>
+                                            </template>
+                                            <v-alert v-slot:no-results :value="true" color="error" icon="warning">
+                                                Your search for "{{ search }}" found no results.
+                                            </v-alert>
                                         </v-data-table>
                                     </div>
                                 </div>
                             </div>
 
-                            <div class="col-md-9" v-if="search.filter_by == 'product'">
-                                <div class="row bg-warning text-white">
-                                    <div class="col-md-12">
-                                        <span>: {{ product_report_info }}</span>
+                            <div
+                            v-if="search.filter_by == 'product'" 
+                            class="col-md-9 col-sm-12 col-xs-12 py-2" 
+                            style="background-color:#d8e6eb; position:relative; min-height:500px">
+                                <div class="my-loader" v-if="isLoading"></div>
+                                <div class="row px-3">
+                                    <div class="col-md-12 bg-light">
+                                        <span style="font-weight:bold">INFO: {{ info_product }} </span>
+                                    </div>
+                                </div>
+                                <div class="row px-3 mb-2">
+                                    <div class="col-md-12 bg-light">
+                                        <span style="font-weight:bold">
+                                            TOTAL AMOUNT SOLD: GHC{{ getMoney(total_amount_product) }} 
+                                        </span>
                                     </div>
                                 </div>
                                 <div class="row">
-                                    <div class="col-md-12">
-                                        <!-- <span>TOTAL PURCHASE: GHC{{ getMoney(product_total_amount || 0) }} </span> -->
-                                    </div>
-                                </div>
-                                <div class="row" style="height:500px; overflow-y:auto">
-                                    <div class="col-md-12">
+                                    <div class="col-md-12" style="height:550px; overflow-y:auto">
                                         <v-data-table
-                                        :items="report_by_products"
-                                        :headers="product_headers"
-                                        :hide-actions="true">
+                                        :items="reports_product"
+                                        :headers="headers_product"
+                                        hide-actions>
                                             <template v-slot:items="props">
-                                                <td>
-                                                    {{ props.item.product_label }}
+                                                <td>{{ (props.item.product || {}).label }}</td>
+                                                <td class="text-xs-left">{{ props.item.created_at }}</td>
+                                                <td class="text-xs-left">
+                                                    {{ props.item.quantity }} {{ (props.item.stock_unit || {}).label }} (s)
                                                 </td>
-                                                <td>
-                                                    {{ props.item.created_at }}
-                                                </td>
-                                                <td>
-                                                    {{ props.item.quantity }} {{ props.item.stock_unit_label }}
-                                                </td>
-                                                <td>
-                                                    {{ getMoney(props.item.cost_price || 0) }}
-                                                </td>
-                                                <td>
-                                                    {{ getMoney(props.item.amount || 0) }}
-                                                </td>
+                                                <td class="text-xs-left">{{ getMoney(props.item.selling_price) || 0 }}</td>
+                                                <td class="text-xs-left">{{ getMoney(props.item.amount) || 0 }}</td>
                                             </template>
+                                            <v-alert v-slot:no-results :value="true" color="error" icon="warning">
+                                                Your search for "{{ search }}" found no results.
+                                            </v-alert>
                                         </v-data-table>
                                     </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
+                    </v-card-text>
+                </v-card>
+            </v-flex>
+        </v-layout>
+    </v-container>
 </template>
 <script>
     import { GetUser } from '../../utils/user' 
-    import { GetPurchaseReportByTransaction, GetPurcahseReportByProduct } from '../../utils/report'
+    import { GetPurchaseReportByTransaction, GetPurchaseReportByProduct } from '../../utils/report'
     export default {
         created() {
             this.fetchUsers();
         },
         data(){
             return {
-                search: {user_id:"",filter_by:'transaction', is_date_range: false
-                            , from_date:'', to_date:'', product:'', invoice_number:''},
-                report_by_transaction: [],
-                transaction_headers: [],
-                transaction_info: '',
-                transaction_total_amount: '',
-                report_by_products: [],
-                product_headers: [],
-                product_report_info: '',
-                product_total_amount: '',
+                search: {user_id:"",filter_by:'transaction', is_date_range: false, product:'', invoice_number:''},
+                reports_transaction: [],
+                headers_transaction: [],
+                info_transaction: '',
+                total_amount_transaction: "",
+                total_paid_transaction: "",
+
+                reports_product: [],
+                headers_product: [],
+                info_product: '',
+                total_amount_product: "",
                 users: [],
                 date_range: [],
-                date: new Date(),
-                rangeOptions: {
-                    shortcuts: [
-                        {
-                            text: 'Last week',
-                            onClick(picker) {
-                                const end = new Date();
-                                const start = new Date();
-                                start.setTime(start.getTime() - 3600 * 1000 * 24 * 7);
-                                picker.$emit('pick', [start, end]);
-                            }
-                        },
-                        {
-                            text: 'Last month',
-                            onClick(picker) {
-                                const end = new Date();
-                                const start = new date();
-                                start.setTime(start.getTime() - 3600 * 1000 * 24 * 30);
-                                picker.$emit('pick', [start, end]);
-                            }
-                        }
-                    ]
-                }
+
+                date: new Date().toISOString().substring(0, 10),
+                dateMenu: false,
+
+                fromDate: new Date().toISOString().substring(0, 10),
+                fromDateMenu: false,
+
+                toDate: new Date().toISOString().substring(0, 10),
+                toDateMenu: false,
+
+                isLoading: false,
             }
         },
         methods: {
             generateReport: function() {
-                let startDate = null;
-                let endDate = null;
-                let myDate = null;
-                if(this.date_range.length == 2) {
-                    startDate = new Date(this.date_range[0]).toLocaleDateString();
-                    endDate = new Date(this.date_range[1]).toLocaleDateString();
-                }
-                if(this.date) {
-                    myDate = new Date(this.date).toLocaleDateString();
-                }
-                let data = Vue.util.extend({}, this.search);
-                if(data.filter_by == 'transaction') {
-                    data.user_id = null
-                }
-                data.date = myDate;
-                data.from_date = startDate;
-                data.to_date = endDate;
-                if(data.filter_by == 'transaction') {
-                    this.fetchByTransaction(data)
+                let searchData = Vue.util.extend({}, this.search);
+                searchData.from_date = "";
+                searchData.to_date = "";
+                searchData.date = "";
+                if(searchData.is_date_range) {
+                    searchData.from_date = this.fromDate;
+                    searchData.to_date = this.toDate;
                 } else {
-                    this.fetchByProduct(data)
+                    searchData.date = this.date;
+                }
+                if(searchData.filter_by == 'product') {
+                    searchData.user_id = null
+                }
+                if(searchData.filter_by == 'transaction') {
+                    this.fetchByTransaction(searchData)
+                } else {
+                    this.fetchByProduct(searchData)
                 }
             },
             fetchUsers: function() {
@@ -237,30 +258,32 @@
                     })
             },
             fetchByTransaction: function(_data) {
+                this.isLoading = true;
                 GetPurchaseReportByTransaction(_data)
                     .then(result=> {
-                        console.log(result)
-                        this.report_by_transaction = result.reports;
-                        this.transaction_headers = result.headers;
-                        this.transaction_info = result.info;
-                        this.transaction_total_amount = result.total_amount;
+                        this.isLoading = false;
+                        this.reports_transaction = result.reports;
+                        this.headers_transaction = result.headers
+                        this.info_transaction = result.info;
+                        this.total_amount_transaction = result.total_amount;
+                        this.total_paid_transaction = result.total_paid;
                     })
                     .catch(err=> {
-
+                        this.isLoading = false;
                     })
             },
             fetchByProduct: function(_data) {
-                GetPurcahseReportByProduct(_data)
+                this.isLoading = true;
+                GetPurchaseReportByProduct(_data)
                     .then(result=> {
-                        console.log('res', result);
-                        this.report_by_products = result.reports;
-                        this.product_headers = result.header || [];
-                        this.product_report_info = result.info
-                        this.product_report_info = result.info
-                        this.product_total_amount = result.total_amount;
+                        this.isLoading = false;
+                        this.reports_product = result.reports;
+                        this.headers_product = result.header;
+                        this.info_product = result.info
+                        this.total_amount_product = result.total_amount || 0;
                     })
                     .catch(err=> {
-
+                        this.isLoading = false;
                     })
             },
             handleChangeRange: function(event){
@@ -271,7 +294,17 @@
                 }
             },
             handleFilterByChange: function(event){
-                console.log('heye')
+                if(event == 'transaction') {
+                    this.report_by_products = [];
+                    this.product_headers = [];
+                    this.product_report_info = ""
+                    this.product_total_amount = 0;
+                } else {
+                    this.report_by_transaction = [];
+                    this.transaction_headers = []
+                    this.transaction_info = "";
+                    this.total_amount = 0;
+                }    
             },
             getMoney: function(val) {
                 let amt = val/100;
@@ -286,6 +319,17 @@
                     {id:'transaction', name:'Transaction'}
                 ];
             },
+            usersList: function() {
+                let entries = this.users || [];
+                entries.push({id:'', name:'All Users'});
+                return entries;
+            },
+            filterByList: function(){
+                return [
+                    {id: 'transaction', name:'Transaction'},
+                    {id: 'product', name: 'Product'}
+                ]
+            }
             
         },
     }

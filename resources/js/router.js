@@ -31,11 +31,18 @@ import SaleReport from './views/report/SaleReport'
 import PurchaseReport from './views/report/PurchaseReport'
 import FinanceReport from './views/report/FinanceReport'
 import PermissionError from './views/PermissionError'
+import StockAdjustmentHistory from './views/ledgers/StockAdjustmentHistory'
+import SalesWithDebtors from './views/ledgers/SalesWithDebtors'
+import PurchasesWithCreditors from './views/ledgers/PurchasesWithCreditors'
+import BatchList from './views/ledgers/BatchList'
+import ProductRestockList from './views/notification/ProductRestockList'
+import ProductExpiryList from './views/notification/ProductExpiryList'
 import store from './store';
+import { GetUserInfo } from './utils/user'
 
 Vue.use(Router)
 
-export default new Router({
+const router = new Router({
     mode: 'history',
     routes: [
         {
@@ -76,7 +83,8 @@ export default new Router({
                         },
                         {
                             path: 'categories',
-                            component: Category
+                            component: Category,
+                            meta: {requiresRoleCheck:true, roleList: ['admin','manager']}
                         },
                         {
                             path: 'stock-units',
@@ -122,7 +130,8 @@ export default new Router({
                 },
                 {
                     path: 'sales/create',
-                    component: CreateSale
+                    component: CreateSale,
+                    name: 'sale_create'
                 },
                 {
                     path: 'purchases',
@@ -152,11 +161,13 @@ export default new Router({
                 },
                 {
                     path: 'reports/sale',
-                    component: SaleReport
+                    component: SaleReport,
+                    name: 'sale_report'
                 },
                 {
                     path: 'reports/purchase',
-                    component: PurchaseReport
+                    component: PurchaseReport,
+                    name: 'purchase_report'
                 },
                 {
                     path: 'reports/finance',
@@ -181,8 +192,40 @@ export default new Router({
                     path: '403',
                     component: PermissionError,
                     name: '403'
+                },
+                {
+                    path: 'ledgers/stock-adjustment',
+                    component: StockAdjustmentHistory,
+                },
+                {
+                    path: 'ledgers/sales-with-debtors',
+                    component: SalesWithDebtors,
+                    name: 'sales-with-debtors'
+                },
+                {
+                    path: 'ledgers/purchases-with-creditors',
+                    component: PurchasesWithCreditors,
+                    name: 'purchases-with-creditors'
+                },
+                {
+                    path: 'ledgers/batches',
+                    component: BatchList,
+                    name: 'batch-list'
+                },
+                {
+                    path: 'alerts/product-restock',
+                    component: ProductRestockList,
+                    name: 'product-restock-list'
+                },
+                {
+                    path: 'alerts/product-expiry',
+                    component: ProductExpiryList,
+                    name: 'product-expiry-list'
                 }
             ]
         }
   ]
 })
+
+
+export default router;

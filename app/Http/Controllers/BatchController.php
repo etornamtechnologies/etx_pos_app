@@ -87,4 +87,25 @@ class BatchController extends Controller
     {
         $batches = Batch::orderBy();
     }
+
+    public function expiryAlertList()
+    {
+        // $q = Batch::where('created_at', '<=', Carbon::now() - )
+    }
+
+    public function update(Request $request, $id)
+    {
+        $input = $request->all();
+        $batch = Batch::where('id', $id)->update([
+            'quantity'=> $input['quantity']
+        ]);
+        return response()->json(['code'=>0]);
+    }
+
+    public function destroy($id)
+    {
+        $batch = Batch::findOrFail($id);
+        $batch->delete();
+        return response()->json(['code'=>0, 'message'=> "Deleted successfully"], 200);
+    }
 }

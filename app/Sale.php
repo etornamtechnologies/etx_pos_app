@@ -114,4 +114,10 @@ class Sale extends Model
                 ->get();
         return $q;        
     }
+
+    public static function mondaySale()
+    {
+        $monday = Carbon::now()->monday;
+        dd($monday);
+    }
 }

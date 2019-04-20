@@ -40,28 +40,35 @@
                         hide-details
                         ></v-text-field>
                     </v-card-title>
-                    <v-data-table
-                    :headers="customer_headers"
-                    :items="customers"
-                    :search="filter"
-                    >
-                    <template v-slot:items="props">
-                        <td>{{ props.item.name || '---' }}</td>
-                        <td class="text-xs-left">{{ props.item.phone || '---' }}</td>
-                        <td class="text-xs-left">{{ props.item.email || '---' }}</td>
-                        <td class="text-xs-left">{{ props.item.address || '---' }}</td>
-                        <td class="text-xs-left">{{ prettyDate(props.item.created_at || '') }}</td>
-                        <td class="text-xs-left">
-                            <v-icon
-                            @click="openEditCustomerDialog(props.item, props.index)">edit</v-icon>
-                            <v-icon color="red"
-                            @click="deleteCustomer(props.item)">delete</v-icon>
-                        </td>
-                    </template>
-                    <v-alert v-slot:no-results :value="true" color="error" icon="warning">
-                        Your search for "{{ search }}" found no results.
-                    </v-alert>
-                    </v-data-table>
+                    <v-card-text style="position:relative; min-height:500px">
+                        <div class="my-loader" v-if="getLoading"></div>
+                        <v-layout column>
+                            <v-flex xs12>
+                                <v-data-table
+                                :headers="customer_headers"
+                                :items="customers"
+                                :search="filter"
+                                >
+                                    <template v-slot:items="props">
+                                        <td>{{ props.item.name || '---' }}</td>
+                                        <td class="text-xs-left">{{ props.item.phone || '---' }}</td>
+                                        <td class="text-xs-left">{{ props.item.email || '---' }}</td>
+                                        <td class="text-xs-left">{{ props.item.address || '---' }}</td>
+                                        <td class="text-xs-left">{{ prettyDate(props.item.created_at || '') }}</td>
+                                        <td class="text-xs-left">
+                                            <v-icon
+                                            @click="openEditCustomerDialog(props.item, props.index)">edit</v-icon>
+                                            <v-icon color="red"
+                                            @click="deleteCustomer(props.item)">delete</v-icon>
+                                        </td>
+                                    </template>
+                                    <v-alert v-slot:no-results :value="true" color="error" icon="warning">
+                                        Your search for "{{ search }}" found no results.
+                                    </v-alert>
+                                </v-data-table>
+                            </v-flex>
+                        </v-layout>
+                    </v-card-text>
                     <v-btn
                             color="pink"
                             dark
@@ -78,7 +85,8 @@
             </v-flex>
         </v-layout>
         <v-dialog v-model="isOpenCreateCustomerDialog" persistent width="500">
-            <v-card>
+            <v-card style="position:relative">
+                <div class="my-loader" v-if="createLoading"></div>
                 <v-form @submit.prevent="createCustomer">
                     <v-card-title class="headline">create customer</v-card-title>
                     <v-card-text>
@@ -113,7 +121,8 @@
         </v-dialog>
 
         <v-dialog v-model="isOpenEditCustomerDialog" persistent width="500">
-            <v-card>
+            <v-card style="position:relative">
+                <div class="my-loader" v-if="updateLoading"></div>
                 <v-form @submit.prevent="updateCustomer">
                     <v-card-title class="headline">edit customer</v-card-title>
                     <v-card-text>

@@ -95,7 +95,7 @@ class SaleController extends Controller
             $this->createSaleEntries($sale->id, $entries); 
             $receiptData['entries'] = $receiptEntries;
             $receiptData['summary'] = $receiptSummary;
-            $receiptData['shop_info'] = Config::findOrFail(1);
+            $receiptData['shop_info'] = Config::first();
         });
         $result['code'] = 0;
         $result['receipt_data'] = $receiptData;

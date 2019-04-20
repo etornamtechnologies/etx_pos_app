@@ -20,6 +20,32 @@
         .btn, .card {
             border-radius: 0 !important;
         }
+        .my-loader {
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            background-color: #f2f3f4;
+            z-index: 88888;
+            top: 0;
+            left: 0;
+            display: flex;
+            flex-direction:row;
+            text-align: center;
+            justify-content: center;
+            align-items: center;
+            background-image: url('/img/ball.svg');
+            background-repeat: no-repeat;
+            background-position: center;
+        }
+        .my-loader-content {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: row;
+            justify-content: center;
+            align-items: center;
+            background-color: red;
+        }
     </style>
 </head>
 <body>

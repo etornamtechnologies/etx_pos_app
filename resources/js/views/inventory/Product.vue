@@ -69,38 +69,47 @@
                         </v-flex>
                     </v-layout>
                 </v-card-title>
-                <v-data-table
-                :headers="headers"
-                :items="products"
-                hide-actions
-                >
-                <template v-slot:items="props">
-                    <td>{{ props.item.label }}</td>
-                    <td class="text-xs-left">{{ props.item.barcode }}</td>
-                    <td class="text-xs-left">{{ (props.item.category || {}).label }}</td>
-                    <td class="text-xs-left">{{ props.item.stock_quantity }} {{ (props.item.default_sku || {}).label }}</td>
-                    <td class="text-xs-left">{{ props.item.status }}</td>
-                    <td class="text-xs-left">
-                        <v-icon
-                        @click="openEditProductDialog(props.item, props.index)">edit</v-icon>
-                        <v-icon color="red"
-                        @click="deleteProduct(props.item)">delete</v-icon>
-                        <v-icon
-                        @click="productDetail(props.item)">info</v-icon>
-                    </td>
-                </template>
-                <v-alert v-slot:no-results :value="true" color="error" icon="warning">
-                    Your search for "{{ search }}" found no results.
-                </v-alert>
-                </v-data-table>
-                <el-pagination
-                background
-                :current-page.sync="currentPage"
-                :page-size="perPage"
-                :pager-count="21"
-                layout="prev, pager, next"
-                :total="totalRows">
-                </el-pagination>
+                <v-card-text>
+                    <v-layout column>
+                        <v-flex xs12 style="position:relative; min-height:400px">
+                            <div class="my-loader" v-if="isLoading"></div>
+                            <v-data-table
+                            :headers="headers"
+                            :items="products"
+                            hide-actions
+                            >
+                                <template v-slot:items="props">
+                                    <td>{{ props.item.label }}</td>
+                                    <td class="text-xs-left">{{ props.item.barcode }}</td>
+                                    <td class="text-xs-left">{{ (props.item.category || {}).label }}</td>
+                                    <td class="text-xs-left">{{ props.item.stock_quantity }} {{ (props.item.default_sku || {}).label }}</td>
+                                    <td class="text-xs-left">{{ props.item.status }}</td>
+                                    <td class="text-xs-left">
+                                        <v-icon
+                                        @click="openEditProductDialog(props.item, props.index)">edit</v-icon>
+                                        <v-icon color="red"
+                                        @click="deleteProduct(props.item)">delete</v-icon>
+                                        <v-icon
+                                        @click="productDetail(props.item)">info</v-icon>
+                                    </td>
+                                </template>
+                                <v-alert v-slot:no-results :value="true" color="error" icon="warning">
+                                    Your search for "{{ search }}" found no results.
+                                </v-alert>
+                            </v-data-table>
+                        </v-flex>
+                        <v-flex xs12>
+                            <el-pagination
+                            background
+                            :current-page.sync="currentPage"
+                            :page-size="perPage"
+                            :pager-count="21"
+                            layout="prev, pager, next"
+                            :total="totalRows">
+                            </el-pagination>
+                        </v-flex>
+                    </v-layout>
+                </v-card-text>
                 <v-btn
                         color="pink"
                         dark
@@ -117,7 +126,8 @@
         </v-flex>
 
         <v-dialog v-model="isOpenCreateProductDialog" persistent width="500">
-            <v-card>
+            <v-card style="position:relative">
+                <div class="my-loader" v-if="isUpdating"></div>
                 <v-form @submit.prevent="createProduct"
                 ref="form"
                 v-model="valid">
@@ -158,7 +168,8 @@
         </v-dialog>
 
         <v-dialog v-model="isOpenEditProductDialog" persistent width="500">
-            <v-card>
+            <v-card style="position:relative">
+                <div class="my-loader" v-if="isUpdating"></div>
                 <v-form @submit.prevent="updateProduct">
                     <v-card-title class="headline">edit product</v-card-title>
                     <v-card-text>
@@ -194,7 +205,17 @@
     import {GetProduct, CreateProduct, UpdateProduct, DeleteProduct} from '../../utils/product'
     import {GetCategory} from '../../utils/category'
     import {GetStockUnit} from '../../utils/stock-unit'
+    import { hasAnyRole } from '../../utils/helpers'
     export default {
+        beforeRouteEnter (to, from, next) {
+            hasAnyRole(['admin','manager','sales-reps'], (res)=> {
+                if(res) {
+                    next()
+                } else {
+                    next(from)
+                }
+            })
+        },
         mounted() {
             this.fetchProducts();
             this.fetchCategories();
@@ -228,6 +249,8 @@
                 currentPage: 1,
                 perPage: 2,
                 totalRows: null,
+                isLoading: false,
+                isUpdating: false,
             }
         },
         methods: {
@@ -236,13 +259,17 @@
                 _data.paginate = true;
                 _data.filter = this.search;
                 _data.page = this.currentPage;
+                this.isLoading = true;
                 GetProduct(_data)
                     .then(result=> {
-                        console.log('cats',result)
+                        this.isLoading = false;
                         this.products = (result.products || {}).data || [];
                         this.currentPage = (result.products || {}).current_page;
                         this.perPage = (result.products || {}).per_page;
                         this.totalRows = (result.products || {}).total
+                    })
+                    .catch(err=> {
+                        this.isLoading = false;
                     })
             },
             fetchCategories: function(){
@@ -259,13 +286,16 @@
             },
             createProduct: function(){
                 let data = Vue.util.extend({}, this.product);
+                this.isUpdating = true;
                 CreateProduct(data)
                     .then(result=> {
+                        this.isUpdating = false;
                         this.products.push(result.product || {});
                         this.isOpenCreateProductDialog = false;
+                        this.product = {label:'', category_id:'', barcode:''};
                     })
                     .catch(err=> {
-
+                        this.isUpdating = false;
                     })
             },
             openEditProductDialog: function(row, index){
@@ -274,11 +304,16 @@
                 this.isOpenEditProductDialog = true;
             },
             updateProduct: function(){
+                this.isUpdating = true;
                 UpdateProduct(this.edit_product)
                     .then(result=> {
+                        this.isUpdating = false;
                         this.products[this.edit_product.index] = result.product;
                         this.isOpenEditProductDialog = false;
                         this.fetchProducts();
+                    })
+                    .catch(err=> {
+                        this.isUpdating = false;
                     })
             },
             deleteProduct: function(row) {

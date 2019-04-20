@@ -226,8 +226,19 @@
 <script>
     import {GetProduct, CreateProduct, UpdateProduct, DeleteProduct, GetProductDetail} from '../../utils/product'
     import {GetStockUnit} from '../../utils/stock-unit'
+
+    import { hasAnyRole } from '../../utils/helpers'
     import {AddStockUnitToProduct, RemoveStockUnitFromProduct, UpdateStockCostPrice, UpdateStockSellingPrice} from '../../utils/inventory'
     export default {
+        beforeRouteEnter (to, from, next) {
+            hasAnyRole(['admin','manager','sales-reps'], (res)=> {
+                if(res) {
+                    next()
+                } else {
+                    next(from)
+                }
+            })
+        },
         mounted(){
             this.fetchStockUnits()
             this.fetchProduct();

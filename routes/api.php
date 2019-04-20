@@ -115,6 +115,21 @@ Route::post('reports/sale/product', 'ReportController@getSaleReportByProduct');
 Route::post('reports/purchase/transaction', 'ReportController@getPurchaseReportByTransaction');
 Route::post('reports/purchase/product', 'ReportController@getPurchaseReportByProduct');
 
+Route::post('reports/financial', 'ReportController@getFinancialReport');
+
 
 Route::post('reports/stock-adjustment/transaction', 'ReportController@getStockAdjustmentReportByTransaction');
 Route::post('reports/stock-adjustment/product', 'ReportController@getStockAdjustmentReportByProduct');
+
+
+Route::get('batches/expiry-alert', 'BatchController@expiryAlertList');
+
+Route::get('alerts/restock-list', 'NotificationController@getProductRestockList');
+Route::get('alerts/expiry-list', 'NotificationController@getProductExpiryList');
+
+Route::get('ledgers/sales-with-debt', 'LedgerController@salesWithDebt');
+Route::get('ledgers/purchases-with-credit', 'LedgerController@purchasesWithCredit');
+Route::get('ledgers/batches', 'LedgerController@getAllProductBatches');
+
+Route::put('batches/{batch}', 'BatchController@update');
+Route::delete('batches/{batch}', 'BatchController@destroy');

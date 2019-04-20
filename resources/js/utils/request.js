@@ -13,8 +13,6 @@ const service = axios.create({
 // request interceptor
 service.interceptors.request.use(
     config => {
-        console.log('req token',getApiToken())
-        // Do something before request is sent
         if (store.getters.token) {
             config.headers['X-Token'] = getApiToken();
             config.headers['Authorization'] = getApiToken();
@@ -75,8 +73,8 @@ service.interceptors.response.use(
     } 
     else if(status == 401) {
         router.push('/account/login')
-    } else if(status = 403) {
-        //router.push('/403')
+    } else if(status == 403) {
+        router.push('/403')
     } else {
         Message({
             message: (errResponse.data || {}).message || "Server Error" ,

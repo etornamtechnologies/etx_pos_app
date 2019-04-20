@@ -42,7 +42,7 @@ class PurchaseController extends Controller
                             ->with(['user', 'supplier', 'out_payments'])
                             ->orderBy('created_at', 'DESC');
         if($request->has('paginate')) {
-            return response()->json(['purchases'=> $purchasesQuery->paginate(15), 'code'=>0], 200);
+            return response()->json(['purchases'=> $purchasesQuery->paginate(10), 'code'=>0], 200);
         } else {
             return response()->json(['code'=>0, 'purchases'=> $purchasesQuery->take(100)->get()]);
         }
@@ -102,6 +102,7 @@ class PurchaseController extends Controller
                 $purchaseEntries = PurchaseEntry::createPurchaseEntries($purchase->id, $entries);
             });
             $result['code'] = 0;
+            $result['message'] = "Purchase invoice created successfully";
         } catch (Exception $e) {
             $result['code'] = 1;
             $result['message'] = "Something went wrong! please contact admin";
