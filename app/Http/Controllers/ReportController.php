@@ -18,7 +18,8 @@ class ReportController extends Controller
     public function __construct()
     {
         $this->middleware('api_auth');
-        $this->middleware('api_role:manager,admin');
+        $this->middleware('api_role:manager,admin')->except(['getFinancialReport']);
+        $this->middleware('api_role:admin')->only(['getFinancialReport']);
     }
 
     public function indexPage()

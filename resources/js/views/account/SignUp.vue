@@ -14,6 +14,8 @@
                 <form class="login-form" @submit.prevent="handleRegister">
                     <div class="login-form-header">
                         <span>Register</span>
+                        <span style="float:right; cursor:pointer"
+                        @click="goToLoginPage()">Login</span>
                     </div>
                     <div class="login-form-inputs">
                         <v-text-field
@@ -93,9 +95,11 @@
                         this.$router.push({ path: '/' })
                     })
                     .catch((err)=> {
-                        console.log('err', err);
                         this.loading = false;
                     })
+            },
+            goToLoginPage: function() {
+                this.$router.push({ name:'login' })
             }
         },
         computed: {

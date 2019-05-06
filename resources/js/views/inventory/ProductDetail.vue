@@ -2,7 +2,7 @@
     <div class="row">
         <div class="col-md-4">
             <v-card style="min-height:700px; padding-bottom:10px">
-                <v-toolbar color="cyan" dark flat>
+                <v-toolbar flat dense>
                     <v-toolbar-side-icon></v-toolbar-side-icon>
                     <v-toolbar-title>PRODUCT DETAIL</v-toolbar-title>
                 </v-toolbar>
@@ -13,7 +13,7 @@
                         </v-list-tile-action>
                         <v-list-tile-content>
                             <v-list-tile-title>Product Name</v-list-tile-title>
-                            <v-list-tile-sub-title>{{ product.label }}</v-list-tile-sub-title>
+                            <v-list-tile-sub-title>{{ (product || {}).label }}</v-list-tile-sub-title>
                         </v-list-tile-content>
                     </v-list-tile>
                     <v-list-tile>
@@ -22,7 +22,7 @@
                         </v-list-tile-action>
                         <v-list-tile-content>
                             <v-list-tile-title>Product Barcode</v-list-tile-title>
-                            <v-list-tile-sub-title>{{ product.barcode }}</v-list-tile-sub-title>
+                            <v-list-tile-sub-title>{{ (product || {}).barcode }}</v-list-tile-sub-title>
                         </v-list-tile-content>
                     </v-list-tile>
                     <v-list-tile>
@@ -31,7 +31,7 @@
                         </v-list-tile-action>
                         <v-list-tile-content>
                             <v-list-tile-title>Product Category</v-list-tile-title>
-                            <v-list-tile-sub-title>{{ (product.category|| {}).label }}</v-list-tile-sub-title>
+                            <v-list-tile-sub-title>{{ ((product || {}).category|| {}).label }}</v-list-tile-sub-title>
                         </v-list-tile-content>
                     </v-list-tile>
                     <v-list-tile>
@@ -40,7 +40,7 @@
                         </v-list-tile-action>
                         <v-list-tile-content>
                             <v-list-tile-title>Product Default Stock unit</v-list-tile-title>
-                            <v-list-tile-sub-title>{{ (product.default_sku || {}).label }}</v-list-tile-sub-title>
+                            <v-list-tile-sub-title>{{ ((product || {}).default_sku || {}).label }}</v-list-tile-sub-title>
                         </v-list-tile-content>
                     </v-list-tile>
                 </v-list>
@@ -52,7 +52,7 @@
                         <hr>
                         <div class="row">
                             <div class="col-md-12">
-                                {{ product.description }}
+                                {{ (product || {}).description }}
                             </div>
                         </div>
                     </div>
@@ -99,6 +99,8 @@
         <div class="col-md-8">
             <div class="card">
                 <div class="card-header py-1">
+                    <button class="btn btn-warning btn-sm text-white"
+                    @click="openBatchDialog">Add Batch Number</button>
                     <button class="btn btn-info btn-sm float-right" @click="openAddStockUnitModal">ADD STOCK_UNIT</button>
                 </div>
                 <div class="card-body">
@@ -114,7 +116,7 @@
                             </tr>
                         </thead>
                         <tbody>
-                            <tr v-for="sku in product.stock_units" :key="sku.id">
+                            <tr v-for="sku in (product || {}).stock_units" :key="sku.id">
                                 <td>{{ sku.label }}</td>
                                 <td>{{ sku.pivot.metric_scale }}</td>
                                 <td>{{ metricQuantity(sku) }}</td>
@@ -166,7 +168,7 @@
                         <label for="">Stock Unit</label>
                         <select class="form-control" v-model="add_stock_unit.stock_unit_id">
                             <option v-for="sku in stock_units" :value="sku.id" :key="sku.id">
-                                {{ sku.label }}
+                                {{ (sku || {}).label }}
                             </option>
                         </select>
                     </div>
@@ -221,17 +223,45 @@
                 </form>
             </v-card>
         </v-dialog>
+
+        <v-dialog v-model="showBatchDialog" persistent width="500">
+            <v-card>
+                <form @submit.prevent="createBatch">
+                    <v-card-title class="headline">CREATE BATCH</v-card-title>
+                    <v-card-text>
+                        <v-text-field
+                        label="Batch Number"
+                        v-model="batch.batch_no"
+                        ></v-text-field>
+                        <v-text-field
+                        label="Expiry Date"
+                        placeholder="MM/YYYY"
+                        v-model="batch.expiry_date"
+                        ></v-text-field>
+                        <v-text-field
+                        label="Quantity"
+                        v-model="batch.quantity"
+                        ></v-text-field>
+                    </v-card-text>
+                    <v-card-actions>
+                        <v-spacer></v-spacer>
+                        <v-btn color="red darken-1" flat ripple @click="showBatchDialog = false">CANCEL</v-btn>
+                        <v-btn color="green darken-1" flat type="submit">SUBMIT</v-btn>
+                    </v-card-actions>
+                </form>
+            </v-card>
+        </v-dialog>
     </div>
 </template>
 <script>
     import {GetProduct, CreateProduct, UpdateProduct, DeleteProduct, GetProductDetail} from '../../utils/product'
     import {GetStockUnit} from '../../utils/stock-unit'
-
+    import { AddBatchToProduct } from '../../utils/batch'
     import { hasAnyRole } from '../../utils/helpers'
     import {AddStockUnitToProduct, RemoveStockUnitFromProduct, UpdateStockCostPrice, UpdateStockSellingPrice} from '../../utils/inventory'
     export default {
         beforeRouteEnter (to, from, next) {
-            hasAnyRole(['admin','manager','sales-reps'], (res)=> {
+            hasAnyRole(['admin','manager','sales-reps','supervisor'], (res)=> {
                 if(res) {
                     next()
                 } else {
@@ -257,7 +287,9 @@
                 stock_selling_price_data: {},
                 stock_cost_price_data: {},
                 isPricingLoading: false,
-                suppliers: []
+                suppliers: [],
+                showBatchDialog: false,
+                batch: {batch_no:'', quantity:'', expiry_date:''}
             }
         },
         methods: {
@@ -271,6 +303,9 @@
                         this.initPage()
                     })
             },
+            openBatchDialog: function() {
+                this.showBatchDialog = true;
+            },
             initPage: function() {
                 this.product_data = Vue.util.extend({}, this.product);
                 let status = this.product_data.status;
@@ -283,7 +318,7 @@
             fetchStockUnits: function() {
                 GetStockUnit()
                     .then(result=> {
-                        this.stock_units = result.stock_units || [];
+                        this.stock_units = (result || {}).stock_units || [];
                     })
             },
             metricQuantity: function(sku_row) {
@@ -366,10 +401,24 @@
                         this.isPricingLoading = false;
                     })
             },
+            createBatch: function() {
+                let data = Vue.util.extend({}, this.batch);
+                data.product_id = this.product.id;
+                console.log(data);
+                AddBatchToProduct(data)
+                    .then(result=> {
+                        this.batch = {batch_no:'', quantity:'', expiry_date:''}
+                        location.reload(true)
+                    })
+                    .catch(err=> {
+
+                    })
+                
+            }
         },
         computed:  {
             getBasicStockUnits: function() {
-                let skus = (this.product.stock_units) || [];
+                let skus = ((this.product || {}).stock_units) || [];
                 return skus.filter((sku)=> {
                     return (sku.pivot || {}).metric_scale == 1
                 })

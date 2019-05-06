@@ -13,6 +13,7 @@ import Inventory from './views/inventory/Inventory'
 import InventoryIndex from './views/inventory/InventoryIndex'
 import ProductCreateEntries from './views/inventory/ProductCreateEntries'
 import ProductCreate from './views/inventory/ProductCreate'
+import ProductCreateCsv from './views/inventory/ProductCreateCsv'
 import PriceTemplate from './views/inventory/PriceTemplate'
 import PriceTemplateCreate from './views/inventory/PriceTemplateCreate'
 import ProductDetail from './views/inventory/ProductDetail'
@@ -55,11 +56,13 @@ const router = new Router({
                 {
                     path: "login",
                     component: SignIn,
-                    alias: "/login"
+                    alias: "/login",
+                    name: 'login'
                 },
                 {
                     path: "register",
-                    component: SignUp
+                    component: SignUp,
+                    name: 'register'
                 }
             ]
         },  
@@ -102,6 +105,11 @@ const router = new Router({
                         {
                             path: 'products/create',
                             component: ProductCreate
+                        },
+                        {
+                            path: 'products/create/entries/csv',
+                            component: ProductCreateCsv,
+                            name: 'product-create-csv'
                         },
                         {
                             path: 'products/create/entries',

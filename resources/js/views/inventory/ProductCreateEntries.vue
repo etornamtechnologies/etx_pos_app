@@ -28,7 +28,9 @@
                                 <th>Barcode</th>
                                 <th>Category</th>
                                 <th>Default sku</th>
-                                <th>Description</th>
+                                <th>Quantity</th>
+                                <th>Batch #</th>
+                                <th>Expiry date</th>
                                 <th></th>
                             </tr>
                         </thead>
@@ -55,8 +57,14 @@
                                         </option>
                                     </select>
                                 </td>
+                                <td style="max-width:100px;">
+                                    <input type="number" class="form-control" v-model="entry.quantity" style="width:100%">
+                                </td>
                                 <td>
-                                    <input type="text" class="form-control" v-model="entry.description">
+                                    <input type="text" class="form-control" v-model="entry.batch">
+                                </td>
+                                <td>
+                                    <input type="text" class="form-control" v-model="entry.expiry_date">
                                 </td>
                                 <td>
                                     <button class="btn btn-danger"
@@ -92,7 +100,8 @@ import Axios from 'axios';
                 product_entries: [],
                 headers: [{text:'label', value:'label'}, {text:'barcode', value:'barcode'}
                             ,{text:'category', value:'category_id'}, {text:'basic stock-unit', value:'default_sku_id'}
-                            ,{text:'description', value:'description'},{text:'Actions', value:'btn', align:'right'}],
+                            ,{text:'Batch #', value:'batch'}, {text: 'Expiry Date(mm/yyyy)', value: 'expiry_date'}
+                            ,{text:'Actions', value:'btn', align:'right'}],
                 categories: [],
                 stock_units: [],            
             }
@@ -107,7 +116,8 @@ import Axios from 'axios';
                 }
             },
             addEntry: function(){
-                let entry = {label:'', barcode:'', category_id:"", default_sku_id:"", description:''};
+                let entry = {label:'', barcode:'', category_id:"", default_sku_id:"", expiry_date:''
+                                , batch:'', quantity:'', description:''};
                 this.product_entries.push(Vue.util.extend({}, entry));
             },
             fetchCategories: function() {
@@ -182,7 +192,6 @@ import Axios from 'axios';
                     return {value:cat.id, text:cat.label};
                 });
                 return res || [];
-                console.log('catlist',res);
             },
             getStockUnits: function(){
                 let list = this.stock_units || [];

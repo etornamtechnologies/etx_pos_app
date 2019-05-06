@@ -15,7 +15,7 @@ class OutPaymentController extends Controller
     public function __construct()
     {
         $this->middleware('api_auth');
-        $this->middleware('api_role:admin,manager')->except(['index']);
+        $this->middleware('api_role:admin,manager,supervisor')->except(['index']);
     }
 
     public function store(Request $request)

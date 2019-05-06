@@ -14,6 +14,9 @@
                 <form class="login-form" @submit.prevent="handleLogin">
                     <div class="login-form-header">
                         <span>Log in</span>
+                        <span 
+                        @click="goToSignUpPage()"
+                        style="float:right; cursor:pointer">Sign Up</span>
                     </div>
                     <div class="login-form-inputs">
                         <v-text-field
@@ -36,6 +39,7 @@
                         <v-btn
                         type="submit"
                         ripple
+                        dark
                         color="#2ccbe8">LOG IN</v-btn>
                         </div>
                     </div>
@@ -69,14 +73,15 @@
                 this.loading = true;
                 this.$store.dispatch('LoginUser', this.form)
                     .then((res)=> {
-                        console.log('signun', res);
                         this.loading = false;
                         this.$router.push({ path: '/' })
                     })
                     .catch((err)=> {
-                        console.log('err', err);
                         this.loading = false;
                     })
+            },
+            goToSignUpPage: function(){
+                this.$router.push({ name:'register' })
             }
         },
         computed: {

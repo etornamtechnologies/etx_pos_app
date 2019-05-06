@@ -136,7 +136,7 @@
                                             </td>
                                             <td>
                                                 <input
-                                                placeholder="MM/YY" 
+                                                placeholder="MM/YYYY" 
                                                 style="width:100px !important" 
                                                 type="text" class="form-control" 
                                                 v-model="entry.expiry_date">
@@ -253,7 +253,7 @@
                     })
             },
             searchProduct: function() {
-                GetProduct({filter:this.filter, search:true})
+                GetProduct({filter:this.filter, pos_search:true})
                     .then(res=> {
                         if(res.code == 0) {
                             this.handleProductSearchResult(res.products);

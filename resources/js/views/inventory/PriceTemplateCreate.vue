@@ -92,6 +92,7 @@
 <script>
     import { GetCategory } from '../../utils/category'
     import { GetPriceTemplate, CreatePriceTemplate } from '../../utils/inventory'
+    import { hasAnyRole } from '../../utils/helpers'
     export default {
         created() {
             this.fetchCategories();

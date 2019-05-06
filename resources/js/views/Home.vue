@@ -42,8 +42,19 @@
 </template>
 
 <script>
+    import { getApiToken } from '../utils/auth'
     import { HasAnyRole } from '../utils/role'
     export default {
+        beforeRouteEnter (to, from, next) {
+            next(vm=> {
+                let token = getApiToken() || null;
+                if(!token) {
+                    return vm.$router.push({ name: 'login' })
+                } else {
+                    next();
+                }
+          })
+        },
         data() {
             return {
                 
@@ -71,7 +82,9 @@
                 }
             },
             goToCustomersPage: function() {
-                this.$router.push({ name: 'list-customer' })
+                if(this.allowForRoles(['admin','manager','sales-rep','supervisor'])) {
+                    this.$router.push({ name: 'list-customer' })
+                }
             }
         },
         computed: {

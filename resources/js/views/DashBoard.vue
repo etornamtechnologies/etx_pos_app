@@ -147,7 +147,7 @@
                                                 </v-list-tile-action>
                                                 <v-list-tile-content>
                                                     <!-- TODO  expiry alerts from backend-->
-                                                    # {{ dashboard.restock_alert_count || 20 }} 
+                                                    # {{ dashboard.restock_count || 0 }} 
                                                 </v-list-tile-content>
                                             </v-list-tile>
                                             <v-list-tile>
@@ -156,7 +156,7 @@
                                                 </v-list-tile-action>
                                                 <v-list-tile-content>
                                                     <!-- TODO  expiry alerts from backend-->
-                                                    # {{ dashboard.expiry_alert_count || 40 }} 
+                                                    # {{ dashboard.expiry_count || 0 }} 
                                                 </v-list-tile-content>
                                             </v-list-tile>
                                         </v-list>

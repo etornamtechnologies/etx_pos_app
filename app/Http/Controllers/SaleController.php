@@ -29,8 +29,8 @@ class SaleController extends Controller
     public function __construct()
     {
         $this->middleware('api_auth');
-        $this->middleware('api_role:admin,manager,sales-rep');
-        $this->middleware('api_role:admin,manager')->except(['store']);
+        $this->middleware('api_role:admin,manager,sales-rep,supervisor');
+        $this->middleware('api_role:admin,manager,supervisor')->except(['store']);
     }
 
     public function index(Request $request)

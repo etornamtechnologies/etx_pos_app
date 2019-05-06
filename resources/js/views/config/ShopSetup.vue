@@ -26,7 +26,7 @@
                                 <v-flex xs12>
                                     <v-text-field
                                     label="shop email"
-                                    v-model="info.shope_email"></v-text-field>
+                                    v-model="info.shop_email"></v-text-field>
                                 </v-flex>
                                 <v-flex xs12>
                                     <v-text-field
@@ -38,11 +38,11 @@
                                     label="shop message"
                                     v-model="info.shop_message"></v-text-field>
                                 </v-flex>
-                                <v-flex xs12>
+                                <!-- <v-flex xs12>
                                     <v-text-field
                                     label="profit margin"
                                     v-model="info.profit_margin"></v-text-field>
-                                </v-flex>
+                                </v-flex> -->
                                 <v-flex>
                                     <v-btn type="submit">
                                         <v-icon>{{ btnIcon }}</v-icon>

@@ -1,7 +1,9 @@
+const SIDEBAR_CLOSE = 'sidebar_close';
+
 const app = {
     state: {
         sidebar: {
-            closed: false,
+            closed: JSON.parse(localStorage.getItem(SIDEBAR_CLOSE) || false) || false,
         },
         app_search: "",
     },
@@ -24,9 +26,11 @@ const app = {
             context.commit('TOGGLE_SIDEBAR');
         },
         closeSidebar(context) {
+            localStorage.setItem(SIDEBAR_CLOSE, true);
             context.commit('CLOSE_SIDEBAR');
         },
         openSidebar(context) {
+            localStorage.setItem(SIDEBAR_CLOSE, false);
             context.commit('OPEN_SIDEBAR');
         } 
     }

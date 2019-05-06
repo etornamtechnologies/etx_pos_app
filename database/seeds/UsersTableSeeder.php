@@ -15,7 +15,7 @@ class UsersTableSeeder extends Seeder
     {
         $roleAdmin = Role::where('label', 'admin')->first();
         $roleSale = Role::where('label', 'sales-rep')->first();
-
+        $roleSup = Role::where('label', 'supervisor')->first();
         $admin = User::create([
             'name'=> 'etornam anyidoho',
             'username'=> 'etoretornam',
@@ -23,7 +23,22 @@ class UsersTableSeeder extends Seeder
             'phone'=> '0548556086',
             'password'=> bcrypt('143541etor'),
         ]);
-        $admin->roles()->attach($roleAdmin);
 
+        $sup = User::create([
+            'name'=> 'grace amevor',
+            'username'=> 'gracious',
+            'email'=> 'gracius@outlook.com',
+            'phone'=> '0548557383',
+            'password'=> bcrypt('gracious'),
+        ]);
+        // $admin = User::create([
+        //     'name'=> 'david admin',
+        //     'username'=> 'david_admin',
+        //     'email'=> 'davidadmin@outlook.com',
+        //     'phone'=> '0093838737',
+        //     'password'=> bcrypt('david_admin'),
+        // ]);
+        $admin->roles()->attach($roleAdmin);
+        $sup->roles()->attach($roleSup);
     }
 }

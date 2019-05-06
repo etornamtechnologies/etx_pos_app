@@ -1,4 +1,4 @@
-import { createProduct, updateProduct, deleteProduct, getProduct, createProductEntries, getProductDetail} from '../api/product'
+import { createProduct, createProductCsv, updateProduct, deleteProduct, getProduct, createProductEntries, getProductDetail} from '../api/product'
 
 export function CreateProduct( product_data ) {
     return new Promise((resolve, reject) => {
@@ -11,6 +11,20 @@ export function CreateProduct( product_data ) {
         })
     })
 }
+
+
+export function CreateProductCsv( product_data ) {
+    return new Promise((resolve, reject) => {
+        createProductCsv(product_data)
+        .then(response => {
+            const data = response || {}
+            resolve(data)
+        }).catch(error => {
+            reject(error)
+        })
+    })
+}
+
 
 export function CreateProductEntries( product_data ) {
     return new Promise((resolve, reject) => {

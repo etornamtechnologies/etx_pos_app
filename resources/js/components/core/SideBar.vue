@@ -88,7 +88,7 @@
             <el-menu-item-group>
                 <el-menu-item index="/reports/sale">sale report</el-menu-item>
                 <el-menu-item index="/reports/purchase">purchase report</el-menu-item>
-                <el-menu-item index="/reports/finance">financial report</el-menu-item>
+                <el-menu-item index="/reports/finance" v-if="showFinancialReport">financial report</el-menu-item>
             </el-menu-item-group>
         </el-submenu> 
         <hr class="menu-divider" v-if="showReportModule">
@@ -168,13 +168,13 @@
                 return false;
             },
             showInventoryModule: function() {
-                if(HasAnyRole(['admin', 'manager'])) {
+                if(HasAnyRole(['supervisor', 'admin', 'manager'])) {
                     return true;
                 }
                 return false;
             },
             showPurchaseModule: function() {
-                if(HasAnyRole(['admin', 'manager'])) {
+                if(HasAnyRole(['admin', 'manager', 'supervisor'])) {
                     return true;
                 }
                 return false;
@@ -197,14 +197,20 @@
                 }
                 return false;
             },
+            showFinancialReport: function() {
+                if(HasAnyRole(['admin'])) {
+                    return true;
+                }
+                return false;
+            },
             showSalesModule: function() {
-                if(HasAnyRole(['admin', 'manager','sales-rep'])) {
+                if(HasAnyRole(['admin', 'manager','sales-rep','supervisor'])) {
                     return true;
                 }
                 return false;
             },
             showSalesList: function() {
-                if(HasAnyRole(['admin', 'manager'])) {
+                if(HasAnyRole(['admin', 'manager', 'supervisor'])) {
                     return true;
                 }
                 return false;

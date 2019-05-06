@@ -236,10 +236,10 @@
                 searchData.to_date = "";
                 searchData.date = "";
                 if(searchData.is_date_range) {
-                    searchData.from_date = this.fromDate;
-                    searchData.to_date = this.toDate;
+                    searchData.from_date = new Date(this.fromDate || "");
+                    searchData.to_date = new Date(this.toDate || "" );
                 } else {
-                    searchData.date = this.date;
+                    searchData.date = new Date(this.date || "");
                 }
                 if(searchData.filter_by == 'product') {
                     searchData.user_id = null

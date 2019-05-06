@@ -5,7 +5,7 @@
                 <v-card>
                     <v-toolbar dense color="cyan" dark>
                         <v-toolbar-side-icon></v-toolbar-side-icon>
-                        <v-toolbar-title>Finance report</v-toolbar-title>
+                        <v-toolbar-title>Financial Report</v-toolbar-title>
                     </v-toolbar>
                     <v-card-text>
                         <v-layout column style="padding:10px">
@@ -76,7 +76,7 @@
                             <v-flex xs12 style="min-height:500px; position:relative">
                                 <div class="my-loader" v-if="isLoading"></div>
                                 <v-layout row wrap>
-                                    <v-flex xs12 md6 sm12 style="padding:10px">
+                                    <v-flex xs12 md6 sm12 style="padding:20px">
                                         <v-card style="margin-bottom:20px; background-color:#039be5" dark>
                                             <v-card-title>
                                                 <v-icon color="#fff" dark>shopping_cart</v-icon>
@@ -120,7 +120,7 @@
                                             </v-card-text>    
                                         </v-card>
                                     </v-flex>
-                                    <v-flex xs12 sm12 md6 style="padding:10px">
+                                    <v-flex xs12 sm12 md6 style="padding:20px">
                                         <v-card style="margin-bottom:20px; background-color:#ff6f00;" dark>
                                             <v-card-title>
                                                 <v-icon color="#fff" dark>shopping_cart</v-icon>

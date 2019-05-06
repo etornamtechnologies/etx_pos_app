@@ -32,6 +32,7 @@ class CreateAdjustmentEntriesTable extends Migration
             $table->integer('old_quantity');
             $table->integer('new_quantity');
             $table->integer('cost_price')->default(0);
+            $table->integer('selling_price')->default(0);
             $table->timestamps();
         });
     }

@@ -61,7 +61,7 @@ const user = {
                 .then(response => {
                     const data = response || {}
                     const userData = data.user || {};
-                    const token = data.token;
+                    const token = userData.api_token;
                     commit('SET_TOKEN', token)
                     commit('SET_USERNAME', userData.username)
                     setApiToken(token)
@@ -103,7 +103,7 @@ const user = {
             return new Promise(resolve=> {
                 commit('SET_ROLES', roles);
             })
-        }
+        },
     }
 }
 

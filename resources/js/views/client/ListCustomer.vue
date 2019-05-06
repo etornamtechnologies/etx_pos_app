@@ -55,11 +55,15 @@
                                         <td class="text-xs-left">{{ props.item.email || '---' }}</td>
                                         <td class="text-xs-left">{{ props.item.address || '---' }}</td>
                                         <td class="text-xs-left">{{ prettyDate(props.item.created_at || '') }}</td>
-                                        <td class="text-xs-left">
-                                            <v-icon
-                                            @click="openEditCustomerDialog(props.item, props.index)">edit</v-icon>
-                                            <v-icon color="red"
-                                            @click="deleteCustomer(props.item)">delete</v-icon>
+                                        <td class="text-xs-right">
+                                            <v-btn icon color="primary" small dark
+                                            @click="openEditCustomerDialog(props.item, props.index)">
+                                                <v-icon small>edit</v-icon>
+                                            </v-btn>
+                                            <v-btn color="red" small dark icon
+                                            @click="deleteCustomer(props.item)">
+                                                <v-icon small>delete</v-icon>
+                                            </v-btn>
                                         </td>
                                     </template>
                                     <v-alert v-slot:no-results :value="true" color="error" icon="warning">
@@ -178,7 +182,7 @@
                 filter: '',
                 customer_headers: [{text:'name', value:'name', sortable:true}, {text: 'phone', value: 'phone'}
                                     , {text: 'email', value: 'email'}, {text: 'address', value: 'address'}
-                                    , {text:'registered on', value: 'created_at'}, {text: 'Actions', value: 'buttons'}]
+                                    , {text:'registered on', value: 'created_at'}, {text: '', value: 'buttons'}]
             }
         },
         methods: {

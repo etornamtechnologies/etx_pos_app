@@ -12,7 +12,7 @@
                         Users
                         </v-btn>
                 </v-card-title>
-                <v-card-text>
+                <v-card-text style="position:relative">
                     <v-list two-line>
                         <v-list-tile>
                             <v-list-tile-action>
@@ -54,6 +54,9 @@
                             </v-list-tile-content>
                         </v-list-tile>
                     </v-list>
+                    <v-btn color="warning" 
+                    @click="openResetDataDialog"
+                    style="bottom:0">RESET PASSWORD</v-btn>
                 </v-card-text>
             </v-card>
         </v-flex>
@@ -65,6 +68,7 @@
                         <thead>
                             <tr>
                                 <th>Sales Rep</th>
+                                <th>Supervisor</th>
                                 <th>Manager</th>
                                 <th>Admin</th>
                                 <th></th>
@@ -74,6 +78,9 @@
                             <tr>
                                 <td><input type="checkbox" class=""
                                         v-model="sales_rep">
+                                </td>
+                                <td><input type="checkbox" class=""
+                                        v-model="supervisor">
                                 </td>
                                 <td><input type="checkbox" class=""
                                         v-model="manager">
@@ -93,10 +100,29 @@
                 </v-card-text>
             </v-card>
         </v-flex>
+        <v-dialog v-model="isOpenResetDialog" persistent width="500">
+            <v-card style="position:relative">
+                <div class="my-loader" v-if="isUpdating"></div>
+                <form @submit.prevent="resetPassword">
+                <v-card-title class="headline">Reset User Password</v-card-title>
+                <v-card-text>
+                    <v-text-field
+                    label="label"
+                    required
+                    v-model="reset_data.password"></v-text-field>
+                </v-card-text>
+                <v-card-actions>
+                    <v-spacer></v-spacer>
+                    <v-btn color="red darken-1" flat ripple @click="isOpenResetDialog = false">CANCEL</v-btn>
+                    <v-btn color="green darken-1" flat type="submit">RESET</v-btn>
+                </v-card-actions>
+                </form>
+            </v-card>
+        </v-dialog>
     </v-layout>
 </template>
 <script>
-    import { ShowUser, AssignRoleToUser } from '../../utils/admin'
+    import { ShowUser, AssignRoleToUser, ResetUserPassword } from '../../utils/admin'
     export default {
         beforeRouteEnter: function(to, from, next) {
             next();
@@ -120,6 +146,10 @@
                 admin:false,
                 sales_rep: false,
                 manager: false,  
+                supervisor: false,
+                isOpenResetDialog: false,
+                isUpdating: false,
+                reset_data: {password: ''},
             }
         },
         methods: {
@@ -127,7 +157,6 @@
                 let id = this.$route.params.id;
                 ShowUser({ id })
                     .then(result=> {
-                        console.log(result)
                         this.user = result.user;
                         this.initRoles();
                     })
@@ -138,6 +167,9 @@
                 data.id = this.user.id
                 if(this.sales_rep) {
                     data.sales_rep = this.sales_rep;
+                }
+                if(this.supervisor) {
+                    data.supervisor = this.supervisor;
                 }
                 if(this.manager) {
                     data.manager = this.manager;
@@ -161,6 +193,9 @@
                     if(role.label == 'admin') {
                         this.admin = true;
                     }
+                    if(role.label == 'supervisor') {
+                        this.supervisor = true;
+                    }
                     if(role.label == 'manager') {
                         this.manager = true;
                     }
@@ -171,6 +206,22 @@
             },
             goBack: function() {
                 this.$router.go(-1);
+            },
+            openResetDataDialog: function() {
+                this.reset_data.password = '';
+                this.isOpenResetDialog = true;
+            },
+            resetPassword: function() {
+                console.log(this.reset_data);
+                let data = Vue.util.extend({}, this.reset_data);
+                data.id = (this.user || {}).id || null;
+                ResetUserPassword(data)
+                    .then(result=> {
+                        this.isOpenResetDialog = false;
+                    })
+                    .catch(err=> {
+                        
+                    })
             }
         }
     }

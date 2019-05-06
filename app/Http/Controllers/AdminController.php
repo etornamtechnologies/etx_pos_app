@@ -47,6 +47,12 @@ class AdminController extends Controller
         return response()->json(['code'=> 0, 'user'=> $user]);
     }
 
+    public function destroy($id)
+    {
+        User::destroy($id);
+        return response()->json(['code'=> 0, 'message'=> 'User deleted successfully'], 200);
+    }
+
     public function assignRole(Request $request, $id)
     {
         DB::transaction(function () use($request) {
@@ -56,6 +62,9 @@ class AdminController extends Controller
             $myuser->roles()->detach();
             if($request->has('sales_rep')) {
                 $myuser->roles()->attach(Role::where('label', 'sales-rep')->first());
+            }
+            if($request->has('supervisor')) {
+                $myuser->roles()->attach(Role::where('label', 'supervisor')->first());
             }
             if($request->has('manager')) {
                 $myuser->roles()->attach(Role::where('label', 'manager')->first());
@@ -200,5 +209,19 @@ class AdminController extends Controller
     {
         //Artisan::call('backup:run');
         return response()->json(['code'=> 0, 'message'=> 'backup created successfully']);
+    }
+
+    public function resetPassword(Request $request, $userId)
+    {
+        $request->validate([
+            'password'=> 'required'
+        ]);
+        $user = User::findOrFail($userId);
+        if(!$user) {
+            return response()->json(['code'=> 1, 'message'=> 'User not found']);
+        }
+        $user->password = bcrypt($request->get('password'));
+        $user->save();
+        return response()->json(['code'=> 0, 'message'=> 'Password changed'], 200);
     }
 }

@@ -22,7 +22,7 @@ class Product extends Model
     protected $table = "products";
 
     protected $fillable = ['label', 'barcode', 'description', 'category_id', 'manufacturer_id'
-                            , 'default_stock_unit', 'status', 'reorder_quantity'];
+                            , 'default_stock_unit', 'status', 'reorder_quantity', 'stock_quantity'];
 
     public function category()
     {

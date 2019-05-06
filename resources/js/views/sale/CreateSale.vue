@@ -53,7 +53,7 @@
                                 <button 
                                 class="btn btn-info mt-4" 
                                 type="submit"
-                                :disabled="cart.length < 1 || !cartIsValid"
+                                :disabled="cart.length < 1 || !cartIsValid || isLoading"
                                 @click="createSale">SELL</button>
                             </div>    
                         </div>
@@ -228,7 +228,17 @@
     import { CreateSale } from '../../utils/pos'
     import { Message } from 'element-ui';
     import { CreateCustomer, GetCustomer } from '../../utils/inventory'
+    import { hasAnyRole } from '../../utils/helpers'
     export default {
+        beforeRouteEnter (to, from, next) {
+            hasAnyRole(['admin','manager','sales-rep','supervisor'], (res)=> {
+                if(res) {
+                    next()
+                } else {
+                    next(from)
+                }
+            })
+        },
         mounted() {
             this.fetchCustomers()
         },
@@ -243,7 +253,8 @@
                 summary: {customer_id:"", total_cost:null, amount_paid:null},
                 isLoading: false,
                 showCreateCustomerModal: false,
-                receipt_data: {}
+                receipt_data: {},
+                isLoading: false,
             }
         },
         methods: {
@@ -255,8 +266,7 @@
 
             },        
             searchProduct: function() {
-                console.log('search');
-                GetProduct({filter:this.filter})
+                GetProduct({ filter:this.filter, pos_search:true })
                     .then(result=> {
                         let res = result;
                         if(res.code == 0) {
@@ -323,6 +333,16 @@
             },
             getEntrySellingPrice: function(entry) {
                 let stockUnit = this.getEntrySelectedStockUnit(entry);
+                let stock = (stockUnit.pivot || {});
+                let stockSp = stock.selling_price || 0;
+                let stockCp = stock.cost_price || 0;
+                if(stockCp > stockSp) {
+                    Message({
+                        message: 'Selling Price is less than cost price!',
+                        type: 'warning',
+                        duration: 2 * 1000
+                    })
+                }
                 let price = ((stockUnit.pivot || {}).selling_price) || 0;
                 return (stockUnit.pivot || {}).selling_price || 0;
             },
@@ -344,14 +364,14 @@
                 let summaryData = this.summary;
                 let data = {summary: summaryData, entries: entries};
                 let ss = 6
-                console.log('errList',entriesData.errors);
                 if(entriesData.errors.length > 0) {
                     return false;
                 } else {
+                    this.isLoading = true;
                     CreateSale(data)
                     .then(result=> {
+                        this.isLoading = false
                         if(result.code == 0) {
-                            console.log('invoice',result)
                             this.receipt_data = result.receipt_data;
                             this.$nextTick(()=> {
                                 window.print();
@@ -362,7 +382,11 @@
                                 this.receipt_data = {};
                             })
                         } else {
+                            
                         }
+                    })
+                    .catch(err=> {
+                        this.isLoading = false;
                     })
                 }
             },
@@ -475,6 +499,7 @@
     }
     .receipt {
         display: none;
+        overflow-x: hidden;
     }
 
 

@@ -48,14 +48,14 @@ class Sale extends Model
     public static function todaySaleCount()
     {
         $date = Carbon::now();
-        $query = Sale::whereDate('created_at', $date)->get();
+        $query = Sale::where('status', 'active')->whereDate('created_at', $date)->get();
         return count($query);
     }
 
     public static function todaySaleAmount()
     {
         $date = Carbon::now();
-        $sales = Sale::whereDate('created_at', $date)->get();
+        $sales = Sale::where('status', 'active')->whereDate('created_at', $date)->get();
         $total = 0;
         foreach($sales as $sale) {
             $total = $total + $sale->total_cost;
@@ -70,7 +70,7 @@ class Sale extends Model
 
     public static function totalSaleAmount()
     {
-        $sales = Sale::all();
+        $sales = Sale::where('status', 'active')->get();
         $total = 0;
         foreach($sales as $sale) {
             $amt = $sale->total_cost;

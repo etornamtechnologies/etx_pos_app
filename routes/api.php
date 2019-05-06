@@ -45,6 +45,7 @@ Route::post('/products', 'ProductController@store');
 Route::put('/products/{product}', 'ProductController@update');
 Route::delete('/products/{product}', 'ProductController@destroy');
 Route::post('/products/entries', 'ProductController@storeEntries');
+Route::post('/products/create-csv', 'ProductController@storeProductsWithCsv');
 
 
 Route::get('/inventory/products/{product}/stock-units/{stock_unit}/add', 'InventoryController@addStockUnit');
@@ -101,6 +102,7 @@ Route::put('/admin/users/{user}/assign-role', 'AdminController@assignRole');
 Route::delete('/admin/users/{user}', 'AdminController@destroy');
 Route::get('/admin/create-backup', 'AdminController@createBackup');
 Route::get('/admin/restore-backup/{backup}', 'AdminController@restoreBackup');
+Route::post('/admin/users/{user}/reset-password', 'AdminController@resetPassword');
 
 Route::get('/users', 'UserController@index');
 
@@ -133,3 +135,4 @@ Route::get('ledgers/batches', 'LedgerController@getAllProductBatches');
 
 Route::put('batches/{batch}', 'BatchController@update');
 Route::delete('batches/{batch}', 'BatchController@destroy');
+Route::post('batches', 'BatchController@addBatchToProduct');

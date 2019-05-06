@@ -32,6 +32,16 @@ export function createProduct(product_data) {
     })
 }
 
+export function createProductCsv(_data) {
+    const data = _data;
+    return request({
+        url: '/api/products/create-csv',
+        method: 'post',
+        data
+    })
+}
+
+
 export function createProductEntries(product_data) {
     const data = product_data;
     return request({

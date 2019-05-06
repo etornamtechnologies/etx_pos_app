@@ -15,7 +15,7 @@ class InPaymentController extends Controller
     public function __construct()
     {
         $this->middleware('api_auth');
-        $this->middleware('api_role:admin,manager,sale-rep')->except(['index']);
+        $this->middleware('api_role:admin,manager,sale-rep,supervisor')->except(['index']);
     }
 
     public function store(Request $request)

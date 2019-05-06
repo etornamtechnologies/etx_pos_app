@@ -55,7 +55,7 @@ class AuthController extends Controller
                 'password'=> Hash::make($request->password),
                 'api_token'=> str_random(50)
             ]);
-            return response()->json(['user'=> $user, 'code'=> 200]);
+            return response()->json(['user'=> $user, 'code'=> 0]);
         } catch(Exception $e) {
             return response()->json(['code'=>500, 'message'=>'Server error']);
         }

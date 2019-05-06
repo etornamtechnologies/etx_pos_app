@@ -172,7 +172,7 @@
         },
         methods: {
             searchProduct: function() {
-                GetProduct({filter:this.filter})
+                GetProduct({filter:this.filter, pos_search:true})
                     .then(result=> {
                         this.handleProductSearchResult(result.products);
                     })

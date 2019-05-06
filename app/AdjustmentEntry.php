@@ -3,15 +3,21 @@
 namespace App;
 
 
-use Illuminate\Database\Eloquent\Model;
+use App\Batch;
+use App\Product;
+use App\StockUnit;
 use App\Adjustment;
+use App\AdjustmentEntry;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Database\Eloquent\Model;
 
 class AdjustmentEntry extends Model
 {
     protected $table = "adjustment_entries";
 
     protected $fillable = ["product_id", "stock_unit_id", "adjustment_id"
-                            , "old_quantity", "new_quantity", "product_label", "stock_unit_label", "cost_price"];
+                            , "old_quantity", "new_quantity", "product_label"
+                            , "stock_unit_label", "cost_price", "selling_price"];
 
     public function adjsutment()
     {
@@ -41,6 +47,7 @@ class AdjustmentEntry extends Model
                 'product_label'=> $product->label,
                 'stock_unit_label'=> $stockUnit->label,
                 'cost_price'=> $productStockData->cost_price,
+                'selling_price'=> $productStockData->selling_price,
             ]);
             $qty = $stockQty + $entry['difference'];
             $product->stock_quantity = $qty;

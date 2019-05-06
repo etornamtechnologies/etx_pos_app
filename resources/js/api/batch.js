@@ -10,6 +10,15 @@ export function updateBatch(_data) {
     })
 }
 
+export function addBatchToProduct(_data) {
+    const data = _data || null;
+    return request({
+        url: `/api/batches`,
+        method: 'post',
+        data
+    })
+}
+
 export function deleteBatch(_data) {
     const data = _data || null;
     return request({

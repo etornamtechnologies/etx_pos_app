@@ -37,7 +37,8 @@
                                 </v-list-tile-title>
                             </v-list-tile>
                             <v-list-tile
-                            key="upload_product_csv">
+                            key="upload_product_csv"
+                            @click="goProductCreateCsvPage">
                                 <v-list-tile-title>
                                     <v-icon small>upload_file</v-icon>
                                     Upload product (CSV)
@@ -84,13 +85,25 @@
                                     <td class="text-xs-left">{{ (props.item.category || {}).label }}</td>
                                     <td class="text-xs-left">{{ props.item.stock_quantity }} {{ (props.item.default_sku || {}).label }}</td>
                                     <td class="text-xs-left">{{ props.item.status }}</td>
-                                    <td class="text-xs-left">
-                                        <v-icon
-                                        @click="openEditProductDialog(props.item, props.index)">edit</v-icon>
-                                        <v-icon color="red"
-                                        @click="deleteProduct(props.item)">delete</v-icon>
-                                        <v-icon
-                                        @click="productDetail(props.item)">info</v-icon>
+                                    <td class="text-xs-right">
+                                        <v-btn 
+                                        color="cyan"
+                                        icon small dark
+                                         @click="productDetail(props.item)">
+                                            <v-icon small>info</v-icon>
+                                        </v-btn>
+                                        <v-btn icon
+                                        color="primary" small dark
+                                        @click="openEditProductDialog(props.item, props.index)"
+                                        >
+                                            <v-icon small>edit</v-icon>
+                                        </v-btn>
+                                        <v-btn icon
+                                        @click="deleteProduct(props.item)"
+                                        color="error" dark small
+                                        >
+                                            <v-icon small>delete</v-icon>
+                                        </v-btn>
                                     </td>
                                 </template>
                                 <v-alert v-slot:no-results :value="true" color="error" icon="warning">
@@ -133,6 +146,13 @@
                 v-model="valid">
                 <v-card-title class="headline">create product</v-card-title>
                 <v-card-text>
+                    <v-select
+                    label="category *"
+                    item-text="label"
+                    item-value="id"
+                    :rules="[v => !!v || 'category is required']"
+                    v-model="product.category_id"
+                    :items="categories"></v-select>
                     <v-text-field
                     label="label *"
                     required
@@ -142,13 +162,6 @@
                     label="barcode"
                     required
                     v-model="product.barcode"></v-text-field>
-                    <v-select
-                    label="category *"
-                    item-text="label"
-                    item-value="id"
-                    :rules="[v => !!v || 'category is required']"
-                    v-model="product.category_id"
-                    :items="categories"></v-select>
                     <v-select
                         label="default stock unit *"
                         item-text="label"
@@ -208,7 +221,7 @@
     import { hasAnyRole } from '../../utils/helpers'
     export default {
         beforeRouteEnter (to, from, next) {
-            hasAnyRole(['admin','manager','sales-reps'], (res)=> {
+            hasAnyRole(['admin','manager','supervisor'], (res)=> {
                 if(res) {
                     next()
                 } else {
@@ -297,6 +310,9 @@
                     .catch(err=> {
                         this.isUpdating = false;
                     })
+            },
+            goProductCreateCsvPage: function(){
+                this.$router.push({ name: 'product-create-csv' })
             },
             openEditProductDialog: function(row, index){
                 this.edit_product = Vue.util.extend({},row);

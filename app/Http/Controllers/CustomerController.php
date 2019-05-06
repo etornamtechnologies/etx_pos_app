@@ -12,7 +12,7 @@ class CustomerController extends Controller
     public function __construct()
     {
        $this->middleware('api_auth');
-       $this->middleware('api_role:admin,manager')->except(['store','index']);
+       $this->middleware('api_role:admin,manager,sales-rep,supervisor');
     }
 
     public function indexPage()

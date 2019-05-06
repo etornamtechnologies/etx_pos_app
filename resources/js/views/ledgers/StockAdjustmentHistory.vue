@@ -14,7 +14,8 @@
                         prepend-inner-icon="search"
                         v-model="search"></v-text-field>
                     </v-card-title>
-                    <v-card-text>
+                    <v-card-text style="min-height:400px; position:relative">
+                        <div class="my-loader" v-if="isLoading"></div>
                         <v-data-table
                         :search="search"
                         :items="ledgers"
@@ -23,6 +24,7 @@
                                 <td class="text-xs-left">{{ props.item.product }}</td>
                                 <td class="text-xs-left">{{ props.item.user }}</td>
                                 <td class="text-xs-left">{{ props.item.created_at }}</td>
+                                <td class="text-xs-left">{{ props.item.reason }}</td>
                                 <td class="text-xs-left">{{ props.item.old_quantity || 0 }} {{ props.item.stock_unit }} (s)</td>
                                 <td class="text-xs-left">{{ props.item.new_quantity }} {{ props.item.stock_unit }} (s)</td>
                                 <td class="text-xs-left">{{ props.item.quantity_balance }} {{ props.item.stock_unit }} (s)</td>
@@ -46,8 +48,8 @@
                 search: '',
                 ledgers: [],
                 headers: [{text:'Product', value:'product'}, {text:'User', value:'user'}, {text:'Date', value:'date'}
-                            , {text:'Old-Quantity', value:'old_quantity'}, {text:'New-Quantity', value:'new_quantity'}
-                            , {text:'Quantity Balance', value:'quantity_balance'}
+                            , {text: 'Reason', value: 'reason'}, {text:'Old-Quantity', value:'old_quantity'}
+                            , {text:'New-Quantity', value:'new_quantity'}, {text:'Quantity Balance', value:'quantity_balance'}
                             ],
                 isLoading: false,
             }
@@ -59,7 +61,6 @@
                     .then(result=> {
                         this.isLoading = false
                         this.ledgers = (result || {}).stock_adjustments || [];
-                        console.log('led', this.ledgers)
                     })
                     .catch(err=> {
                         this.isLoading = false;

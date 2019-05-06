@@ -53,3 +53,12 @@ export function apiRestoreBackup(_data) {
         data
     })
 }
+
+export function apiResetUserPassword(_data) {
+    const data = _data || {};
+    return request({
+        url: `/api/admin/users/${data.id}/reset-password`,
+        method: 'post',
+        data
+    })
+}

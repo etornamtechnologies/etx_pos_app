@@ -71,3 +71,15 @@ export function RestoreBackup( _data ) {
         })
     })
 }
+
+export function ResetUserPassword( _data ) {
+    return new Promise((resolve, reject) => {
+        adminApi.apiResetUserPassword(_data)
+        .then(response => {
+            const data = response || {}
+            resolve(data)
+        }).catch(error => {
+            reject(error)
+        })
+    })
+}

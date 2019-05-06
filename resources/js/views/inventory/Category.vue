@@ -32,11 +32,16 @@
                                 <td>{{ props.item.label }}</td>
                                 <td class="text-xs-left">{{ props.item.created_at }}</td>
                                 <td class="text-xs-left">{{ props.item.products_count }}</td>
-                                <td class="text-xs-left">
-                                    <v-icon
-                                    @click="openEditCategoryDialog(props.item, props.index)">edit</v-icon>
-                                    <v-icon color="red"
-                                    @click="deleteCategory(props.item)">delete</v-icon>
+                                <td class="text-xs-right">
+                                    <v-btn icon small dark color="primary"
+                                    @click="openEditCategoryDialog(props.item, props.index)"
+                                    >
+                                        <v-icon small>edit</v-icon>
+                                    </v-btn>
+                                    <v-btn icon small dark color="error"
+                                    @click="deleteCategory(props.item)">
+                                        <v-icon small>delete</v-icon>
+                                    </v-btn>
                                 </td>
                             </template>
                             <v-alert v-slot:no-results :value="true" color="error" icon="warning">
@@ -112,7 +117,7 @@
             this.fetchCategories();
         },
         beforeRouteEnter (to, from, next) {
-            hasAnyRole(['admin','manager','sales-reps'], (res)=> {
+            hasAnyRole(['admin','manager','supervisor'], (res)=> {
                 if(res) {
                     next()
                 } else {

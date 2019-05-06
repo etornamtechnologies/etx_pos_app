@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Batch;
 use Carbon\Carbon;
+use App\helpers\Util;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
@@ -107,5 +108,24 @@ class BatchController extends Controller
         $batch = Batch::findOrFail($id);
         $batch->delete();
         return response()->json(['code'=>0, 'message'=> "Deleted successfully"], 200);
+    }
+
+    public function addBatchToProduct(Request $request)
+    {
+        $request->validate([
+            'batch_no'=> 'required|unique:batches',
+            'expiry_date'=> 'required',
+            'quantity'=> 'required',
+            'product_id'=> 'required'
+        ]);
+        $input = $request->all();
+        $expiryDate = Util::convertDateToCarbon($input['expiry_date']);
+        Batch::create([
+            'batch_no'=> $input['batch_no'],
+            'quantity'=> $input['quantity'],
+            'expiry_date'=> $expiryDate,
+            'product_id'=> $input['product_id']
+        ]);
+        return response()->json(['code'=> 0], 200);
     }
 }

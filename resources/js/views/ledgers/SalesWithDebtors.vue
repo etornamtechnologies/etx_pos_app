@@ -14,7 +14,8 @@
                         color="cyan"
                         prepend-inner-icon="search"></v-text-field>
                     </v-card-title>
-                    <v-card-text>
+                    <v-card-text style="min-height:400px; position:relative">
+                        <div class="my-loader" v-if="isLoading"></div>
                         <v-data-table
                         :search="search"
                         :items="ledgers"

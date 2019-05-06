@@ -17,8 +17,13 @@ class RolesTableSeeder extends Seeder
         $owner->display = 'Manager';
         $owner->save();
 
+        $sup = new Role();
+        $sup->label = 'supervisor';
+        $sup->display = 'Supervisor';
+        $sup->save();
+
         $admin = new Role();
-        $admin->label         = 'admin';
+        $admin->label = 'admin';
         $admin->display = 'Admin';
         $admin->save();
 

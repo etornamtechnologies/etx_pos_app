@@ -37,11 +37,15 @@
                             <template v-slot:items="props">
                                 <td>{{ props.item.label }}</td>
                                 <td class="text-xs-left">{{ props.item.created_at }}</td>
-                                <td class="text-xs-left">
-                                    <v-icon
-                                    @click="openEditStockUnitDialog(props.item, props.index)">edit</v-icon>
-                                    <v-icon color="red"
-                                    @click="deleteStockUnit(props.item)">delete</v-icon>
+                                <td class="text-xs-right">
+                                    <v-btn icon small dark color="primary"
+                                    @click="openEditStockUnitDialog(props.item, props.index)">
+                                        <v-icon small>edit</v-icon>
+                                    </v-btn>
+                                    <v-btn icon color="error" small dark
+                                    @click="deleteStockUnit(props.item)">
+                                        <v-icon small>delete</v-icon>
+                                    </v-btn>
                                 </td>
                             </template>
                             <v-alert v-slot:no-results :value="true" color="error" icon="warning">
@@ -109,8 +113,18 @@
 </template>
 
 <script>
-import {GetStockUnit, CreateStockUnit, UpdateStockUnit, DeleteStockUnit} from '../../utils/stock-unit'
+    import {GetStockUnit, CreateStockUnit, UpdateStockUnit, DeleteStockUnit} from '../../utils/stock-unit'
+    import { hasAnyRole } from '../../utils/helpers'
     export default {
+        beforeRouteEnter (to, from, next) {
+            hasAnyRole(['supervisor','admin','manager'], (res)=> {
+                if(res) {
+                    next()
+                } else {
+                    next(from)
+                }
+            })
+        },
         mounted() {
             this.fetchStockUnit();
         },
@@ -132,7 +146,6 @@ import {GetStockUnit, CreateStockUnit, UpdateStockUnit, DeleteStockUnit} from '.
                 this.isLoading = true;
                 GetStockUnit({})
                     .then(result=> {
-                        console.log('cats',result)
                         this.isLoading = false;
                         this.stock_units = result.stock_units || []
                     })
@@ -180,7 +193,6 @@ import {GetStockUnit, CreateStockUnit, UpdateStockUnit, DeleteStockUnit} from '.
                     DeleteStockUnit(row)
                         .then(result=> {
                             let index = this.stock_units.indexOf(row);
-                            console.log(index);
                             this.stock_units.splice(index, 1);
                         })
                         .catch(err=> {
