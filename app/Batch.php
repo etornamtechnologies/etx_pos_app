@@ -42,7 +42,7 @@ class Batch extends Model
                                     ->where('quantity', '>', 0)
                                     ->orderBy('expiry_date', 'ASC')->get();  
         $expiryDateForEntry = $query->first();                                                 
-        $remainingQty = $quantity;  
+        $remainingQty = $quantity;
         $done = 0;                
         foreach($query as $b) {
             $batchData = Batch::findOrFail($b->id);
@@ -60,6 +60,17 @@ class Batch extends Model
             }
         }
         return $expiryDateForEntry;
+    }
+
+    public static function addLastBatch($product_id, $quantity) {
+        $batches = Batch::where('product_id', $product_id)
+                      ->orderBy('expiry_date', 'DESC')
+                      ->get();
+        $lastBatch = $batches[0];
+        if($lastBatch) {
+            Batch::where('batch_no', $lastBatch['batch_no'])
+                ->increment('quantity', $quantity);
+        }              
     }
 
     public static function addSaleEntriesBatches($saleId)

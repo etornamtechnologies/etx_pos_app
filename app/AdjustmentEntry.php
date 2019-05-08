@@ -37,6 +37,16 @@ class AdjustmentEntry extends Model
             $stockQty = $product->stock_quantity;
             if($entry['batch_number'] && $entry['expiry_date']) {
                 Batch::addProductToBatch($entry['batch_number'], $entry['expiry_date'], $productId, $entry['difference']); 
+            } else {
+                $batchExist = Batch::where('product_id', $productId)->first();
+                if($batchExist) {
+                    if($entry['difference'] < 0) {
+                        $qty = abs($entry['difference']);
+                        Batch::removeFirstBatch($productId, $qty);
+                    } else {
+                        Batch::addLastBatch($productId, $entry['difference']);
+                    }
+                }
             }
             AdjustmentEntry::create([
                 'product_id'=> $productId,
