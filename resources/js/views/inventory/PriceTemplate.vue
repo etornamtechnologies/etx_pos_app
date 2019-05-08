@@ -42,6 +42,7 @@
                         :items="templates"
                         :headers="template_headers"
                         :search="filter"
+                        :rows-per-page-items="myRows"
                         >
                             <template v-slot:items="props">
                                 <td>
@@ -110,7 +111,8 @@
                                     , {text:'formula', value:'formula'},{text:'apply on category', value:'category'}
                                     ,{text:'status', value:'status'},{text:'actions', value:'buttons'}],
                 isApplyLoading: false,
-                isLoading: false,                    
+                isLoading: false,   
+                myRows: [10,20,30],                 
             }
         },
         methods: {

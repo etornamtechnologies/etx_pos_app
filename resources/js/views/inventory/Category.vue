@@ -27,6 +27,7 @@
                             :headers="headers"
                             :items="categories"
                             :search="search"
+                            :rows-per-page-items="myRows"
                             >
                             <template v-slot:items="props">
                                 <td>{{ props.item.label }}</td>
@@ -137,6 +138,7 @@
                 edit_category: {id:null, label:''},
                 isLoading: false,
                 isUpdating: false,
+                myRows: [10,20,30],
             }
         },
         methods: {

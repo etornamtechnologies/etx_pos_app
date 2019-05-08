@@ -33,6 +33,7 @@
                             :headers="headers"
                             :items="stock_units"
                             :search="search"
+                            :rows-per-page-items="myRows"
                             >
                             <template v-slot:items="props">
                                 <td>{{ props.item.label }}</td>
@@ -56,14 +57,14 @@
                     </v-layout>
                 </v-card-text>
                 <v-btn
-                        color="pink"
-                        dark
-                        small
-                        absolute
-                        bottom
-                        right
-                        fab
-                        @click="isOpenCreateStockUnitDialog = true"
+                color="pink"
+                dark
+                small
+                absolute
+                bottom
+                right
+                fab
+                @click="isOpenCreateStockUnitDialog = true"
                 >
                     <v-icon>add</v-icon>
                 </v-btn>
@@ -139,6 +140,7 @@
                 edit_stock_unit: {id:null, label:''},
                 isLoading: false,
                 isUpdating: false,
+                myRows: [10,20,30],
             }
         },
         methods: {

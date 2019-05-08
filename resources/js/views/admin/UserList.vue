@@ -27,6 +27,7 @@
                     :items="users"
                     :headers="headers"
                     :search="filter"
+                    :rows-per-page-items="myRows"
                     >
                         <template v-slot:items="props">
                             <td>{{ props.item.name }}</td>
@@ -117,6 +118,7 @@
                 showEditDialog: false,
                 isUpdating: false,
                 isCreating: false,
+                myRows: [10,20,30],
             }
         },
         methods: {

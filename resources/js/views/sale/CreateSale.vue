@@ -284,8 +284,9 @@
             createCustomer: function() {
                 CreateCustomer(this.customer)
                     .then(result=> {
-                        this.customers.push(result.customer)
+                        this.customers.push(result.customer || {})
                         this.showCreateCustomerModal = false;
+                        this.summary.customer_id = (result.customer || {}).id || null;
                     })
                     .catch(err=> {
 

@@ -19,7 +19,8 @@
                         <v-data-table
                         :search="search"
                         :items="ledgers"
-                        :headers="headers">
+                        :headers="headers"
+                        :rows-per-page-items="myRows">
                             <template v-slot:items="props">
                                 <td class="text-xs-left">{{ props.item.ref_code }}</td>
                                 <td class="text-xs-left">{{ props.item.user }}</td>
@@ -52,6 +53,7 @@
                             , {text:'Amount Owed (GHC)', value:'amount_owed'}
                             ],
                 isLoading: false,
+                myRows: [10,20,30]
             }
         },
         methods: {

@@ -19,7 +19,8 @@
                         <v-data-table
                         :search="search"
                         :items="ledgers"
-                        :headers="headers">
+                        :headers="headers"
+                        :rows-per-page-items="myRows">
                             <template v-slot:items="props">
                                 <td class="text-xs-left">{{ props.item.product }}</td>
                                 <td class="text-xs-left">{{ props.item.user }}</td>
@@ -52,6 +53,7 @@
                             , {text:'New-Quantity', value:'new_quantity'}, {text:'Quantity Balance', value:'quantity_balance'}
                             ],
                 isLoading: false,
+                myRows: [10,20,30],
             }
         },
         methods: {

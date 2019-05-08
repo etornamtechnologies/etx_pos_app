@@ -48,6 +48,7 @@
                                 :headers="supplier_headers"
                                 :items="suppliers"
                                 :search="filter"
+                                :rows-per-page-items="myRows"
                                 >
                                     <template v-slot:items="props">
                                         <td>{{ props.item.name || '---' }}</td>
@@ -182,7 +183,8 @@
                 filter: '',
                 supplier_headers: [{text:'name', value:'name', sortable:true}, {text: 'phone', value: 'phone'}
                                     , {text: 'email', value: 'email'}, {text: 'address', value: 'address'}
-                                    , {text:'registered on', value: 'created_at'}, {text: '', value: 'buttons'}]
+                                    , {text:'registered on', value: 'created_at'}, {text: '', value: 'buttons'}],
+                myRows: [10,20,30],                    
             }
         },
         methods: {
