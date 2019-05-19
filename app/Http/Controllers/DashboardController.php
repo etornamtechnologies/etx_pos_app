@@ -43,6 +43,7 @@ class DashboardController extends Controller
         $dashboard['customer_count'] = count(Customer::all());
         $dashboard['sale_with_debt_count'] = Sale::salesWithDebtCount();
         $dashboard['purchase_with_credit_count'] = Purchase::purchaseWithCreditCount();
+        $dashboard['total_value'] = $this->totalValue();
         $result['dashboard'] = $dashboard;
         return response()->json($result, 200);
     }
@@ -85,6 +86,23 @@ class DashboardController extends Controller
                                     ,'batches.batch_no as batch_no')
                         ->get();
         return count($batches);                
+    }
+
+    public static function totalValue()
+    {
+        $totalSellingPrice = 0; 
+        $stocks = DB::table('product_stock_unit')
+                        ->leftJoin('products', 'products.default_stock_unit', '=', 'product_stock_unit.stock_unit_id')
+                        ->select('product_stock_unit.selling_price as selling_price'
+                                    , 'product_stock_unit.cost_price as cost_price'
+                                    , 'products.stock_quantity as quantity')
+                        ->get()->toArray();   
+                        //dd($products);            
+        foreach($stocks as $stock) {
+            $tot = $stock->quantity*$stock->selling_price;
+            $totalSellingPrice = $totalSellingPrice + $tot;
+        }                
+        return $totalSellingPrice;
     }
 
 }

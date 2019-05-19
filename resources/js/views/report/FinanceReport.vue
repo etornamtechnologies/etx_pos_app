@@ -10,6 +10,11 @@
                     <v-card-text>
                         <v-layout column style="padding:10px">
                             <v-flex xs12>
+                                <span style="font-weight:bold; font-size:16px">
+                                    TOTAL PRODUCTS VALUE: GHC{{ getMoney(total_value) }}
+                                </span>
+                            </v-flex>
+                            <v-flex xs12>
                                 <v-layout row wrap>
                                     <v-flex xs12>
                                         <v-form
@@ -186,6 +191,7 @@
 
                 total_purchase: {},
                 isLoading: false,
+                total_value: 0,
             }
         },
         methods: {
@@ -198,6 +204,7 @@
                         this.total_sale = result.total_sale
                         this.sale_profit = result.sale_profit
                         this.info = result.info || '';
+                        this.total_value = (result || {}).total_value;
                         this.total_purchase = result.total_purchase;
                     })
                     .catch(err=> {

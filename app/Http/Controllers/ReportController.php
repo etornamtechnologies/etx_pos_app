@@ -358,6 +358,7 @@ class ReportController extends Controller
         $td = new Carbon($toDate);
         $result = [];
         $result['code'] = 0;
+        $result['total_value'] = DashboardController::totalValue();
         $result['sale_profit'] = $this->getSaleProfit($fromDate, $toDate);
         $result['total_sale'] = $this->totalSale($fromDate, $toDate);
         $result['info'] = "Financial report from ".$fd->toFormattedDateString()." to ".$td->toFormattedDateString();

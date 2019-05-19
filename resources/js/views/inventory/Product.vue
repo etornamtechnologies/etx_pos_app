@@ -192,7 +192,7 @@
                         :rules="[v => !!v || 'label is required']"
                         v-model="edit_product.label"></v-text-field>
                         <v-text-field
-                        label="label"
+                        label="barcode"
                         required
                         v-model="edit_product.barcode"></v-text-field>
                         <v-select
@@ -202,6 +202,10 @@
                         :rules="[v => !!v || 'category is required']"
                         v-model="edit_product.category_id"
                         :items="categories"></v-select>
+                        <v-text-field
+                        label="stock quantity"
+                        required
+                        v-model="edit_product.stock_quantity"></v-text-field>
                     </v-card-text>
                     <v-card-actions>
                         <v-spacer></v-spacer>

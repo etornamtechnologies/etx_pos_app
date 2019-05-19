@@ -147,10 +147,11 @@ class ProductController extends Controller
 
     public function update(Request $request, $productId)
     {
+        //dd($request->all());
         $request->validate([
             'label'=>'required|unique:products,label,'.$productId.'id',
             'category_id'=> 'required',
-            'barcode'=> 'nullable|unique:products,barcode,'.$productId.'id'
+            'barcode'=> 'nullable|unique:products,barcode,'.$productId.'id',
         ]);
         $product = Product::findOrFail($productId);
         $result = [];
@@ -175,6 +176,7 @@ class ProductController extends Controller
                 'default_stock_unit'=>$request->default_stock_unit,
                 'reorder_quantity'=>$request->reorder_quantity,
                 'status'=> $request->status,
+                'stock_quantity'=> $request->stock_quantity
             ]);
             $result['code'] = 0;
             $result['product'] = $product;

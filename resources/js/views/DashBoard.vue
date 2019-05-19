@@ -114,6 +114,14 @@
                                                     GHC {{ getMoney(dashboard.this_month_purchase_total_amount) }}
                                                 </v-list-tile-content>
                                             </v-list-tile>
+                                            <v-list-tile>
+                                                <v-list-tile-action>
+                                                    <span style="font-weight:bold; margin-right:5px">Total Products Value:</span>
+                                                </v-list-tile-action>
+                                                <v-list-tile-content>
+                                                    GHC {{ getMoney((dashboard || {}).total_value) }}
+                                                </v-list-tile-content>
+                                            </v-list-tile>
                                         </v-list>
                                     </v-card-text>
                                     <v-card-actions>
