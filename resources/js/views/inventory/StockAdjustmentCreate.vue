@@ -145,7 +145,7 @@
     import { CreateReason, GetReason, CreateStockAdjustment } from '../../utils/adjustment'
     export default {
         beforeRouteEnter (to, from, next) {
-            hasAnyRole(['admin','manager'], (res)=> {
+            hasAnyRole(['admin','manager', 'supervisor'], (res)=> {
                 if(res) {
                     next()
                 } else {

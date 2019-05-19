@@ -19,7 +19,8 @@
                         <v-data-table
                         :search="search"
                         :items="products"
-                        :headers="headers">
+                        :headers="headers"
+                        :rows-per-page-items="myRows">
                             <template v-slot:items="props">
                                 <td class="text-xs-left">{{ props.item.product }}</td>
                                 <td class="text-xs-left">{{ props.item.barcode }}</td>
@@ -48,6 +49,7 @@
                 headers: [{text:'Product', value:'product'}, {text:'barcode', value:'barcode'}
                              ,{text: 'Quantity', value:'quantity'}, {text:'Restock Quantity', value:'reorder_quantity'}],
                 isLoading: false,
+                myRows: [10,20,30]
             }
         },
         methods: {

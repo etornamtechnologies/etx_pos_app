@@ -74,7 +74,7 @@ class SaleController extends Controller
             $customerId = $input['summary']['customer_id'];
             $paid = $input['summary']['amount_paid'] * 100;
             $amountPaid = $paid;
-            $myDate = new Carbon();
+            $myDate = Carbon::now();
             $totalCost = $this->getTotalSaleCost($entries)['total'];
             $change = $paid - $totalCost;
             if($change > 0) {
@@ -83,7 +83,7 @@ class SaleController extends Controller
             $receiptEntries = $this->getTotalSaleCost($entries)['receipt_entries'];
             $receiptSummary = ['reference_number'=> $refCode, 'amount_paid'=> $paid/100
                                 ,'total_cost'=> $totalCost/100, 'change'=> $change/100
-                                ,'user'=> $user, 'date'=> $myDate];
+                                ,'user'=> $user, 'date'=> $myDate->toDateTimeString()];
             //create sale
             $sale = Sale::create([
                 'customer_id'=>$customerId,

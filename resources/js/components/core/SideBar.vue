@@ -63,7 +63,7 @@
                 <el-menu-item index="/inventory/products/create/entries">+ Create Products</el-menu-item>
                 <el-menu-item index="/inventory/categories">Categories</el-menu-item>
                 <el-menu-item index="/inventory/stock-units">Stock-Units</el-menu-item>
-                <el-menu-item index="/inventory/price-templates">Price Templates</el-menu-item>
+                <el-menu-item v-if="showPriceTemplate" index="/inventory/price-templates">Price Templates</el-menu-item>
                 <el-menu-item index="/inventory/stock-adjustments/create">+ Create Stock-Adjustment</el-menu-item>
             </el-menu-item-group>
         </el-submenu>
@@ -225,6 +225,12 @@
             showHistoryModule: function() {
                 if(HasAnyRole(['admin', 'manager'])) {
                     return true;
+                }
+                return false;
+            },
+            showPriceTemplate: function() {
+                if(HasAnyRole(['admin','manager'])) {
+                    return true
                 }
                 return false;
             }

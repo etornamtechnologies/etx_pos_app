@@ -629,6 +629,7 @@
         .summary-item {
             text-align: center;
             font-weight: bold;
+            font-size: 20px;
         }
     }
 </style>

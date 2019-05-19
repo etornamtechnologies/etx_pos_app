@@ -20,9 +20,11 @@
                     </v-btn>
                 </v-toolbar>
                 <v-card-title>
-                    <span style="color:blue"><v-icon small color="">add</v-icon> Create Category</span>
+                    <span
+                    @click="openCreateCategoryDialog" 
+                    style="color:blue; cursor:pointer"><v-icon small color="">add</v-icon> Create Category</span>
                 </v-card-title>
-                <v-card-text>
+                <v-card-text style="max-height:500px; overflow-y:auto">
                     <table class="table">
                         <thead>
                             <tr>
@@ -92,13 +94,32 @@
                 </v-card>
             </v-flex>
         </v-layout>
+        <v-dialog v-model="createCategoryDialog" persistent width="500">
+            <v-card style="position:relative">
+                <div class="my-loader" v-if="isUpdating"></div>
+                <form @submit.prevent="createCategory">
+                <v-card-title class="headline">create category</v-card-title>
+                <v-card-text>
+                    <v-text-field
+                    label="label"
+                    v-model="category.label"
+                    required></v-text-field>
+                </v-card-text>
+                <v-card-actions>
+                    <v-spacer></v-spacer>
+                    <v-btn color="red darken-1" flat ripple @click="createCategoryDialog = false">CANCEL</v-btn>
+                    <v-btn color="green darken-1" flat type="submit">CREATE</v-btn>
+                </v-card-actions>
+                </form>
+            </v-card>
+        </v-dialog>
     </v-container>
 </template>
 <script>
     import { Message } from 'element-ui'
-    import {GetCategory} from '../../utils/category'
     import {GetStockUnit} from '../../utils/stock-unit'
     import {CreateProductEntries} from '../../utils/product'
+    import {GetCategory, CreateCategory, UpdateCategory, DeleteCategory} from '../../utils/category'
 import Axios from 'axios';
     export default {
         mounted() {
@@ -110,7 +131,10 @@ import Axios from 'axios';
             return {
                 product_entries: [],
                 categories: [],
-                stock_units: [],            
+                stock_units: [],  
+                isUpdating: false,
+                category: {label:''},    
+                createCategoryDialog: false,      
             }
         },
         methods: {
@@ -190,6 +214,34 @@ import Axios from 'axios';
                         duration: 2 * 1000
                     })
                 }
+            },
+            fetchCategories: function(){
+                GetCategory({})
+                    .then(result=> {
+                        this.categories = result.categories || []
+                    })
+                    .catch(err=> {
+                    })
+            },
+            createCategory: function(){
+                let data = Vue.util.extend({}, this.category);
+                data.label = this.category.label.toUpperCase();
+                this.isUpdating = true;
+                CreateCategory(data)
+                    .then(result=> {
+                        this.isUpdating = false;
+                        this.categories.push(result.category || {});
+                        this.createCategoryDialog = false;
+                        this.category = {label:''}
+                    })
+                    .catch(err=> {
+                        this.isUpdating = false;
+                        this.category = {label:''}
+                    })
+            },
+            openCreateCategoryDialog: function() {
+                this.category = {label:''};
+                this.createCategoryDialog = true;
             }
         },
         computed: {

@@ -19,7 +19,8 @@
                         <v-data-table
                         :search="search"
                         :items="batches"
-                        :headers="headers">
+                        :headers="headers"
+                        :rows-per-page-items="myRows">
                             <template v-slot:items="props">
                                 <td class="text-xs-left">{{ props.item.product }}</td>
                                 <td class="text-xs-left">{{ props.item.batch_no }}</td>
@@ -46,6 +47,7 @@
                 headers: [{text:'Product', value:'product'}, {text:'Batch number', value:'batch'}
                             ,{text: 'Expiry Date', value:'expiry_date'}, {text:'Quantity', value:'quantity'}],
                 isLoading: false,
+                myRows: [10,20,30]
             }
         },
         methods: {
