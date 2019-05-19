@@ -40,6 +40,10 @@
                                 @click="showUser(props.item)">
                                     <v-icon small>info</v-icon>
                                 </v-btn>
+                                <v-btn small dark color="primary" icon
+                                @click="openEditUserDialog(props.item)">
+                                    <v-icon small>edit</v-icon>
+                                </v-btn>
                                 <v-btn color="error" small dark icon
                                 @click="deleteUser(props.item)">
                                     <v-icon small>delete</v-icon>
@@ -78,8 +82,10 @@
                         v-model="new_user.name"></v-text-field>
                         <v-text-field
                         label="phone"
-                        required
                         v-model="new_user.phone"></v-text-field>
+                        <v-text-field
+                        label="email"
+                        v-model="new_user.email"></v-text-field>
                         <v-text-field
                         label="username"
                         required
@@ -97,10 +103,40 @@
                     </form>
                 </v-card>
             </v-dialog>
+
+            <v-dialog v-model="showEditDialog" persistent width="500">
+                <v-card style="position:relative">
+                    <div class="my-loader" v-if="isUpdating"></div>
+                    <form @submit.prevent="updateUser">
+                    <v-card-title class="headline">update user</v-card-title>
+                    <v-card-text>
+                        <v-text-field
+                        label="name"
+                        required
+                        v-model="edit_user.name"></v-text-field>
+                        <v-text-field
+                        label="phone"
+                        v-model="edit_user.phone"></v-text-field>
+                        <v-text-field
+                        label="email"
+                        v-model="edit_user.email"></v-text-field>
+                        <v-text-field
+                        label="username"
+                        required
+                        v-model="edit_user.username"></v-text-field>
+                    </v-card-text>
+                    <v-card-actions>
+                        <v-spacer></v-spacer>
+                        <v-btn color="red darken-1" flat ripple @click="showEditDialog = false">CANCEL</v-btn>
+                        <v-btn color="green darken-1" flat type="submit">UPDATE</v-btn>
+                    </v-card-actions>
+                    </form>
+                </v-card>
+            </v-dialog>
     </v-layout>
 </template>
 <script>
-    import { GetUser, DeleteUser } from '../../utils/admin'
+    import { GetUser, DeleteUser, CreateUser, UpdateUser } from '../../utils/admin'
     export default {
         mounted() {
             this.fetchUsers();
@@ -113,8 +149,8 @@
                 isLoading: false,
                 filter: '',
                 showCreateDialog: false,
-                new_user: {name: '', username: '', password: '', phone: ''},
-                edit_user: {},
+                new_user: {name: '', username: '', password: '', phone: '', email:''},
+                edit_user: {name: '', username: '', password: '', phone: '', email:'', user_id:null},
                 showEditDialog: false,
                 isUpdating: false,
                 isCreating: false,
@@ -147,6 +183,10 @@
                         })
                 }
             },
+            openEditUserDialog: function(row) {
+                this.edit_user = Vue.util.extend({}, row);
+                this.showEditDialog = true;
+            },
             showUser: function(row) {
                 this.$router.push({ name: 'user_detail', params: {id: row.id}})
             },
@@ -157,6 +197,30 @@
             editUserDialog: function(row) {
                 this.edit_user = Vue.util.extend({}, row);
                 this.showEditDialog = true;
+            },
+            createUser: function() {
+                CreateUser(this.new_user)
+                    .then(result=> {
+                        this.users.push(result.user || {});
+                        this.new_user = {name: '', username: '', password: '', phone: '', email:''};
+                        this.showCreateDialog = false;
+                    })
+                    .catch(err=> {
+
+                    })
+            },
+            updateUser: function() {
+                this.isUpdating = true;
+                UpdateUser(this.edit_user)
+                    .then(result=> {
+                        this.isUpdating = false;
+                        this.users = result.users || [];
+                        this.showEditDialog = false;
+                        this.edit_user = {};
+                    })
+                    .catch(err=> {
+                        this.isUpdating = false;
+                    })
             }
         }
     }

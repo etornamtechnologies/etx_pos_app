@@ -217,7 +217,7 @@
                 entry.data = Vue.util.extend({}, product);
                 entry.batch_number = "";
                 entry.expiry_date = "";
-                entry.difference = 1;
+                entry.difference = 0;
                 this.cart.unshift(entry);
                 this.filter = "";
                 document.querySelector('#search-input').focus();

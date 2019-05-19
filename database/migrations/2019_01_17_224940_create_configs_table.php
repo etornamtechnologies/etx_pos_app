@@ -21,6 +21,8 @@ class CreateConfigsTable extends Migration
             $table->string('shop_email')->nullable();
             $table->string('shop_message')->nullable();
             $table->decimal('profit_margin')->nullable();
+            $table->string('sale_receipt_prefix')->default('SALINV#');
+            $table->string('purchase_receipt_prefix')->default('PURINV#');
             $table->timestamps();
         });
     }

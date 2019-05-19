@@ -15,6 +15,7 @@ use App\Product;
 use App\InPayment;
 use App\SaleEntry;
 use App\StockUnit;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
@@ -58,7 +59,9 @@ class SaleController extends Controller
     {
         $result = [];
         $saleCount = Sale::count() + 1;
-        $refCode = "SALE/".$saleCount;
+        $config = DB::table('configs')->get()[0];
+        $salePrefix = $config->sale_receipt_prefix;
+        $refCode = $salePrefix.$saleCount;
         $receiptData = [];
         DB::transaction(function () use($result, &$refCode, &$receiptData, &$request){
             $input = Input::all();
@@ -71,6 +74,7 @@ class SaleController extends Controller
             $customerId = $input['summary']['customer_id'];
             $paid = $input['summary']['amount_paid'] * 100;
             $amountPaid = $paid;
+            $myDate = new Carbon();
             $totalCost = $this->getTotalSaleCost($entries)['total'];
             $change = $paid - $totalCost;
             if($change > 0) {
@@ -79,7 +83,7 @@ class SaleController extends Controller
             $receiptEntries = $this->getTotalSaleCost($entries)['receipt_entries'];
             $receiptSummary = ['reference_number'=> $refCode, 'amount_paid'=> $paid/100
                                 ,'total_cost'=> $totalCost/100, 'change'=> $change/100
-                                ,'user'=> $user];
+                                ,'user'=> $user, 'date'=> $myDate];
             //create sale
             $sale = Sale::create([
                 'customer_id'=>$customerId,

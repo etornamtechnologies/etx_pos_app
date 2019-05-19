@@ -83,3 +83,27 @@ export function ResetUserPassword( _data ) {
         })
     })
 }
+
+export function CreateUser( _data ) {
+    return new Promise((resolve, reject) => {
+        adminApi.apiCreateUser(_data)
+        .then(response => {
+            const data = response || {}
+            resolve(data)
+        }).catch(error => {
+            reject(error)
+        })
+    })
+}
+
+export function UpdateUser( _data ) {
+    return new Promise((resolve, reject) => {
+        adminApi.apiUpdateUser(_data)
+        .then(response => {
+            const data = response || {}
+            resolve(data)
+        }).catch(error => {
+            reject(error)
+        })
+    })
+}

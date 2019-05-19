@@ -10,6 +10,24 @@ export function apiGetUser(_data) {
 }
 
 
+export function apiCreateUser(_data) {
+    const data = _data || {};
+    return request({
+        url: '/api/users',
+        method: 'post',
+        data
+    })
+}
+
+export function apiUpdateUser(_data) {
+    const data = _data || {};
+    return request({
+        url: `/api/users/${data.id}`,
+        method: 'put',
+        data
+    })
+}
+
 export function apiAssignRole(_data) {
     const data = _data || {};
     return request({

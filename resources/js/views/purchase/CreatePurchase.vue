@@ -76,7 +76,7 @@
                                 </span>
                             </div>
                             <div class="col-md-6" style="position:relative">
-                                <form @submit.prevent="searchProduct">
+                                <!-- <form @submit.prevent="searchProduct">
                                     <v-text-field
                                     label="search"
                                     v-model="filter"
@@ -85,7 +85,25 @@
                                     autocomplete="off"
                                     autofocus></v-text-field>
                                     <button style="display:none" type="submit"></button>
-                                </form>
+                                </form> -->
+                                <v-autocomplete
+                                auto-select-first
+                                autofocus
+                                item-text="label"
+                                item-value="id"
+                                id="my-search-input"
+                                :items="myProducts"
+                                label="Product Search"
+                                @change="handleProductSelect($event)"
+                                :loading="isSearchLoading"
+                                :search-input.sync="search"
+                                placeholder="Start typing to Search"
+                                hide-no-data
+                                hide-selected
+                                prepend-icon="mdi-database-search"
+                                return-object
+                                :clearable = true
+                                ></v-autocomplete>
                                 <div v-if="search_result.length > 0" class="search-result">
                                     <div class="row">
                                         <div class="col-md-12">
@@ -228,6 +246,15 @@
         mounted() {
             this.fetchSuppliers();
         },
+        watch: {
+            search(val) {
+                if(this.isSearchLoading) {
+                    return
+                }
+                this.filter = val;
+                this.filterProduct();
+            }
+        },
         data() {
             return {
                 filter:"",
@@ -239,13 +266,15 @@
                 summary: {supplier_id:"", supplier_invoice:"", invoice_amount:null, amount_paid:null},
                 isLoading: false,
                 showCreateSupplierModal: false,
+                myProducts: [],
+                isSearchLoading: false,
+                search: ''
             }
         },
         methods: {
             fetchSuppliers: function() {
                 GetSupplier({})
                     .then(result=> {
-                        console.log('res', result)
                         this.suppliers = result.suppliers || []
                     })
                     .catch(err=> {
@@ -261,6 +290,26 @@
                             Notifier.error(res.message || "");
                         }
                     })
+            },
+            filterProduct: function() {
+                this.isSearchLoading = true
+                GetProduct({ filter:this.filter, pos_search:true })
+                    .then(result=> {
+                        this.isSearchLoading = false;
+                        let res = result;
+                        if(res.code == 0) {
+                            this.myProducts = (result || {}).products
+                        }
+                    })
+                    .catch(err=> {
+                        this.isSearchLoading = false;
+                    })
+            },
+            handleProductSelect: function(event) {
+                let product = event || {};
+                if(product.id) {
+                    this.autoAddToCart(product)
+                }
             },
             handleProductSearchResult: function(products) {
                 let productLen = products.length;
@@ -289,6 +338,18 @@
                 this.cart.unshift(entry);
                 this.filter = "";
                 document.querySelector('#search-input').focus();
+            },
+            autoAddToCart: function(product) {
+                let entry = {};
+                entry.quantity = 1;
+                entry.cost_price = "";
+                entry.batch_number = "";
+                entry.expiry_date = "";
+                entry.selected_sku = product.default_stock_unit || "";
+                entry.data = Vue.util.extend({}, product);
+                this.cart.unshift(entry);
+                this.filter = "";
+                document.querySelector('#my-search-input').focus();
             },
             openCreateSupplierModal: function(){
                 this.supplier.label = "";

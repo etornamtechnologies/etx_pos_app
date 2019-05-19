@@ -100,6 +100,7 @@ class ProductController extends Controller
     public function storeEntries(Request $request)
     {
         $input = $request->all();
+        //dd($input);
         $entries = $input['entries'];
         foreach($entries as $entry) {
             $product = Product::where('label', $entry['label'])->first();
@@ -111,10 +112,21 @@ class ProductController extends Controller
                         'category_id'=> $entry['category_id'],
                         'default_stock_unit'=> $entry['default_sku_id'],
                         'description'=> $entry['description'],
-                        'stock_quantity'=> $entry['quantity']
+                        'stock_quantity'=> $entry['quantity'],
                     ]);
-                    $p->stock_units()->attach($entry['default_sku_id'], ['metric_scale'=> 1]);
                     $productId = $p->id;
+                    if($p) {
+                        $stockExists = DB::table('product_stock_unit')
+                                         ->where('product_id', $p->id)
+                                         ->where('stock_unit_id', $entry['default_sku_id'])
+                                         ->first();
+                        if(!isset($stockExists)) {
+                            $p->stock_units()->attach($entry['default_sku_id']
+                                                            , ['cost_price'=> $entry['cost_price']*100
+                                                            , 'selling_price'=> $entry['selling_price']*100
+                                                            , 'metric_scale'=> 1]);
+                        }                 
+                    }
                     if($entry['batch'] && $entry['expiry_date']) {
                         $existsB = $this->batchExist($entry['batch']);
                         $expiryDateCon = Util::convertDateToCarbon($entry['expiry_date']);

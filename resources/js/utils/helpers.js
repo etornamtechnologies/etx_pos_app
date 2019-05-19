@@ -11,7 +11,7 @@ export function makeQueryString(_data) {
 
 export function formatDate(date_str) {
     let options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-    let today  = new Date();
+    let today  = new Date(date_str);
     return today.toLocaleDateString("en-US", options)
 }
 

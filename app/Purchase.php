@@ -58,4 +58,11 @@ class Purchase extends Model
         return $total;
     }
 
+    public static function purchaseWithCreditCount()
+    {
+        $purchases = DB::table('purchases')
+                       ->whereRaw('purchases.paid < purchases.total')->get();
+        return count($purchases);               
+    }
+
 }

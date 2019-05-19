@@ -14,9 +14,9 @@
                 <form class="login-form" @submit.prevent="handleLogin">
                     <div class="login-form-header">
                         <span>Log in</span>
-                        <span 
+                        <!-- <span 
                         @click="goToSignUpPage()"
-                        style="float:right; cursor:pointer">Sign Up</span>
+                        style="float:right; cursor:pointer">Sign Up</span> -->
                     </div>
                     <div class="login-form-inputs">
                         <v-text-field

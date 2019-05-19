@@ -19,7 +19,10 @@
                                 <v-btn
                                 dark
                                 @click="uploadCsv"
-                                color="cyan">Upload</v-btn>
+                                color="cyan">
+                                    <img src="/img/rolling.svg" alt="" v-if="isUploading">
+                                    Upload
+                                </v-btn>
                             </v-flex>
                         </v-layout>
                     </v-card-text>
@@ -34,6 +37,7 @@
         data() {
             return {
                 file: null,
+                isUploading: false,
             }
         },
         methods: {
@@ -42,14 +46,16 @@
                 console.log(this.file);
             },
             uploadCsv: function() {
+                this.isUploading = true;
                 let fd = new FormData();
                 fd.append('file', this.file);
                 CreateProductCsv(fd)
                     .then(result=> {
-
+                        this.isUploading = false;
+                        this.$router.push({ name: 'product_list' })
                     })
                     .catch(err=> {
-                        
+                        this.isUploading = false;
                     })
             }
         },

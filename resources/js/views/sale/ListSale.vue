@@ -8,7 +8,7 @@
                             <div class="row">
                                 <div class="col-md-4">
                                     <div class="form-group">
-                                        <label>reference code</label>
+                                        <label>Receipt Number</label>
                                         <input type="text" class="form-control" v-model="search.ref_code">
                                     </div>
                                 </div>

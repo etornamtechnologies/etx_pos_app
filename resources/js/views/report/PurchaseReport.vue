@@ -135,7 +135,7 @@
                                         hide-actions>
                                             <template v-slot:items="props">
                                                 <td>{{ props.item.ref_code }}</td>
-                                                <td class="text-xs-left">{{ props.item.created_at }}</td>
+                                                <td class="text-xs-left">{{ prettyDate(props.item.created_at || "") }}</td>
                                                 <td class="text-xs-left">{{ (props.item.user || {}).name || '--' }}</td>
                                                 <td class="text-xs-left">{{ (props.item.supplier || {}).name || '--' }}</td>
                                                 <td class="text-xs-left">{{ getMoney(props.item.total) || 0 }}</td>
@@ -174,7 +174,7 @@
                                         hide-actions>
                                             <template v-slot:items="props">
                                                 <td>{{ (props.item.product || {}).label }}</td>
-                                                <td class="text-xs-left">{{ props.item.created_at }}</td>
+                                                <td class="text-xs-left">{{ prettyDate(props.item.created_at || "") }}</td>
                                                 <td class="text-xs-left">
                                                     {{ props.item.quantity }} {{ (props.item.stock_unit || {}).label }} (s)
                                                 </td>
@@ -197,10 +197,12 @@
 </template>
 <script>
     import { GetUser } from '../../utils/user' 
+    import { formatDate } from '../../utils/helpers'
     import { GetPurchaseReportByTransaction, GetPurchaseReportByProduct } from '../../utils/report'
     export default {
         created() {
             this.fetchUsers();
+            this.generateReport();
         },
         data(){
             return {
@@ -309,7 +311,11 @@
             getMoney: function(val) {
                 let amt = val/100;
                 return amt.toFixed(2)
+            },
+            prettyDate: function(date_str) {
+                return formatDate(date_str);
             }
+
 
         },
         computed: {

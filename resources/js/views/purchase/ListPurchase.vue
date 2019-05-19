@@ -6,15 +6,21 @@
                     <div class="card-body py-0">
                         <form @submit.prevent="fetchPurchases" class="py-0">
                             <div class="row">
-                                <div class="col-md-4">
+                                <div class="col-md-3">
                                     <div class="form-group">
-                                        <label>reference code</label>
+                                        <label>REFERENCE NUMBER</label>
                                         <input type="text" class="form-control" v-model="search.ref_code">
                                     </div>
                                 </div>
-                                <div class="col-md-4">
+                                <div class="col-md-3">
                                     <div class="form-group">
-                                        <label>supplier</label>
+                                        <label>SUPPLIER INVOICE #</label>
+                                        <input type="text" class="form-control" v-model="search.supplier_invoice">
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="form-group">
+                                        <label>SUPPLIER</label>
                                         <select v-model="search.supplier_id" class="form-control">
                                             <option value="">All</option>
                                             <option v-for="supplier in suppliers" :key="supplier.id" :value="supplier.id">
@@ -23,7 +29,7 @@
                                         </select>
                                     </div>
                                 </div>
-                                <div class="col-md-4">
+                                <div class="col-md-3">
                                     <button class="btn btn-success" 
                                     type="submit"
                                     style="margin-top:26px">
@@ -48,6 +54,7 @@
                                     <thead>
                                         <tr>
                                             <th>Reference code</th>
+                                            <th>Supplier invoice #</th>
                                             <th>User</th>
                                             <th>Supplier</th>
                                             <th>Date</th>
@@ -61,6 +68,9 @@
                                         <tr v-for="(purchase,index) in purchases" :key="purchase.id">
                                             <td>
                                                 {{ purchase.ref_code }}
+                                            </td>
+                                            <td>
+                                                {{ purchase.invoice_number }}
                                             </td>
                                             <td>
                                                 {{ (purchase.user || {}).name }}
@@ -255,6 +265,7 @@
                 this.isLoading = true;
                 let searchData = this.search;
                 searchData.page = this.currentPage;
+                console.log('search_fa', searchData)
                 GetPurchase(searchData)
                     .then(result=> {
                         this.isLoading = false;

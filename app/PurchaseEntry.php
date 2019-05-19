@@ -45,9 +45,9 @@ class PurchaseEntry extends Model
                             ->where('product_id', $productId)
                             ->where('stock_unit_id', $stockUnitId)->first();
             $metricScale = $stockData->metric_scale;
-            $metricQty = $quantity * $metricScale;   
+            $metricQty = $quantity * $metricScale; 
             Product::where('id', $productId)->increment('stock_quantity', $metricQty);             
-            PurchaseEntry::create([
+            $purchaseEntry = PurchaseEntry::create([
                 'purchase_id'=> $purchase_id,
                 'product_id'=> $productId,
                 'product_label'=> Product::findOrFail($productId)->label,
@@ -58,6 +58,7 @@ class PurchaseEntry extends Model
                 'amount'=> $sum,
                 'metric_quantity'=> $metricQty
             ]);
+            //dd($purchaseEntry);
             $metricCostPrice = round($costPrice/$metricScale, 0, PHP_ROUND_HALF_UP);
             InventoryController::setCostPriceFor($productId, $metricCostPrice);
             if($entry['batch_number'] && $entry['expiry_date']) {

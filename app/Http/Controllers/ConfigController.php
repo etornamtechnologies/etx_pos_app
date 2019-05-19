@@ -38,7 +38,9 @@ class ConfigController extends Controller
                 'shop_address'=> $request->shop_address,
                 'shop_email'=> $request->shop_email,
                 'shop_message'=>$request->shop_message,
-                'profit_margin'=> $request->profit_margin
+                'profit_margin'=> $request->profit_margin,
+                'sale_receipt_prefix'=> $request->sale_receipt_prefix,
+                'purchase_receipt_prefix'=> $request->purchase_receipt_prefix
             ]);
             $result['code']=0;
             $result['message'] = "Config created successfully";
@@ -63,6 +65,8 @@ class ConfigController extends Controller
                 'shop_email'=> $request->shop_email,
                 'shop_message'=>$request->shop_message,
                 'profit_margin'=> $request->profit_margin,
+                'sale_receipt_prefix'=> $request->sale_receipt_prefix,
+                'purchase_receipt_prefix'=> $request->purchase_receipt_prefix
             ]);
             $result['code']=0;
             $result['config'] = $config;

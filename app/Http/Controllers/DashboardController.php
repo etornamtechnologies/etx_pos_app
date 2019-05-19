@@ -40,6 +40,9 @@ class DashboardController extends Controller
         $dashboard['top_category_sale'] = Sale::topCategorySale();
         $dashboard['restock_count'] = $this->restockProductCount();
         $dashboard['expiry_count'] = $this->expiryListCount();
+        $dashboard['customer_count'] = count(Customer::all());
+        $dashboard['sale_with_debt_count'] = Sale::salesWithDebtCount();
+        $dashboard['purchase_with_credit_count'] = Purchase::purchaseWithCreditCount();
         $result['dashboard'] = $dashboard;
         return response()->json($result, 200);
     }

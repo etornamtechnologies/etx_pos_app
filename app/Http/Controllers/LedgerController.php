@@ -17,7 +17,7 @@ class LedgerController extends Controller
                 ->leftjoin('customers', 'customers.id', '=', 'sales.customer_id')
                 ->select('sales.ref_code as ref_code', 'customers.name as customer', 'sales.created_at as date'
                         , 'sales.total_cost as total_cost', 'sales.paid as amount_paid', 'users.name as user'
-                        , DB::raw('sales.total_cost - sales.paid as amount_owed'))
+                        , DB::raw('sales.total_cost - sales.paid as amount_owed'), 'sales.id as id')
                 ->orderBy('sales.created_at', 'DESC');
         $sales = $q->get();                        
         return response()->json(['code'=> 0, 'sales'=> $sales], 200);
@@ -31,7 +31,8 @@ class LedgerController extends Controller
                 ->leftjoin('suppliers', 'suppliers.id', '=', 'purchases.supplier_id')
                 ->select('purchases.ref_code as ref_code', 'suppliers.name as supplier', 'purchases.created_at as date'
                         , 'purchases.total as total_cost', 'purchases.paid as amount_paid', 'users.name as user'
-                        , 'purchases.invoice_number as invoice_number', DB::raw('purchases.total - purchases.paid as amount_owing'))
+                        , 'purchases.invoice_number as invoice_number', DB::raw('purchases.total - purchases.paid as amount_owing')
+                        , 'purchases.id as id')
                 ->orderBy('purchases.created_at', 'DESC');
         $purchases = $q->get();                        
         return response()->json(['code'=> 0, 'purchases'=> $purchases], 200);

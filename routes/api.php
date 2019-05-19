@@ -104,7 +104,7 @@ Route::get('/admin/create-backup', 'AdminController@createBackup');
 Route::get('/admin/restore-backup/{backup}', 'AdminController@restoreBackup');
 Route::post('/admin/users/{user}/reset-password', 'AdminController@resetPassword');
 
-Route::get('/users', 'UserController@index');
+Route::apiResource('/users', 'UserController');
 
 Route::post('/out-payments', 'OutPaymentController@store');
 Route::post('/in-payments', 'InPaymentController@store');

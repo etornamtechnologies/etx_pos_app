@@ -32,9 +32,13 @@ class PurchaseController extends Controller
         $result = [];
         $filter = $request->has('filter') ? $request->query('filter') : "";
         $refCode = $request->has('ref_code') ? $request->query('ref_code') : "";
+        $supplierInv = $request->has('supplier_invoice') ? $request->query('supplier_invoice') : "";
         $supplierId = $request->has('supplier_id') ? $request->query('supplier_id') : "";
         $purchasesQuery = Purchase::when($refCode, function($query, $refCode) {
                                 return $query->where('ref_code', 'LIKE', '%'.$refCode.'%');
+                            })
+                            ->when($supplierInv, function($query, $supplierInv) {
+                                return $query->where('invoice_number', 'LIKE', '%'.$supplierInv.'%');
                             })
                             ->when($supplierId, function($query, $supplierId) {
                                 return $query->where('supplier_id', $supplierId);
@@ -74,6 +78,7 @@ class PurchaseController extends Controller
         try{
             DB::transaction(function () use($result, &$request){
                 $input = Input::all();
+                //dd($input);
                 $token = $request->header('Authorization');
                 $user = User::authUser($token);
                 $userId = $user->id;
@@ -83,7 +88,9 @@ class PurchaseController extends Controller
                 $invoiceAmount = $input['summary']['invoice_amount'] * 100;
                 $entries = $input['entries'];
                 $purchaseCount = Purchase::count() + 1;
-                $refCode = "LEK-PUR/$purchaseCount";
+                $config = DB::table('configs')->get()[0];
+                $purchasePrefix = $config->purchase_receipt_prefix;
+                $refCode = $purchasePrefix.$purchaseCount;
                 $purchase = Purchase::create([
                     'supplier_id'=> $supplierId,
                     'ref_code'=> $refCode,

@@ -120,4 +120,25 @@ class Sale extends Model
         $monday = Carbon::now()->monday;
         dd($monday);
     }
+
+    public static function salesWithDebtCount()
+    {
+        $sales = DB::table('sales')->whereRaw('sales.paid < sales.total_cost')->get();
+        return count($sales);
+    }
+
+
+    public function salesWithDebt()
+    {
+        $q = DB::table('sales')
+                ->whereRaw('sales.paid < sales.total_cost')
+                ->leftjoin('users', 'users.id', '=', 'sales.user_id')
+                ->leftjoin('customers', 'customers.id', '=', 'sales.customer_id')
+                ->select('sales.ref_code as ref_code', 'customers.name as customer', 'sales.created_at as date'
+                        , 'sales.total_cost as total_cost', 'sales.paid as amount_paid', 'users.name as user'
+                        , DB::raw('sales.total_cost - sales.paid as amount_owed'))
+                ->orderBy('sales.created_at', 'DESC');
+        $sales = $q->get();                        
+        return response()->json(['code'=> 0, 'sales'=> $sales], 200);
+    }
 }

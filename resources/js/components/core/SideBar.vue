@@ -31,33 +31,6 @@
             <span slot="title" class="menu-title">Dashboard</span>
         </el-menu-item>
         <hr class="menu-divider" v-if="showDashboard">
-        <el-submenu index="/inventory" class="menu-object" v-if="showInventoryModule">
-            <template slot="title">
-                <img src="/img/icons/inventory.svg" class="el-icon" alt="">
-                <span slot="title" class="menu-title">INVENTORY</span>
-            </template>
-            <el-menu-item-group>
-                <el-menu-item index="/inventory/products">Products</el-menu-item>
-                <el-menu-item index="/inventory/categories">Categories</el-menu-item>
-                <el-menu-item index="/inventory/stock-units">Stock-Units</el-menu-item>
-                <el-menu-item index="/inventory/price-templates">Price Templates</el-menu-item>
-                <el-menu-item index="/inventory/stock-adjustments/create">+ Create Stock-Adjustment</el-menu-item>
-            </el-menu-item-group>
-        </el-submenu>
-        <hr class="menu-divider" v-if="showDashboard">
-        <el-submenu index="/ledgers" class="menu-object" v-if="showHistoryModule">
-            <template slot="title">
-                <img src="/img/icons/ledger.svg" class="el-icon" alt="">
-                <span slot="title" class="menu-title">History / Ledgers</span>
-            </template>
-            <el-menu-item-group>
-                <el-menu-item index="/ledgers/stock-adjustment">Stock-Adjustment History</el-menu-item>
-                <el-menu-item index="/ledgers/sales-with-debtors">Sales With Debtors</el-menu-item>
-                <el-menu-item index="/ledgers/purchases-with-creditors">Purchases With Creditors</el-menu-item>
-                <el-menu-item index="/ledgers/batches">All Batch Numbers</el-menu-item>
-            </el-menu-item-group>
-        </el-submenu>
-        <hr class="menu-divider" v-if="showInventoryModule">
         <el-submenu index="/sales" class="menu-object" v-if="showSalesModule">
             <template slot="title">
                 <img src="/img/icons/shopping-cart.svg" class="el-icon" alt="">
@@ -80,6 +53,32 @@
             </el-menu-item-group>
         </el-submenu> 
         <hr class="menu-divider" v-if="showPurchaseModule">
+        <el-submenu index="/inventory" class="menu-object" v-if="showInventoryModule">
+            <template slot="title">
+                <img src="/img/icons/inventory.svg" class="el-icon" alt="">
+                <span slot="title" class="menu-title">INVENTORY</span>
+            </template>
+            <el-menu-item-group>
+                <el-menu-item index="/inventory/products">Products</el-menu-item>
+                <el-menu-item index="/inventory/products/create/entries">+ Create Products</el-menu-item>
+                <el-menu-item index="/inventory/categories">Categories</el-menu-item>
+                <el-menu-item index="/inventory/stock-units">Stock-Units</el-menu-item>
+                <el-menu-item index="/inventory/price-templates">Price Templates</el-menu-item>
+                <el-menu-item index="/inventory/stock-adjustments/create">+ Create Stock-Adjustment</el-menu-item>
+            </el-menu-item-group>
+        </el-submenu>
+        <hr class="menu-divider" v-if="showInventoryModule">
+        <el-submenu index="/clients" class="menu-object" v-if="showClientsModule">
+            <template slot="title">
+                <img src="/img/icons/customer.svg" class="el-icon" alt="">
+                <span slot="title" class="menu-title">clients</span>
+            </template>
+            <el-menu-item-group>
+                <el-menu-item index="/clients/customers">customers</el-menu-item>
+                <el-menu-item index="/clients/suppliers">suppliers</el-menu-item>
+            </el-menu-item-group>
+        </el-submenu> 
+        <hr class="menu-divider" v-if="showClientsModule">
         <el-submenu index="/reports" class="menu-object" v-if="showReportModule">
             <template slot="title">
                 <img src="/img/icons/statistics.svg" class="el-icon" alt="">
@@ -92,17 +91,19 @@
             </el-menu-item-group>
         </el-submenu> 
         <hr class="menu-divider" v-if="showReportModule">
-        <el-submenu index="/clients" class="menu-object" v-if="showClientsModule">
+        <el-submenu index="/ledgers" class="menu-object" v-if="showHistoryModule">
             <template slot="title">
-                <img src="/img/icons/customer.svg" class="el-icon" alt="">
-                <span slot="title" class="menu-title">clients</span>
+                <img src="/img/icons/ledger.svg" class="el-icon" alt="">
+                <span slot="title" class="menu-title">History / Ledgers</span>
             </template>
             <el-menu-item-group>
-                <el-menu-item index="/clients/customers">customers</el-menu-item>
-                <el-menu-item index="/clients/suppliers">suppliers</el-menu-item>
+                <el-menu-item index="/ledgers/stock-adjustment">Stock-Adjustment History</el-menu-item>
+                <el-menu-item index="/ledgers/sales-with-debtors">Sales With Debtors</el-menu-item>
+                <el-menu-item index="/ledgers/purchases-with-creditors">Purchases With Creditors</el-menu-item>
+                <el-menu-item index="/ledgers/batches">All Batch Numbers</el-menu-item>
             </el-menu-item-group>
-        </el-submenu> 
-        <hr class="menu-divider" v-if="showClientsModule">
+        </el-submenu>
+        <hr class="menu-divider" v-if="showInventoryModule">
         <el-submenu index="/admin" class="menu-object" v-if="showAdminModule">
             <template slot="title">
                 <img src="/img/icons/admin.svg" class="el-icon" alt="">

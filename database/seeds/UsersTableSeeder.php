@@ -17,18 +17,18 @@ class UsersTableSeeder extends Seeder
         $roleSale = Role::where('label', 'sales-rep')->first();
         $roleSup = Role::where('label', 'supervisor')->first();
         $admin = User::create([
-            'name'=> 'etornam anyidoho',
-            'username'=> 'etoretornam',
-            'email'=> 'etornamanyidoho@outlook.com',
+            'name'=> 'system adminstrator',
+            'username'=> 'admin',
+            'email'=> 'systemadmin@outlook.com',
             'phone'=> '0548556086',
-            'password'=> bcrypt('143541etor'),
+            'password'=> bcrypt('admin'),
         ]);
 
         $sup = User::create([
             'name'=> 'grace amevor',
             'username'=> 'gracious',
-            'email'=> 'gracius@outlook.com',
-            'phone'=> '0548557383',
+            'email'=> '',
+            'phone'=> '',
             'password'=> bcrypt('gracious'),
         ]);
         // $admin = User::create([

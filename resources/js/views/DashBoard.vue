@@ -5,7 +5,7 @@
                 <v-layout column>
                     <v-flex xs12>
                         <v-layout row wrap>
-                            <v-flex xs12 md6 sm12 style="padding:10px">
+                            <v-flex xs12 md4 sm12 style="padding:10px">
                                 <div 
                                 style="display:flex; flex-direction:row; text-align:center; font-size:20px">
                                     DASHBOARD <span style="margin-left:5px">
@@ -18,8 +18,26 @@
                                     src="img/rolling.svg" alt="" width="23px" height="23px">
                                 </div>
                             </v-flex>
-                            <v-flex xs12 sm12 md6  
+                            <v-flex xs12 sm12 md8  
                             style="display:flex; flex-direction:row; justify-content:flex-end; flex-wrap:wrap">
+                                <v-badge overlap color="cyan" style="margin-right:10px">
+                                    <span slot="badge" v-if="dashboard.sale_with_debt_count > 0">
+                                        {{ dashboard.sale_with_debt_count || '' }}
+                                    </span>
+                                    <v-btn
+                                    @click="goToSalesWithDebt"
+                                    dark
+                                    color="primary" small>Sales(debt)</v-btn>
+                                </v-badge>  
+                                <v-badge overlap color="purple" style="margin-right:10px">
+                                    <span slot="badge" v-if="dashboard.purchase_with_credit_count > 0">
+                                        {{ dashboard.purchase_with_credit_count || '' }}
+                                    </span>
+                                    <v-btn
+                                    @click="goToPurchasesWithCredit"
+                                    dark
+                                    color="cyan" small>Purchases(credit)</v-btn>
+                                </v-badge> 
                                 <v-badge overlap color="red" style="margin-right:5px">
                                     <span slot="badge" v-if="dashboard.restock_count">
                                         {{ dashboard.restock_count || '' }}
@@ -58,18 +76,18 @@
                                         <v-list>
                                             <v-list-tile>
                                                 <v-list-tile-action>
-                                                    <span style="font-weight:bold; margin-right:5px">Total Sale:</span>
+                                                    <span style="font-weight:bold; margin-right:5px">Sales With Debt:</span>
                                                 </v-list-tile-action>
                                                 <v-list-tile-content>
-                                                    GHC {{ getMoney(dashboard.total_sale_amount) }}
+                                                    # {{ dashboard.sale_with_debt_count || 0 }}
                                                 </v-list-tile-content>
                                             </v-list-tile>
                                             <v-list-tile>
                                                 <v-list-tile-action>
-                                                    <span style="font-weight:bold; margin-right:5px">This Month Total Sale:</span>
+                                                    <span style="font-weight:bold; margin-right:5px">Purchases With Creditors:</span>
                                                 </v-list-tile-action>
                                                 <v-list-tile-content>
-                                                    GHC {{ getMoney(dashboard.this_month_total_sale) }}
+                                                    # {{ dashboard.purchase_with_credit_count || 0 }}
                                                 </v-list-tile-content>
                                             </v-list-tile>
                                             <v-list-tile>
@@ -99,7 +117,7 @@
                                         </v-list>
                                     </v-card-text>
                                     <v-card-actions>
-                                        <v-spacer></v-spacer>
+                                        <v-spacer></v-spacer>  
                                         <v-btn 
                                         @click="goToSalesPage"
                                         dark
@@ -127,7 +145,7 @@
                                             </v-list-tile>
                                             <v-list-tile>
                                                 <v-list-tile-action>
-                                                    <span style="font-weight:bold; margin-right:5px">Number Of Users:</span>
+                                                    <span style="font-weight:bold; margin-right:5px">Number Of System Users:</span>
                                                 </v-list-tile-action>
                                                 <v-list-tile-content>
                                                     # {{ dashboard.users_count }}
@@ -135,7 +153,7 @@
                                             </v-list-tile>
                                             <v-list-tile>
                                                 <v-list-tile-action>
-                                                    <span style="font-weight:bold; margin-right:5px">Number Of Vendors:</span>
+                                                    <span style="font-weight:bold; margin-right:5px">Number Of Suppliers:</span>
                                                 </v-list-tile-action>
                                                 <v-list-tile-content>
                                                     # {{ dashboard.suppliers_count }}
@@ -143,11 +161,11 @@
                                             </v-list-tile>
                                             <v-list-tile>
                                                 <v-list-tile-action>
-                                                    <span style="font-weight:bold; margin-right:5px">Restock Alerts:</span>
+                                                    <span style="font-weight:bold; margin-right:5px">Registered Customers #:</span>
                                                 </v-list-tile-action>
                                                 <v-list-tile-content>
                                                     <!-- TODO  expiry alerts from backend-->
-                                                    # {{ dashboard.restock_count || 0 }} 
+                                                    # {{ dashboard.customer_count || 0 }} 
                                                 </v-list-tile-content>
                                             </v-list-tile>
                                             <v-list-tile>
@@ -261,6 +279,12 @@
             },
             goToProductExpiryAlertListPage: function() {
                 this.$router.push({ name: 'product-expiry-list' });
+            },
+            goToSalesWithDebt: function() {
+                this.$router.push({ name: 'sales-with-debtors' })
+            },
+            goToPurchasesWithCredit: function() {
+                this.$router.push({ name:'purchases-with-creditors' });
             }
         },
         computed: {

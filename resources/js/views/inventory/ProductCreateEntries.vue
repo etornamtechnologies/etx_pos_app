@@ -19,6 +19,9 @@
                         create products
                     </v-btn>
                 </v-toolbar>
+                <v-card-title>
+                    <span style="color:blue"><v-icon small color="">add</v-icon> Create Category</span>
+                </v-card-title>
                 <v-card-text>
                     <table class="table">
                         <thead>
@@ -29,6 +32,8 @@
                                 <th>Category</th>
                                 <th>Default sku</th>
                                 <th>Quantity</th>
+                                <th>Cost Price</th>
+                                <th>Selling Price</th>
                                 <th>Batch #</th>
                                 <th>Expiry date</th>
                                 <th></th>
@@ -60,11 +65,17 @@
                                 <td style="max-width:100px;">
                                     <input type="number" class="form-control" v-model="entry.quantity" style="width:100%">
                                 </td>
-                                <td>
+                                <td style="max-width:120px">
+                                    <input type="number" step="0.01" style="width:100%" class="form-control" v-model="entry.cost_price">
+                                </td>
+                                <td style="max-width:120px">
+                                    <input type="number" style="width:100%" step="0.01" class="form-control" v-model="entry.selling_price">
+                                </td>
+                                <td style="max-width:120px">
                                     <input type="text" class="form-control" v-model="entry.batch">
                                 </td>
-                                <td>
-                                    <input type="text" class="form-control" v-model="entry.expiry_date">
+                                <td style="max-width:120px">
+                                    <input type="text" class="form-control" v-model="entry.expiry_date" placeholder="MM/YYYY">
                                 </td>
                                 <td>
                                     <button class="btn btn-danger"
@@ -98,10 +109,6 @@ import Axios from 'axios';
         data(){
             return {
                 product_entries: [],
-                headers: [{text:'label', value:'label'}, {text:'barcode', value:'barcode'}
-                            ,{text:'category', value:'category_id'}, {text:'basic stock-unit', value:'default_sku_id'}
-                            ,{text:'Batch #', value:'batch'}, {text: 'Expiry Date(mm/yyyy)', value: 'expiry_date'}
-                            ,{text:'Actions', value:'btn', align:'right'}],
                 categories: [],
                 stock_units: [],            
             }
@@ -117,7 +124,7 @@ import Axios from 'axios';
             },
             addEntry: function(){
                 let entry = {label:'', barcode:'', category_id:"", default_sku_id:"", expiry_date:''
-                                , batch:'', quantity:'', description:''};
+                                , batch:'', quantity:'', description:'', cost_price:'', selling_price:''};
                 this.product_entries.push(Vue.util.extend({}, entry));
             },
             fetchCategories: function() {

@@ -132,10 +132,13 @@ class ReportController extends Controller
             $fil = " for invoice number ".$referenceNumber;
         }
         if(!$isRange && $date) {
-            $duration = " on ".$date;
+            $myDate = new Carbon($date);
+            $duration = " on ".$myDate->toFormattedDateString();
         }
         if($isRange) {
-            $duration = " from ".$fromDate." to ".$toDate;
+            $fd = new Carbon($fromDate);
+            $td = new Carbon($toDate);
+            $duration = " from ".$fd->toFormattedDateString()." to ".$td->toFormattedDateString();
         }
         $reportQuery = Sale::when($userId, function($query, $userId) use($user) {
                             return $query->where('sales.user_id', $userId);
@@ -190,10 +193,13 @@ class ReportController extends Controller
             $fil = "for product ".$product;
         }
         if(!$isRange && $date) {
-            $duration = " on ".$date;
+            $d = new Carbon($date);
+            $duration = " on ".$d->toFormattedDateString();
         }
         if($isRange) {
-            $duration = " from ".$fromDate." to ".$toDate;
+            $fd = new Carbon($fromDate);
+            $td = new Carbon($toDate);
+            $duration = " from ".$fd->toFormattedDateString()." to ".$td->toFormattedDateString();
         }
         $reportQuery = SaleEntry::when($product, function($query, $product){
                             return $query->join('products', 'products.id', '=', 'sale_entries.product_id')
@@ -245,10 +251,13 @@ class ReportController extends Controller
             $fil = " for invoice number ".$referenceNumber;
         }
         if(!$isRange && $date) {
-            $duration = " on ".$date;
+            $d = new Carbon($date);
+            $duration = " on ".$d->toFormattedDateString();
         }
         if($isRange) {
-            $duration = " from ".$fromDate." to ".$toDate;
+            $fd = new Carbon($fromDate);
+            $td = new Carbon($toDate);
+            $duration = " from ".$fd->toFormattedDateString()." to ".$td->toFormattedDateString();
         }
         $reportQuery = Purchase::when($userId, function($query, $userId){
                             return $query->where('purchases.user_id', $userId);
@@ -304,10 +313,13 @@ class ReportController extends Controller
             $fil = " for invoice number ".$referenceNumber;
         }
         if(!$isRange && $date) {
-            $duration = " on ".$date;
+            $d = new Carbon($date);
+            $duration = " on ".$d->toFormattedDateString();
         }
         if($isRange) {
-            $duration = " from ".$fromDate." to ".$toDate;
+            $fd = new Carbon($fromDate);
+            $td = new Carbon($toDate);
+            $duration = " from ".$fd->toFormattedDateString()." to ".$td->toFormattedDateString();
         }
         $reportQuery = PurchaseEntry::when($product, function($query, $product){
                             return $query->join('products', 'products.id', '=', 'purchase_entries.product_id')
@@ -342,11 +354,13 @@ class ReportController extends Controller
         $fromDate = new Carbon($input['from_date']);
         $toDate = new Carbon($input['to_date']);
         $duration = "from ".$fromDate." to ".$toDate;
+        $fd = new Carbon($fromDate);
+        $td = new Carbon($toDate);
         $result = [];
         $result['code'] = 0;
         $result['sale_profit'] = $this->getSaleProfit($fromDate, $toDate);
         $result['total_sale'] = $this->totalSale($fromDate, $toDate);
-        $result['info'] = "Financial report from ".$fromDate." to ".$toDate;
+        $result['info'] = "Financial report from ".$fd->toFormattedDateString()." to ".$td->toFormattedDateString();
         $result['total_purchase'] = $this->totalPurchase($fromDate, $toDate);
         return response()->json($result, 200);
     }

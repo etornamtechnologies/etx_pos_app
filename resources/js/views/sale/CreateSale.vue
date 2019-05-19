@@ -71,7 +71,7 @@
                                 <span ><i class="fa fas-shopping-cart"></i>  SALE / CART ENTRIES</span>
                             </div>
                             <div class="col-md-6" style="position:relative">
-                                <form @submit.prevent="searchProduct">
+                                <!-- <form @submit.prevent="searchProduct">
                                     <v-text-field
                                     color="cyan"
                                     prepend-inner-icon="search"
@@ -80,7 +80,26 @@
                                     id="search-input"
                                     v-model="filter"></v-text-field>
                                     <button style="display:none" type="submit"></button>
-                                </form>
+                                </form> -->
+                                <v-autocomplete
+                                auto-select-first
+                                autofocus
+                                item-text="label"
+                                item-value="id"
+                                id="my-search-input"
+                                :items="myProducts"
+                                label="Product Search"
+                                @change="handleProductSelect($event)"
+                                :loading="isSearchLoading"
+                                :search-input.sync="search"
+                                placeholder="Start typing to Search"
+                                hide-no-data
+                                color="cyan"
+                                hide-selected
+                                prepend-icon="mdi-database-search"
+                                return-object
+                                :clearable = true
+                                ></v-autocomplete>
                                 <div v-if="search_result.length > 0" class="search-result">
                                     <div class="row">
                                         <div class="col-md-12">
@@ -157,6 +176,7 @@
                     <div class="header-item">{{ (receipt_data.shop_info || {}).shop_address }}</div>
                     <div class="header-item">{{ (receipt_data.shop_info || {}).shop_phone }}</div>
                     <div class="header-item">attendant: {{ ((receipt_data.summary || {}).user || {}).name}}</div>
+                    <div class="header-item">Date-Time: {{ (receipt_data.summary || {}).date }}</div>
                 </div>
                 <div class="receipt-invoice-wrapper">
                     <span>invoice#: {{ (receipt_data.summary || {}).reference_number }}</span>
@@ -242,6 +262,15 @@
         mounted() {
             this.fetchCustomers()
         },
+        watch: {
+            search(val) {
+                if(this.isSearchLoading) {
+                    return
+                }
+                this.filter = val;
+                this.filterProduct();
+            }
+        },
         data() {
             return {
                 filter:"",
@@ -255,6 +284,9 @@
                 showCreateCustomerModal: false,
                 receipt_data: {},
                 isLoading: false,
+                myProducts: [],
+                isSearchLoading: false,
+                search: ''
             }
         },
         methods: {
@@ -273,6 +305,26 @@
                             this.handleProductSearchResult(res.products);
                         }
                     })
+            },
+            filterProduct: function() {
+                this.isSearchLoading = true
+                GetProduct({ filter:this.filter, pos_search:true })
+                    .then(result=> {
+                        this.isSearchLoading = false;
+                        let res = result;
+                        if(res.code == 0) {
+                            this.myProducts = (result || {}).products
+                        }
+                    })
+                    .catch(err=> {
+                        this.isSearchLoading = false;
+                    })
+            },
+            handleProductSelect: function(event) {
+                let product = event || {};
+                if(product.id) {
+                    this.autoAddToCart(product)
+                }
             },
             openCreateCustomerModal: function(){
                 this.customer.label = "";
@@ -316,6 +368,15 @@
                 this.cart.unshift(entry);
                 this.filter = "";
                 document.querySelector('#search-input').focus();
+            },
+            autoAddToCart: function(product) {
+                let entry = {};
+                entry.quantity = 1;
+                entry.selected_sku = product.default_stock_unit || "";
+                entry.data = Vue.util.extend({}, product);
+                this.cart.unshift(entry);
+                this.filter = "";
+                document.querySelector('#my-search-input').focus();
             },
             removeCartEntry: function(index) {
                 this.cart.splice(index, 1);

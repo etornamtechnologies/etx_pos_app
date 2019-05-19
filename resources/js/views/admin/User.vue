@@ -107,7 +107,8 @@
                 <v-card-title class="headline">Reset User Password</v-card-title>
                 <v-card-text>
                     <v-text-field
-                    label="label"
+                    label="New-Password"
+                    type="password"
                     required
                     v-model="reset_data.password"></v-text-field>
                 </v-card-text>
