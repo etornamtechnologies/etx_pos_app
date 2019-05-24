@@ -325,6 +325,7 @@
             },
             updateProduct: function(){
                 this.isUpdating = true;
+                console.log(this.edit_product.index)
                 UpdateProduct(this.edit_product)
                     .then(result=> {
                         this.isUpdating = false;

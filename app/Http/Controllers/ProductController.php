@@ -100,7 +100,6 @@ class ProductController extends Controller
     public function storeEntries(Request $request)
     {
         $input = $request->all();
-        //dd($input);
         $entries = $input['entries'];
         foreach($entries as $entry) {
             $product = Product::where('label', $entry['label'])->first();
