@@ -12,7 +12,7 @@ class UserController extends Controller
     public function __construct()
     {
         $this->middleware('api_auth');
-        $this->middleware('api_role:supervisor,manager,admin')->except(['index','show']);
+        $this->middleware('api_role:supervisor,manager,admin')->except(['index','show','getAuthUserInfo']);
         $this->middleware('api_role:admin')->only(['store', 'update']);
     }
 
