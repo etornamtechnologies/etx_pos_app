@@ -8,7 +8,6 @@
 
 namespace App\Http\Controllers;
 
-
 use App\Product;
 use App\PriceTemplate;
 use Illuminate\Http\Request;
@@ -158,6 +157,19 @@ class InventoryController extends Controller
             ->update(['cost_price'=> $input['cost_price']*100]);
         $product = Product::where('id', $productId)->with(['stock_units', 'category','defaultSku'])->first();
         return response()->json(['code'=> 0, 'message'=>'price updated', 'product'=> $product], 200);
+    }
+
+    public function updateStockQuantity(Request $request, $productId)
+    {
+        $input = $request->all();
+        try {
+            $product = DB::table('products')
+                ->where('id', $productId)
+                ->update(['stock_quantity'=> $input['quantity']]);
+            return response()->json(['code'=>0, 'message'=> 'Stock Quantity Updated Successful', 'product'=>$product]);
+        } catch (Exception $e) {
+            return response()->json(['code'=>1, 'message'=>'Error Updating Stock Quantity'], 500);
+        }
     }
 
     public static function updateSellingPrice(Request $request, $productId, $stockUnitId)

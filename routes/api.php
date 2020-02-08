@@ -52,6 +52,7 @@ Route::get('/inventory/products/{product}/stock-units/{stock_unit}/add', 'Invent
 Route::get('/inventory/products/{product}/stock-units/{stock_unit}/remove', 'InventoryController@removeStockUnit');
 Route::put('/inventory/products/{product}/stock-units/{stock_unit}/update-cost-price', 'InventoryController@updateCostPrice');
 Route::put('/inventory/products/{product}/stock-units/{stock_unit}/update-selling-price', 'InventoryController@updateSellingPrice');
+Route::put('/inventory/products/{productId}/update-stock-quantity', 'InventoryController@updateStockQuantity');
 
 Route::post('/inventory/price-templates/{templates}/apply', 'InventoryController@applyPriceTemplate');
 

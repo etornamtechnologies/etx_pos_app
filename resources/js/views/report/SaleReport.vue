@@ -6,6 +6,11 @@
                     <v-toolbar dense dark color="cyan">
                         <v-toolbar-side-icon></v-toolbar-side-icon>
                         <v-toolbar-title>Sale Report</v-toolbar-title>
+                        <v-spacer></v-spacer>
+                        <v-icon 
+                        id="download-sales-report-excel" 
+                        @click="handelDownloadSalesReportClick"
+                        :disabled="isPrintLoading">print</v-icon>
                     </v-toolbar>
                     <v-card-text>
                         <div class="row">
@@ -18,12 +23,14 @@
                                     :items="usersList"
                                     item-text="name"
                                     item-value="id"
+                                    :disabled="search.filter_by=='product'"
                                     v-model="search.user_id"></v-select>
                                     <v-select
                                     label="View By"
                                     :items="filterByList"
                                     item-text="name"
                                     item-value="id"
+                                    @change="handelFilterByChange"
                                     v-model="search.filter_by"></v-select>
                                     <v-text-field
                                     v-if="search.filter_by == 'transaction'"
@@ -197,7 +204,7 @@
 </template>
 <script>
     import { GetUser } from '../../utils/user' 
-    import { formatDate } from '../../utils/helpers'
+    import { formatDate, JSONToCSVConvertorUtil } from '../../utils/helpers'
     import { GetSaleReportByTransaction, GetSaleReportByProduct } from '../../utils/report'
     export default {
         created() {
@@ -229,9 +236,27 @@
                 toDate: new Date().toISOString().substring(0, 10),
                 toDateMenu: false,
                 isLoading: false,
+                isPrintLoading: false,
             }
         },
         methods: {
+            handelFilterByChange: function(event) {
+                if(event == 'product') {
+                    this.search.user_id = null;
+                }
+            },
+            handelDownloadSalesReportClick: function() {
+                console.log('report by product', this.reports_product)
+                let reportHeader = this.info_transaction || '';
+                let reports = this.reports_transaction;
+                // console.log('lets download report');
+                if(this.search.filter_by == 'transaction') {
+                    JSONToCSVConvertorUtil(this.GetSalesReportByTransactionExcelData, this.info_transaction, true)
+                } else {
+                    JSONToCSVConvertorUtil(this.GetSalesReportByProductExcelData, this.info_product, true)
+                }
+                
+            },
             generateReport: function() {
                 let searchData = Vue.util.extend({}, this.search);
                 searchData.from_date = "";
@@ -259,6 +284,7 @@
                     })
             },
             fetchByTransaction: function(_data) {
+                console.log('===Lets Fetch By Transaction===')
                 this.isLoading = true;
                 GetSaleReportByTransaction(_data)
                     .then(result=> {
@@ -313,8 +339,7 @@
             },
             prettyDate: function(date_str) {
                 return formatDate(date_str);
-            }
-
+            },
         },
         computed: {
             filterByList: function(){
@@ -333,8 +358,37 @@
                     {id: 'transaction', name:'Transaction'},
                     {id: 'product', name: 'Product'}
                 ]
+            },
+            GetSalesReportByTransactionExcelData: function() {
+                let sales = this.reports_transaction || [];
+                let salesReport = sales.map((sale)=> {
+                    let data = {};
+                    data.reference_no = sale.ref_code || '';
+                    data.sales_rep = (sale.user || {}).name || '';
+                    data.date = this.prettyDate(sale.created_at);
+                    data.total_cost = `GHC ${sale.total_cost}`
+                    data.customer = (sale.customer || {}).name || '';
+                    data.amount_paid = `GHC ${sale.paid}`;
+                    data.status = sale.status;
+                    return data;
+                })
+                return salesReport || [];      
+            },
+            GetSalesReportByProductExcelData: function() {
+                let sales = this.reports_product || [];
+                let salesReport = sales.map((sale)=> {
+                    let data = {};
+                    data.product = sale.product_label || '';
+                    data.reference_no = (sale.sale || {}).ref_code || '';
+                    data.quantity = `${sale.quantity || 0} ${sale.stock_unit_label || ''}(S)`;
+                    data.selling_price = `GHC ${sale.selling_price || 0}`;
+                    //data.amount = `GHC ${sale.amount}`
+                    data.date = this.prettyDate(sale.created_at);
+                    data.status = sale.status;
+                    return data;
+                })
+                return salesReport || [];      
             }
-            
         },
     }
 </script>

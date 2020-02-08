@@ -6,6 +6,19 @@
                     <v-toolbar-side-icon></v-toolbar-side-icon>
                     <v-toolbar-title>PRODUCTS</v-toolbar-title>
                     <v-spacer></v-spacer>
+                    <!-- <downloadexcel
+                    class = "btn"
+                    :fetch   = "exportAllProductsToExcel"
+                    :fields = "excelProductsFields"
+                    :before-generate = "startDownload"
+                    :before-finish = "finishDownload"
+                    >
+                    Download Excel
+                    </downloadexcel> -->
+                    <v-icon 
+                    id="download-products-excel" 
+                    @click="handelPrintAllProductsClick"
+                    :disabled="isPrintLoading">print</v-icon>
                     <v-menu bottom left>
                         <template v-slot:activator="{ on }">
                             <v-btn
@@ -223,6 +236,9 @@
     import {GetCategory} from '../../utils/category'
     import {GetStockUnit} from '../../utils/stock-unit'
     import { hasAnyRole } from '../../utils/helpers'
+    import downloadexcel from 'vue-json-excel'
+    // import JsonExcel from 'vue-json-excel'
+    // Vue.component('downloadExcel', JsonExcel)
     export default {
         beforeRouteEnter (to, from, next) {
             hasAnyRole(['admin','manager','supervisor'], (res)=> {
@@ -242,6 +258,9 @@
             currentPage: function() {
                 this.fetchProducts();
             }
+        },
+        components: {
+            downloadexcel
         },
         data(){
             return {
@@ -268,9 +287,45 @@
                 totalRows: null,
                 isLoading: false,
                 isUpdating: false,
+                excelProducts: [],
+                isPrintLoading: false,
+                json_meta: [
+                    [
+                        {
+                            'key': 'charset',
+                            'value': 'utf-8'
+                        }
+                    ]
+                ],
+                excelProductsFields: { 'Product': 'product_name', 'Category': 'product_category', 'Stock Quantity': 'stock_quantity' }
             }
         },
         methods: {
+            exportAllProductsToExcel: function(callback) {
+                let _data = {};
+                this.isPrintLoading = true;
+                GetProduct(_data)
+                    .then(result=> {
+                        this.isPrintLoading = false;
+                        let products = result.products || [];
+                        this.excelProducts = this.excelAllProductsData(products);
+                        callback(result);
+                        // console.log('products', products)
+                    })
+                    .catch(err=> {
+                        this.isLoading = false;
+                    })
+            },
+            handelPrintAllProductsClick: function() {
+                if(this.excelProducts.length > 0) {
+                    this.JSONToCSVConvertor(this.excelProducts, 'List Of Products', true);
+                } else {
+                    this.exportAllProductsToExcel((result)=> {
+                        this.JSONToCSVConvertor(this.excelProducts, 'List Of Products', true);
+                    });
+                    
+                }
+            },
             fetchProducts: function(){
                 let _data = {};
                 _data.paginate = true;
@@ -358,6 +413,101 @@
             },
             goCreateProductEntries: function(){
                 this.$router.push({name:'create_product_entries'})
+            },
+            excelAllProductsData: function(products) {
+                let arr = products.map((product) => {
+                    let data = {}
+                    data.product_name = product.label || '';
+                    let barcode = product.barcode || '';
+                    if(barcode) barcode = '--' + barcode + '--'
+                    data.barcode = barcode;
+                    data.product_category = (product.category || {}).label || '';
+                    let defaultStockUnit = (product.default_sku || {}).label || ''
+                    let stockQuantity = product.stock_quantity || 0;
+                    data.stock_quantity = stockQuantity || 0;
+                    data.stock_unit = defaultStockUnit || '';
+                    data.status = product.status || '';
+                    return data;
+                });
+                return arr || [];
+            },
+            startDownload: function() {
+                alert('start download')
+            },
+            finishDownload: function() {
+                alert('finish download')
+            },
+            JSONToCSVConvertor: function (JSONData, ReportTitle, ShowLabel) {
+                console.log('lets convert to csv', JSONData)
+    //If JSONData is not an object then JSON.parse will parse the JSON string in an Object
+                var arrData = typeof JSONData != 'object' ? JSON.parse(JSONData) : JSONData;
+                
+                var CSV = '';    
+                //Set Report title in first row or line
+                
+                CSV += ReportTitle + '\r\n\n';
+
+                //This condition will generate the Label/Header
+                if (ShowLabel) {
+                    var row = "";
+                    
+                    //This loop will extract the label from 1st index of on array
+                    for (var index in arrData[0]) {
+                        
+                        //Now convert each value to string and comma-seprated
+                        row += index + ',';
+                    }
+
+                    row = row.slice(0, -1);
+                    
+                    //append Label row with line break
+                    CSV += row + '\r\n';
+                }
+                
+                //1st loop is to extract each row
+                for (var i = 0; i < arrData.length; i++) {
+                    var row = "";
+                    
+                    //2nd loop will extract each column and convert it in string comma-seprated
+                    for (var index in arrData[i]) {
+                        row += '"' + arrData[i][index] + '",';
+                    }
+
+                    row.slice(0, row.length - 1);
+                    
+                    //add a line break after each row
+                    CSV += row + '\r\n';
+                }
+                if (CSV == '') {        
+                    alert("Invalid data");
+                    return;
+                }   
+                
+                //Generate a file name
+                var fileName = "MyReport_";
+                //this will remove the blank-spaces from the title and replace it with an underscore
+                fileName += ReportTitle.replace(/ /g,"_");   
+                
+                //Initialize file format you want csv or xls
+                var uri = 'data:text/csv;charset=utf-8,' + escape(CSV);
+                
+                // Now the little tricky part.
+                // you can use either>> window.open(uri);
+                // but this will not work in some browsers
+                // or you will not get the correct file extension    
+                
+                //this trick will generate a temp <a /> tag
+                var link = document.createElement("a");    
+                link.href = uri;
+                
+                //set the visibility hidden so it will not effect on your web-layout
+                link.style = "visibility:hidden";
+                link.download = fileName + ".csv";
+                
+                //this part will append the anchor tag and remove it after automatic click
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
             }
         },
         computed: {
@@ -366,7 +516,7 @@
                 return cats.map(cat=> {
                     return {value:cat.id, text:cat.label}
                 })
-            }
+            },
         }
     }
 </script>

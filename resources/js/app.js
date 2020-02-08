@@ -23,6 +23,9 @@ import FusionCharts from 'fusioncharts';
 import AngularGauge from 'fusioncharts/fusioncharts.widgets';
 import FusionTheme from 'fusioncharts/themes/fusioncharts.theme.fusion';
 import ZuneTheme from 'fusioncharts/themes/fusioncharts.theme.zune';
+// import JsonExcel from 'vue-json-excel'
+ 
+
 
 Vue.use(VueFusionCharts, FusionCharts, AngularGauge, FusionTheme, ZuneTheme);
 Vue.use(Vuetify)
@@ -39,6 +42,7 @@ Vue.use(ElementUI, { locale })
 // files.keys().map(key => Vue.component(key.split('/').pop().split('.')[0], files(key).default));
 Vue.component('app', require('./App.vue').default);
 Vue.component('example-component', require('./components/ExampleComponent.vue').default);
+// Vue.component('downloadExcel', JsonExcel)
 
 /**
  * Next, we will create a fresh Vue application instance and attach it to

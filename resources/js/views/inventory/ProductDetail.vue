@@ -119,7 +119,9 @@
                             <tr v-for="sku in (product || {}).stock_units" :key="sku.id">
                                 <td>{{ sku.label }}</td>
                                 <td>{{ sku.pivot.metric_scale }}</td>
-                                <td>{{ metricQuantity(sku) }}</td>
+                                <td>
+                                    {{ metricQuantity(sku) }}
+                                </td>
                                 <td>
                                     {{ entryPrice(sku.pivot.cost_price || 0) }}
                                     <v-icon class="float-right"
@@ -369,6 +371,9 @@
                 this.stock_cost_price_data.stock_unit_id = pivot.stock_unit_id || null
                 this.stock_cost_price_data.cost_price = "";
                 this.isUpdateCostPriceDialog = true;
+            },
+            openStockPriceUpdateDialog: function(entry) {
+                console.log('entry',entry)
             },
             openStockSellingPriceUpdateDialog: function(entry) {
                 let pivot = Vue.util.extend({}, entry.pivot || {})

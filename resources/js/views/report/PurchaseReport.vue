@@ -6,6 +6,11 @@
                     <v-toolbar dense dark color="cyan">
                         <v-toolbar-side-icon></v-toolbar-side-icon>
                         <v-toolbar-title>Purchase Report</v-toolbar-title>
+                        <v-spacer></v-spacer>
+                        <v-icon 
+                        id="download-sales-report-excel" 
+                        @click="handelDownloadPurchaseReportClick"
+                        :disabled="isPrintLoading">print</v-icon>
                     </v-toolbar>
                     <v-card-text>
                         <div class="row">
@@ -197,7 +202,7 @@
 </template>
 <script>
     import { GetUser } from '../../utils/user' 
-    import { formatDate } from '../../utils/helpers'
+    import { formatDate, JSONToCSVConvertorUtil } from '../../utils/helpers'
     import { GetPurchaseReportByTransaction, GetPurchaseReportByProduct } from '../../utils/report'
     export default {
         created() {
@@ -230,9 +235,22 @@
                 toDateMenu: false,
 
                 isLoading: false,
+                isPrintLoading: false,
             }
         },
         methods: {
+            handelDownloadPurchaseReportClick: function() {
+                console.log('report by product', this.reports_product)
+                let reportHeader = this.info_transaction || '';
+                let reports = this.reports_transaction;
+                // console.log('lets download report');
+                if(this.search.filter_by == 'transaction') {
+                    JSONToCSVConvertorUtil(this.GetPurchaseReportByTransactionExcelData, this.info_transaction, true)
+                } else {
+                    JSONToCSVConvertorUtil(this.GetPurchaseReportByProductExcelData, this.info_product, true)
+                }
+                
+            },
             generateReport: function() {
                 let searchData = Vue.util.extend({}, this.search);
                 searchData.from_date = "";
@@ -335,8 +353,38 @@
                     {id: 'transaction', name:'Transaction'},
                     {id: 'product', name: 'Product'}
                 ]
+            },
+            GetPurchaseReportByTransactionExcelData: function() {
+                let purchases = this.reports_transaction || [];
+                let purchasesReport = purchases.map((purchase)=> {
+                    let data = {};
+                    data.reference_no = purchase.ref_code || '---';
+                    data.invoice_no = purchase.invoice_number || '---'
+                    data.input_by = (purchase.user || {}).name || '';
+                    data.supplier = (purchase.supplier || {}).name || '';
+                    data.date = this.prettyDate(purchase.created_at);
+                    data.total_cost = `GHC ${purchase.total}`
+                    data.amount_paid = `GHC ${purchase.paid}`;
+                    data.status = purchase.status;
+                    return data;
+                })
+                return purchasesReport || [];      
+            },
+            GetPurchaseReportByProductExcelData: function() {
+                let purchases = this.reports_product || [];
+                let purchasesReport = purchases.map((purchase)=> {
+                    let data = {};
+                    data.product = purchase.product_label || '';
+                    data.reference_no = (purchase.purchase || {}).ref_code || '';
+                    data.invoice_no = (purchase.purchase || {}).invoice_number || '';
+                    data.quantity = `${purchase.quantity || 0} ${purchase.stock_unit_label || ''}(S)`;
+                    data.unit_cost_price = `GHC ${purchase.cost_price || 0}`;
+                    data.total_cost = `GHC ${purchase.amount}`
+                    data.date = this.prettyDate(purchase.created_at);
+                    return data;
+                })
+                return purchasesReport || [];      
             }
-            
         },
     }
 </script>
